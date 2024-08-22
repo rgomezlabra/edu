@@ -1,0 +1,67 @@
+{% extends '/layout/base.html.twig' %}
+{% set titulo = titulo|default(aplicacion.nombre) %}
+
+{% block content %}
+    <a class="float-end" href="{{ path('intranet_ayuda_show', {'aplic': aplicacion.ruta|regex_replace('/^intranet_/', '')}) }}">
+        <span class="fas fa-info-circle"></span> Ayuda
+    </a>
+    <div class="pagina-titulo">
+        {{- titulo }}
+        {%- if aplicacion.estadoActual and aplicacion.estadoActual.color %}
+            <sup class="badge bg-{{ aplicacion.estadoActual.color }}"><span class="fas fa-sm {{ aplicacion.estadoActual.icono }}"></span> {{ aplicacion.estadoActual }}</sup>
+        {%- endif %}
+    </div>
+    <p class="">{{ aplicacion.descripcion }}</p>
+    <div class="pagina-seccion lead">Autoevaluación del desempaño</div>
+    <ul>
+        <li>Formulario para autoevaluación de competencias</li>
+        <li>Comprobar evaluadores</li>
+        <li>Incidencias para autoevaluación</li>
+    </ul>
+    <div class="pagina-seccion lead">Evaluación de otras personas</div>
+    <ul>
+        <li>Formulario de evaluación de competencias de otras personas</li>
+        <li>Comprobar evaluados</li>
+        <li>Incidencias de evaluación</li>
+    </ul>
+
+    {#- Mostrar roles de la aplicación con permiso para el usuario. #}
+    {%- set admin = false -%}
+    {%- for rol in aplicacion.roles|default -%}
+        {%- for p in aplicacion.permisos|filter(p => p.usuario == app.user)|filter(r => r.rol == rol) -%}
+            {%- if p.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO') %}
+                {%- if p.rol.ruta == 'admin' %}
+                    {%- set admin = true -%}
+                {%- endif %}
+                <div class="h5">
+                    <a href="{{ path(aplicacion.ruta ~ '_' ~ rol.ruta) }}">
+                        <span class="fas {{ rol.icono }}"></span> {{ rol.nombre }}
+                    </a>
+                    {% if p.unidad %} <span class="badge rounded-pill">({{ p.unidad.nombre }})</span>{% endif %}
+                </div>
+                <p>{{ rol.descripcion }}</p>
+            {%- else %}
+                <div class="h5">
+                    <span class="fas {{ rol.icono }}"></span> {{ rol.nombre }}
+                    <sup class="bg-{{ p.estado.color|default }}">({{ p.estado.nombre }})</sup>
+                </div>
+            {%- endif %}
+        {%- endfor -%}
+    {%- endfor -%}
+    {#- Si el usuario tiene acceso, se muestran las aplicaciones relacionadas (excepto "Sistema"). -#}
+    {%- if admin %}
+        {%- for aplic in aplicacion.dependientes|merge(aplicacion.dependencias)|filter(a => a.nombreCorto != 'Sistema') %}
+            {%- if loop.first %}<div class="pagina-seccion">Aplicaciones relacionadas</div>{% endif %}
+            <h5 class="ms-4"><a href="{{ path(aplic.ruta) }}">{{ aplic.nombre }}</a></h5>
+        {%- endfor %}
+    {%- endif %}
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path('intranet_usuario_aplicacion') }}"><span class="fas fa-tools"></span> Mis Aplicaciones</a></li>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+{% endblock %}
