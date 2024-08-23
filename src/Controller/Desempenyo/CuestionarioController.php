@@ -38,7 +38,7 @@ class CuestionarioController extends AbstractController
     {
         $this->denyAccessUnlessGranted('admin');
 
-        return $this->render('intranet/desempenyo/admin/cuestionario/index.html.twig', [
+        return $this->render('intranet/desempenyo/admin/cuestionario/index.html.twig', [
             'cuestionarios' => $this->cuestionarioRepository->findBy(['aplicacion' => $this->actual->getAplicacion()]),
         ]);
     }
