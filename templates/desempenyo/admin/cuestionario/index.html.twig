@@ -1,0 +1,135 @@
+{% extends path(aplicacion.ruta) ~ '/admin/index.html.twig' %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <div class="my-4">
+        <table class="tabla-condensada" id="datosCuestionarios">
+            <thead class="cabecera-condensada">
+                <tr>
+                    <th class="text-center">Estado</th>
+                    <th>Código</th>
+                    <th>Título</th>
+                    <th>Fecha inicio</th>
+                    <th>Fecha fin</th>
+                    <th>Autor</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            {%- for cuestionario in cuestionarios %}
+                <tr>
+                    <td class="text-center">
+                        {%- if cuestionario.estado %}
+                            <span class="fas {{ cuestionario.estado.icono }} text-{{ cuestionario.estado.color }}"
+                                  title="{{ cuestionario.estado.nombre }}"></span>
+                        {%- endif %}
+                    </td>
+                    <td>{{ cuestionario.codigo }}</td>
+                    <td>{{ cuestionario.titulo }}</td>
+                    <td>{{ cuestionario.fechaAlta }}</td>
+                    <td>{{ cuestionario.fechaBaja }}</td>
+                    <td>{{ cuestionario.autor.persona }}</td>
+                    <td>
+{#                        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {'id': cuestionario.id}) }}">#}
+{#                            <span class="mx-1 fas fa-eye" title="Ver"></span>#}
+{#                        </a>#}
+{#                        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_edit', {'id': cuestionario.id}) }}">#}
+{#                            <span class="mx-1 fas fa-edit" title="Editar"></span>#}
+{#                        </a>#}
+{#                        <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {'id': cuestionario.id}) }}">#}
+{#                            <span class="mx-1 fas fa-arrow-right" title="Grupos de preguntas"></span>#}
+{#                        </a>#}
+{#                        {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO')#}
+{#                            or cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::ARCHIVADO') %}#}
+{#                            <a href="{{ path(aplicacion.ruta ~ '_admin_formulario_index', {'cuestionario': cuestionario.id}) }}">#}
+{#                                <span class="mx-1 fas fa-list-check" title="Formularios entregados"></span>#}
+{#                            </a>#}
+{#                        {%- endif %}#}
+                    </td>
+                </tr>
+            {%- endfor %}
+            </tbody>
+            {#- Leyenda de estados para cuestionarios. #}
+            {%- set cuestiona = aplicacion.dependencias|filter(d => d.nombreCorto == constant('App\\Entity\\Sistema\\Aplicacion::CUESTIONA'))|first  %}
+            {%- if cuestiona %}
+                <caption class="mt-4">
+                    <span class="me-4">Estados</span>
+                    {%- for estado in cuestiona.estados|filter(e => e.icono is not null) -%}
+                        <span class="me-4 badge {% if estado.color %}text-{{ estado.color }}{% else %}text-black{% endif %}">
+                            <em class="fas {{ estado.icono }}"></em> {{ estado.nombre }}</span>
+                    {%- endfor -%}
+                </caption>
+            {%- endif %}
+        </table>
+    </div>
+{% endblock %}
+
+{% block botones %}
+    <li class="nav-item me-2">
+        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_new') }}">
+            <span class="fas fa-plus"></span> Crear cuestionario
+        </a>
+    </li>
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin') }}">Administrador</a></li>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+        $('#datosCuestionarios').dataTable({
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="fas fa-copy"></i>',
+                    titleAttr: 'Copiar',
+                },
+                {
+                    extend: 'print',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5],
+                        stripHtml: false,
+                    },
+                    text: '<i class="fas fa-print"></i>',
+                    titleAttr: 'Imprimir',
+                },
+                {
+                    extend: 'csv',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5],
+                    },
+                    text: '<i class="fas fa-file-csv"></i>',
+                    titleAttr: 'Generar fichero CSV',
+                },
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5],
+                    },
+                    text: '<i class="fas fa-file-excel"></i>',
+                    titleAttr: 'Generar fichero Excel',
+                },
+            ],
+            columnDefs: [
+                {
+                    targets: [6],
+                    orderable: false,
+                    searchable: false,
+                },
+            ],
+            dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +
+                '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            language: {
+                url: '{{ asset("includes/datatable.es.json") }}',
+            },
+            order: [
+                [3, 'asc'],
+            ],
+        });
+    </script>
+{% endblock %}

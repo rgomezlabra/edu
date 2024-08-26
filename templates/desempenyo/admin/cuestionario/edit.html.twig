@@ -1,0 +1,14 @@
+{% extends path(aplicacion.ruta) ~ '/admin/cuestionario/index.html.twig' %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    {{ include(path(aplicacion.ruta) ~ '/admin/cuestionario/_form.html.twig', {'button_label': 'Actualizar'}) }}
+{% endblock %}
+
+{% block botones %}{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">Cuestionarios</a></li>
+{% endblock %}
