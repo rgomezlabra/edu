@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Entidad para gestionar formularios de valuación.
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
-#[ORM\Entity(repositoryClass: EvaluaRepository::class)]
+#[ORM\Entity(repositoryClass: FormularioRepository::class)]
 #[ORM\Table(name: 'desempemnyo_formulario')]
 class Formulario
 {

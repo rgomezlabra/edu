@@ -12,18 +12,22 @@
         {%- endif %}
     </div>
     <p class="">{{ aplicacion.descripcion }}</p>
-    <div class="pagina-seccion lead">Autoevaluación del desempaño</div>
-    <ul>
-        <li>Formulario para autoevaluación de competencias</li>
-        <li>Comprobar evaluadores</li>
-        <li>Incidencias para autoevaluación</li>
-    </ul>
-    <div class="pagina-seccion lead">Evaluación de otras personas</div>
-    <ul>
-        <li>Formulario de evaluación de competencias de otras personas</li>
-        <li>Comprobar evaluados</li>
-        <li>Incidencias de evaluación</li>
-    </ul>
+
+    {#- Acciones comunes. #}
+    <div class="lead">
+        <div class="pagina-seccion">Autoevaluación del desempaño</div>
+        <ul>
+            <li>Formulario para autoevaluación de competencias</li>
+            <li>Comprobar evaluadores</li>
+            <li>Incidencias para autoevaluación</li>
+        </ul>
+        <div class="pagina-seccion">Evaluación de otras personas</div>
+        <ul>
+            <li>Formulario de evaluación de competencias de otras personas</li>
+            <li>Comprobar evaluados</li>
+            <li>Incidencias de evaluación</li>
+        </ul>
+    </div>
 
     {#- Mostrar roles de la aplicación con permiso para el usuario. #}
     {%- set admin = false -%}
@@ -48,6 +52,7 @@
             {%- endif %}
         {%- endfor -%}
     {%- endfor -%}
+
     {#- Si el usuario tiene acceso, se muestran las aplicaciones relacionadas (excepto "Sistema"). -#}
     {%- if admin %}
         {%- for aplic in aplicacion.dependientes|merge(aplicacion.dependencias)|filter(a => a.nombreCorto != 'Sistema') %}
