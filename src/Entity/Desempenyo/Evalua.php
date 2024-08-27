@@ -22,7 +22,7 @@ class Evalua
 
     #[ORM\ManyToOne(targetEntity: Empleado::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Empleado $evaluando = null;
+    private ?Empleado $empleado = null;
 
     #[ORM\ManyToOne(targetEntity: Empleado::class)]
     #[ORM\JoinColumn(nullable: false)]
@@ -37,14 +37,14 @@ class Evalua
         return $this->id;
     }
 
-    public function getEvaluando(): ?Empleado
+    public function getEmpleado(): ?Empleado
     {
-        return $this->evaluando;
+        return $this->empleado;
     }
 
-    public function setEvaluando(?Empleado $evaluando): static
+    public function setEmpleado(?Empleado $empleado): static
     {
-        $this->evaluando = $evaluando;
+        $this->empleado = $empleado;
 
         return $this;
     }

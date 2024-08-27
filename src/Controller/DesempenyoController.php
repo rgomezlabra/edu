@@ -3,7 +3,6 @@
 namespace App\Controller\Intranet;
 
 use App\Entity\Sistema\Estado;
-use App\Entity\Sistema\Usuario;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Sistema\EstadoRepository;
 use App\Service\RutaActual;
@@ -11,27 +10,16 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(
-    path: 'intranet/desempenyo',
-    name: 'intranet_desempenyo'
-)]
+#[Route(path: 'intranet/desempenyo', name: 'intranet_desempenyo')]
 class DesempenyoController extends AbstractController
 {
     #[Route(
         path: '/',
         name: ''
     )]
-    public function inicio(RutaActual $actual): Response
+    public function inicio(): Response
     {
-        /** @var Usuario $usuario */
-        $usuario = $this->getUser();
-        if (true !== $actual->getAplicacion()?->getRelaciones()->reduce(
-            function ($valor, $relacion) use ($usuario) { return $usuario->getRelaciones()->contains($relacion); })
-        ) {
-            $this->addFlash('warning', 'Sin permiso para acceder a la aplicación de Evaluación de Desempeño');
-
-            return $this->redirectToRoute('intranet');
-        }
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
 
         return $this->render('intranet/desempenyo/index.html.twig');
     }
@@ -46,8 +34,7 @@ class DesempenyoController extends AbstractController
         RutaActual             $actual,
         CuestionarioRepository $cuestionarioRepository,
         EstadoRepository       $estadoRepository,
-    ): Response
-    {
+    ): Response {
         $this->denyAccessUnlessGranted('admin');
         if (0 === $cuestionarioRepository->count([
                 'aplicacion' => $actual->getAplicacion(),
@@ -57,18 +44,5 @@ class DesempenyoController extends AbstractController
         }
 
         return $this->render('intranet/desempenyo/admin/index.html.twig');
-    }
-
-    #[Route(
-        path: '/admin',
-        name: '_evalua',
-        defaults: ['titulo' => 'Evaluador de Competencias'],
-        methods: ['GET']
-    )]
-    public function evaluador(): Response
-    {
-        $this->denyAccessUnlessGranted('evalua');
-
-        return $this->render('intranet/desempenyo/evalua/index.html.twig');
     }
 }
