@@ -3,14 +3,14 @@
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
 
+    <div class="pagina-seccion">Cuestionario {{ cuestionario.codigo }}</div>
     <div class="container-fluid my-4 g-4">
         <div>
-            El cuestionario con código "{{ cuestionario.codigo }}" estará activo desde el día
-            {{ cuestionario.fechaAlta|date('d/m/Y') }} hasta el día {{ cuestionario.fechaBaja|date('d/m/Y') }}.
-            Por lo tanto, el cuestionario de valoración solo podrá ser cumplimentado durante dicho periodo.
+            El cuestionario de valoración solo podrá ser cumplimentado durante el periodo comprendido entre los días
+            {{ cuestionario.fechaAlta|date('d/m/Y') }} y {{ cuestionario.fechaBaja|date('d/m/Y') }}.
         </div>
         <div>
-            La dirección para rellenar el cuestionario es:
+            La dirección para rellenar este cuestionario es:
             <div class="bloque-codigo">{{ app.request.schemeAndHttpHost }}/{{ cuestionario.url }}</div>
         </div>
     </div>

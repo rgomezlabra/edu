@@ -1,0 +1,94 @@
+{% extends path(aplicacion.ruta) ~ '/admin/index.html.twig' %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <div class="pagina-seccion">Cuestionario {{ cuestionario.codigo }}</div>
+    <div class="my-4">
+        <table class="tabla-condensada" id="datosEvaluaciones">
+            <thead class="cabecera-condensada">
+                <tr>
+                    <th>Evaluador</th>
+                    <th>Empleado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            {%- for evaluacion in evaluaciones %}
+                <tr>
+                    <td>{{ evaluacion.evaluador }}</td>
+                    <td>{{ evaluacion.empleado }}</td>
+                    <td>
+{#                        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {'id': cuestionario.id}) }}">#}
+{#                            <span class="mx-1 fas fa-eye" title="Ver"></span>#}
+{#                        </a>#}
+                    </td>
+                </tr>
+            {%- endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block botones %}
+    <li class="nav-item me-2">
+{#        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_new') }}">#}
+{#            <span class="fas fa-plus"></span> Crear cuestionario#}
+{#        </a>#}
+    </li>
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">Cuestionarios</a></li>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+        $('#Evaluaciones').dataTable({
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="fas fa-copy"></i>',
+                    titleAttr: 'Copiar',
+                },
+                {
+                    extend: 'print',
+                    exportOptions: {
+                        columns: [0, 1],
+                        stripHtml: false,
+                    },
+                    text: '<i class="fas fa-print"></i>',
+                    titleAttr: 'Imprimir',
+                },
+                {
+                    extend: 'csv',
+                    exportOptions: {
+                        columns: [0, 1],
+                    },
+                    text: '<i class="fas fa-file-csv"></i>',
+                    titleAttr: 'Generar fichero CSV',
+                },
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: [0, 1],
+                    },
+                    text: '<i class="fas fa-file-excel"></i>',
+                    titleAttr: 'Generar fichero Excel',
+                },
+            ],
+            columnDefs: [
+                {
+                    targets: [2],
+                    orderable: false,
+                    searchable: false,
+                },
+            ],
+            language: {
+                url: '{{ asset("includes/datatable.es.json") }}',
+            },
+        });
+    </script>
+{% endblock %}

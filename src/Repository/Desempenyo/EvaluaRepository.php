@@ -2,6 +2,7 @@
 
 namespace App\Repository\Desempenyo;
 
+use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Desempenyo\Evalua;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -12,6 +13,13 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class EvaluaRepository extends ServiceEntityRepository
 {
+    // Tipos de evaluaciones
+    public const int AUTOEVALUACION = 1;    // Autoevaluación (empleado = evaluador)
+
+    public const int EVALUACION = 2;    // Evaluación de otro empleado
+
+    public const int NO_EVALUACION = 3; // Solicitud de no evaluación (evaluador nulo)
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Evalua::class);
@@ -33,5 +41,27 @@ class EvaluaRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * Buscar todos los datos de evaluación para un cuestionario según el tipo solicitado (autoevaluación, evaluación
+     * de otro empleado o solicitud de no evaluación).
+     * @return Evalua[]
+     */
+    public function findByEvaluacion(Cuestionario $cuestionario, int $tipo = self::AUTOEVALUACION): array
+    {
+        $condicion = match ($tipo) {
+            self::EVALUACION => 'evalua.empleado != evalua.evaluador AND evalua.evaluador IS NOT NULL',
+            self::NO_EVALUACION => 'evalua.evaluador IS NULL',
+            default => 'evalua.empleado = evalua.evaluador'
+        };
+
+        return $this->createQueryBuilder('evalua')
+            ->andWhere('evalua.cuestionario = :cuestionario')
+            ->andWhere($condicion)
+            ->setParameter('cuestionario', $cuestionario)
+            ->getQuery()
+            ->getResult()
+        ;
     }
 }
