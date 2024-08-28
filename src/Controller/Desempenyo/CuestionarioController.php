@@ -7,6 +7,7 @@ use App\Entity\Desempenyo\Evalua;
 use App\Entity\Plantilla\Empleado;
 use App\Entity\Sistema\Usuario;
 use App\Form\Cuestiona\CuestionarioType;
+use App\Form\Cuestiona\PeriodoValidezType;
 use App\Form\Util\VolcadoType;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
@@ -16,11 +17,13 @@ use App\Repository\Sistema\PersonaRepository;
 use App\Service\Csv;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
+use App\Service\Slug;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use function Symfony\Component\String\u;
 
 /**
  * Controlador para gestionar cuestionarios para evaluación de competencias.
@@ -30,8 +33,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class CuestionarioController extends AbstractController
 {
     public function __construct(
-        private readonly MessageGenerator       $generator,
-        private readonly RutaActual             $actual,
+        private readonly MessageGenerator $generator,
+        private readonly RutaActual $actual,
         private readonly CuestionarioRepository $cuestionarioRepository,
     ) {
     }
@@ -143,6 +146,79 @@ class CuestionarioController extends AbstractController
             ]);
 
             return $this->redirectToRoute('intranet_desempenyo_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('intranet/desempenyo/admin/cuestionario/edit.html.twig', [
+            'cuestionario' => $cuestionario,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /** Activar formulario (estado publicado). */
+    #[Route(
+        path: '/{id}/activar',
+        name: 'activar',
+        defaults: ['titulo' => 'Activar Cuestionario'],
+        methods: ['GET', 'POST']
+    )]
+    public function activar(Request $request, EstadoRepository $estadoRepository, Cuestionario $cuestionario): Response
+    {
+        $this->denyAccessUnlessGranted('admin');
+        if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
+            $this->addFlash('warning', 'Sin acceso al cuestionario.');
+
+            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
+        } elseif (0 === count($cuestionario->getGrupos())) {
+            $this->addFlash('warning', 'El cuestionario no tiene preguntas definidas.');
+
+            return $this->redirectToRoute('intranet_desempenyo_admin_cuestionario_show', ['id' => $cuestionario->getId()]);
+        } elseif ($cuestionario->getGrupos()->filter(static fn ($grupo) => count($grupo->getPreguntas()) === 0)->count() > 0) {
+            $this->addFlash('warning', 'El cuestionario tiene algún grupo de preguntas vacío.');
+
+            return $this->redirectToRoute('intranet_desempenyo_admin_cuestionario_show', ['id' => $cuestionario->getId()]);
+        }
+
+        $form = $this->createForm(PeriodoValidezType::class, $cuestionario, [
+            'con_fechas' => true,
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if (null === $cuestionario->getFechaAlta() || null === $cuestionario->getFechaBaja()) {
+                $this->addFlash('warning', 'Las fechas inicial y final son obligatorias.');
+
+                return $this->redirectToRoute((string) $request->attributes->get('_route'), [
+                    'id' => $cuestionario->getId(),
+                ]);
+            } elseif ($cuestionario->getFechaAlta() > $cuestionario->getFechaBaja()) {
+                $this->addFlash('warning', 'La fecha final debe ser posterior o igual a la fecha inicial.');
+
+                return $this->redirectToRoute((string) $request->attributes->get('_route'), [
+                    'id' => $cuestionario->getId(),
+                ]);
+            }
+
+            $publicado = $estadoRepository->findOneBy(['nombre' => 'Publicado']);
+            $cuestionario
+                ->setEstado($publicado)
+                ->setUrl(
+                    sprintf(
+                        '%s/evalua/%s-%s',
+                        u($this->actual->getAplicacion()?->getRuta())->replace('_', '/'),
+                        (new Slug())((string)$cuestionario->getCodigo()),
+                        uniqid()
+                    )
+                )
+            ;
+            $this->cuestionarioRepository->save($cuestionario, true);
+            $this->generator->logAndFlash('info', 'Cuestionario activado', [
+                'id' => $cuestionario->getId(),
+                'codigo' => $cuestionario->getCodigo(),
+            ]);
+
+            return $this->render('intranet/desempenyo/admin/cuestionario/activo.html.twig', [
+                'cuestionario' => $cuestionario,
+            ]);
         }
 
         return $this->render('intranet/desempenyo/admin/cuestionario/edit.html.twig', [

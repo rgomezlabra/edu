@@ -1,0 +1,32 @@
+{% extends path(aplicacion.ruta) ~ '/admin/cuestionario/index.html.twig' %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <div class="container-fluid my-4 g-4">
+        <div>
+            El cuestionario con código "{{ cuestionario.codigo }}" estará activo desde el día
+            {{ cuestionario.fechaAlta|date('d/m/Y') }} hasta el día {{ cuestionario.fechaBaja|date('d/m/Y') }}.
+            Por lo tanto, el cuestionario de valoración solo podrá ser cumplimentado durante dicho periodo.
+        </div>
+        <div>
+            La dirección para rellenar el cuestionario es:
+            <div class="bloque-codigo">{{ app.request.schemeAndHttpHost }}/{{ cuestionario.url }}</div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block botones %}
+    <li class="nav-item me-2">
+        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">
+            <span class="fas fa-list"></span> Cuestionarios
+        </a>
+    </li>
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">Cuestionarios</a></li>
+{% endblock %}
+
+{% block modal %}{% endblock %}
