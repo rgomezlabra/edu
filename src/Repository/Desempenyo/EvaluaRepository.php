@@ -39,8 +39,26 @@ class EvaluaRepository extends ServiceEntityRepository
         $this->getEntityManager()->remove($entity);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $this->flush();
         }
+    }
+
+    public function flush(): void
+    {
+        $this->getEntityManager()->flush();
+    }
+
+    /** Borrar datos de autoevaluación. */
+    public function deleteAutoevaluacion(Cuestionario $cuestionario): void
+    {
+        $this->createQueryBuilder('evalua')
+            ->delete()
+            ->andWhere('evalua.cuestionario = :cuestionario')
+            ->andWhere('evalua.empleado = evalua.evaluador')
+            ->setParameter('cuestionario', $cuestionario)
+            ->getQuery()
+            ->getResult()
+        ;
     }
 
     /**

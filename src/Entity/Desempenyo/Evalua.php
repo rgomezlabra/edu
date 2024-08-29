@@ -25,7 +25,6 @@ class Evalua
     private ?Empleado $empleado = null;
 
     #[ORM\ManyToOne(targetEntity: Empleado::class)]
-    #[ORM\JoinColumn(nullable: false)]
     private ?Empleado $evaluador = null;
 
     #[ORM\ManyToOne(targetEntity: Cuestionario::class)]

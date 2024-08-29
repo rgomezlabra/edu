@@ -4,37 +4,81 @@
     <div class="pagina-titulo">{{ titulo }}</div>
 
     <div class="pagina-seccion">Cuestionario {{ cuestionario.codigo }}</div>
-    <div class="my-4">
-        <table class="tabla-condensada" id="datosEvaluaciones">
-            <thead class="cabecera-condensada">
-                <tr>
-                    <th>Evaluador</th>
-                    <th>Empleado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-            {%- for evaluacion in evaluaciones %}
-                <tr>
-                    <td>{{ evaluacion.evaluador }}</td>
-                    <td>{{ evaluacion.empleado }}</td>
-                    <td>
-{#                        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {'id': cuestionario.id}) }}">#}
-{#                            <span class="mx-1 fas fa-eye" title="Ver"></span>#}
-{#                        </a>#}
-                    </td>
-                </tr>
-            {%- endfor %}
-            </tbody>
-        </table>
+    <div class="d-flex align-items-start">
+        <div class="col-3 col-sm-2 me-3">
+            <div class="nav flex-column nav-pills h-100" id="vert-tabs-tab" role="tablist" aria-orientation="vertical">
+                <a class="nav-link show active" id="vert-tabs-empleados-tab" role="tab"
+                   data-bs-toggle="pill" href="#vert-tabs-empleados" aria-controls="vert-tabs-empleados"
+                   aria-selected="true">
+                    Autoevaluación
+                </a>
+                <a class="nav-link" id="vert-tabs-evaluadores-tab" role="tab"
+                   data-bs-toggle="pill" href="#vert-tabs-evaluadores" aria-controls="vert-tabs-evaluadores"
+                   aria-selected="true">
+                    Evaluadores
+                </a>
+                <a class="nav-link" id="vert-tabs-rechazan-tab" role="tab"
+                   data-bs-toggle="pill" href="#vert-tabs-rechazan" aria-controls="vert-tabs-rechazan"
+                   aria-selected="true">
+                    Rechazan evaluación
+                </a>
+            </div>
+        </div>
+        <div class="col-9 col-sm-10">
+            <div class="tab-content" id="vert-tabs-tabContent">
+                {#- Empleados para autoevaluación #}
+                <div class="tab-pane fade text-left show active" id="vert-tabs-empleados"
+                     role="tabpanel" aria-labelledby="vert-tabs-empleados-tab" tabindex="0">
+                    <table class="tabla-condensada" id="datosEmpleados">
+                        <thead class="cabecera-condensada">
+                            <tr>
+                                <th>Evaluador</th>
+                                <th>Empleado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {%- for evaluacion in evaluaciones %}
+                            <tr>
+                                <td>{{ evaluacion.evaluador.persona }}</td>
+                                <td>{{ evaluacion.empleado.persona }}</td>
+                                <td>
+            {#                        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">#}
+            {#                            <span class="mx-1 fas fa-eye" title="Ver"></span>#}
+            {#                        </a>#}
+                                </td>
+                            </tr>
+                        {%- endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {#- Relación de valuadores y empleados #}
+                <div class="tab-pane fade text-left" id="vert-tabs-evaluadores"
+                     role="tabpanel" aria-labelledby="vert-tabs-evaluadores-tab" tabindex="0">
+                    ...
+                </div>
+                {# Empleados que rechazan la evaluación #}
+                <div class="tab-pane fade text-left" id="vert-tabs-rechazan"
+                     role="tabpanel" aria-labelledby="vert-tabs-rechazan-tab" tabindex="0">
+                    ...
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
 {% block botones %}
     <li class="nav-item me-2">
-{#        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_new') }}">#}
-{#            <span class="fas fa-plus"></span> Crear cuestionario#}
-{#        </a>#}
+        <button class="btn btn-primary cargar" id="cargarEmpleados"
+           data-url="{{ path(aplicacion.ruta ~ '_admin_cuestionario_evaluador_auto', {id: cuestionario.id}) }}">
+            <span class="fas fa-person-arrow-down-to-line"></span> Cargar empleados
+        </button>
+    </li>
+    <li class="nav-item me-2">
+        <a class="btn btn-primary cargar" id="cargarEvaluadores"
+           href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_evaluador_carga', {id: cuestionario.id}) }}">
+            <span class="fas fa-file-download"></span> Cargar evaluadores
+        </a>
     </li>
 {% endblock %}
 
@@ -43,13 +87,23 @@
     <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">Cuestionarios</a></li>
 {% endblock %}
 
+{%  block modal %}
+    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoEmpleados', pregunta: '¿Cargar datos de empleados para su autoevaluación?'}) }}
+    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoEvaluadores', pregunta: '¿Cargar evaluadores de empleados?'}) }}
+    {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoEmpleados', mensaje: 'Cargando empleados', progreso: false}) }}
+    {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoEvaluadores', mensaje: 'Cargando evaluadores', progreso: true}) }}
+{% endblock %}
+
 {% block js %}
     {{ parent() }}
     <script type="module">
-        $('#Evaluaciones').dataTable({
+        $('#datosEmpleados').dataTable({
             buttons: [
                 {
                     extend: 'copy',
+                    exportOptions: {
+                        columns: [0, 1],
+                    },
                     text: '<i class="fas fa-copy"></i>',
                     titleAttr: 'Copiar',
                 },
@@ -57,7 +111,6 @@
                     extend: 'print',
                     exportOptions: {
                         columns: [0, 1],
-                        stripHtml: false,
                     },
                     text: '<i class="fas fa-print"></i>',
                     titleAttr: 'Imprimir',
@@ -86,9 +139,56 @@
                     searchable: false,
                 },
             ],
+            dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +
+                '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
             language: {
                 url: '{{ asset("includes/datatable.es.json") }}',
             },
+        });
+        const dialogoEmpleados = $('#dialogoEmpleados');
+        const dialogoEvaluadores = $('#dialogoEvaluadores');
+        // Carga de empleados
+        $('#cargarEmpleados').on('click', function (e) {
+            e.preventDefault();
+            dialogoEmpleados.show();
+            $('.cargar').each(function () {
+                $(this).addClass('disabled');
+            });
+        });
+        $('#dialogoEmpleadosCancelar').on('click', function () {
+            dialogoEmpleados.hide();
+            $('.cargar').each(function () {
+                $(this).removeClass('disabled');
+            });
+        });
+        $('#dialogoEmpleadosAceptar').on('click', function () {
+            dialogoEmpleados.hide();
+            $('#cargandoEmpleados').show();
+            window.location.href = $('#cargarEmpleados').data('url');
+        });
+        // Cargar evaluadores
+        $('#cargarEvaluadores').on('click', function (e) {
+            e.preventDefault();
+            dialogoEvaluadores.show();
+            $('.cargar').each(function () {
+                $(this).addClass('disabled');
+            });
+        });
+        $('#dialogoEvaluadoresCancelar').on('click', function () {
+            dialogoEvaluadores.hide();
+            $('.cargar').each(function () {
+                $(this).removeClass('disabled');
+            });
+        });
+        $('#dialogoEvaluadoresAceptar').on('click', function () {
+            dialogoEvaluadores.hide();
+            $('#cargandoEvaluadores').show();
+            // window.location.href = $('#cargarEvaluadores').data('url');
+        });
+        $(window).on('unload', function () {
+            $('#cargandoEmpleados').hide();
+            $('#cargandoEvaluadores').hide();
         });
     </script>
 {% endblock %}

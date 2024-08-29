@@ -37,7 +37,9 @@
                         <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_edit', {'id': cuestionario.id}) }}">
                             <span class="mx-1 fas fa-edit" title="Editar"></span>
                         </a>
+                        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_evaluador_index', {'id': cuestionario.id}) }}">
                             <span class="mx-1 fas fa-user-check" title="Evaluadores"></span>
+                        </a>
 {#                        <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {'id': cuestionario.id}) }}">#}
                             <span class="mx-1 fas fa-arrow-right" title="Grupos de preguntas"></span>
 {#                        </a>#}
