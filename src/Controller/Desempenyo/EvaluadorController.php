@@ -14,7 +14,11 @@ use App\Repository\Sistema\PersonaRepository;
 use App\Service\Csv;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
+use App\Service\SirhusLock;
+use DateTimeImmutable;
+use RedisException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Cache\Adapter\RedisAdapter;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,8 +27,11 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(path: '/intranet/desempenyo/admin/cuestionario', name: 'intranet_desempenyo_admin_cuestionario_')]
 class EvaluadorController extends AbstractController
 {
+    private object $redis;
+
     public function __construct(
         private readonly MessageGenerator $generator,
+        private readonly SirhusLock $lock,
         private readonly RutaActual $actual,
         private readonly EvaluaRepository $evaluaRepository,
     ) {
@@ -39,7 +46,8 @@ class EvaluadorController extends AbstractController
     public function index(Cuestionario $cuestionario): Response
     {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
-        $evaluaciones = $this->evaluaRepository->findByEvaluacion($cuestionario, EvaluaRepository::AUTOEVALUACION);
+        //$evaluaciones = $this->evaluaRepository->findByEvaluacion($cuestionario, EvaluaRepository::AUTOEVALUACION);
+        $evaluaciones = $this->evaluaRepository->findAll();
 
         return $this->render('intranet/desempenyo/admin/evaluador/index.html.twig', [
             'cuestionario' => $cuestionario,
@@ -54,21 +62,37 @@ class EvaluadorController extends AbstractController
         defaults: ['titulo' => 'Cargar Empleados para Autoevaluación'],
         methods: ['GET']
     )]
-    public function cargarAutoevaluacion(EmpleadoRepository $empleadoRepository, Cuestionario $cuestionario): Response
-    {
+    public function cargarAutoevaluacion(
+        Request            $request,
+        EmpleadoRepository $empleadoRepository,
+        Cuestionario       $cuestionario,
+    ): Response {
         $this->denyAccessUnlessGranted('admin');
         if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
             return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
+        } elseif (null === $this->lock->acquire()) {
+            $this->addFlash('warning', 'Recurso bloqueado por otra operación de carga.');
+
+            return $this->redirectToRoute((string) $request->attributes->get('_route'));
         }
 
-        $nuevos = 0;
         $inicio = microtime(true);
+        $this->redis = RedisAdapter::createConnection((string) $request->server->get('REDIS_URL'));
         // ¿Borrar autoevaluadores anteriores antes de cargar empleados activos?
         //$this->evaluaRepository->deleteAutoevaluacion($cuestionario);
         $empleados = $empleadoRepository->findCesados(false);
+        $datos = [
+            'inicio' => new DateTimeImmutable(),
+            'total' => count($empleados),
+            'actual' => 0,
+            'nuevos' => 0,
+            'duracion' => 0,
+            'finalizado' => false,
+        ];
         foreach ($empleados as $empleado) {
+            ++$datos['actual'];
             if (!$this->evaluaRepository->findOneBy([
                 'empleado' => $empleado,
                 'evaluador' => $empleado,
@@ -81,24 +105,44 @@ class EvaluadorController extends AbstractController
                     ->setCuestionario($cuestionario)
                 ;
                 $this->evaluaRepository->save($evalua);
-                ++$nuevos;
+                ++$datos['nuevos'];
+            }
+
+            $datos['duracion'] = microtime(true) - $inicio;
+            try {
+                $this->redis->set('autoevaluacion', json_encode($datos));
+            } catch (RedisException) {
             }
         }
 
-        if ($nuevos > 0) {
+        if ($datos['nuevos'] > 0) {
             $this->evaluaRepository->flush();
+            $datos['duracion'] = microtime(true) - $inicio;
             $this->generator->logAndFlash('success', 'Se han registrado autoevaluaciones', [
                 'cuestionario' => $cuestionario->getCodigo(),
-                'nuevos' => $nuevos,
-                'duracion' => microtime(true) - $inicio,
+                'nuevos' => $datos['nuevos'],
+                'duracion' => $datos['duracion'],
             ]);
         } else {
             $this->addFlash('warning', 'No se han registrado autoevaluaciones nuevas.');
         }
 
-        return $this->redirectToRoute(sprintf('%s_admin_cuestionario_evaluador_index', $this->actual->getAplicacion()?->getRuta() ?? ''), [
-            'id' => $cuestionario->getId(),
-        ]);
+        $datos['finalizado'] = true;
+        try {
+            $this->redis->set('autoevaluacion', json_encode($datos));
+        } catch (RedisException) {
+        }
+        $this->lock->release();
+
+        return $this->redirectToRoute(
+            sprintf(
+            '%s_%s_cuestionario_evaluador_index',
+                $this->actual->getAplicacion()?->getRuta() ?? '',
+                $this->actual->getRol()?->getRuta() ?? ''
+            ), [
+                'id' => $cuestionario->getId(),
+            ]
+        );
     }
 
     /** Cargar datos que relacionan empleado con su evaluador para el cuestionario indicado. */
@@ -125,6 +169,7 @@ class EvaluadorController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $inicio = microtime(true);
+            $this->redis = RedisAdapter::createConnection((string) $request->server->get('REDIS_URL'));
             $campos = [
                 'EMPLEADO',     // Documento empleado
                 'EVALUADOR',    // Documento evaluador
