@@ -29,23 +29,33 @@
                 {#- Empleados para autoevaluación #}
                 <div class="tab-pane fade text-left show active" id="vert-tabs-empleados"
                      role="tabpanel" aria-labelledby="vert-tabs-empleados-tab" tabindex="0">
+                    {%- if evaluaciones|length > 0 %}
+                        <div class="badge-info">
+                            Último volcado de datos: {{ volcado_empleados ? volcado_empleados|date('d/m/Y, H:i') : 'sin datos' -}}
+                        </div>
+                    {%- endif %}
                     <table class="tabla-condensada" id="datosEmpleados">
                         <thead class="cabecera-condensada">
                             <tr>
-                                <th>Evaluador</th>
-                                <th>Empleado</th>
+                                <th>Unidad</th>
+                                <th>Doc. empleado</th>
+                                <th>Nombre empleado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                        {%- for evaluacion in evaluaciones %}
+                        {%- for evaluacion in evaluaciones|filter(e => e.empleado == e.evaluador) %}
                             <tr>
-                                <td>{{ evaluacion.evaluador.persona }}</td>
+                                <td>
+                                    {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
+                                        : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
+                                </td>
+                                <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
                                 <td>{{ evaluacion.empleado.persona }}</td>
                                 <td>
-            {#                        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">#}
-            {#                            <span class="mx-1 fas fa-eye" title="Ver"></span>#}
-            {#                        </a>#}
+{#                                    <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">#}
+                                        <span class="mx-1 fas fa-remove" title="Rechazar evaluación"></span>
+{#                                    </a>#}
                                 </td>
                             </tr>
                         {%- endfor %}
@@ -55,12 +65,63 @@
                 {#- Relación de valuadores y empleados #}
                 <div class="tab-pane fade text-left" id="vert-tabs-evaluadores"
                      role="tabpanel" aria-labelledby="vert-tabs-evaluadores-tab" tabindex="0">
-                    ...
+                    <table class="tabla-condensada" id="datosEvaluadores">
+                        <thead class="cabecera-condensada">
+                        <tr>
+                            <th>Doc. empleado</th>
+                            <th>Nombre empleado</th>
+                            <th>Doc. evaluador</th>
+                            <th>Nombre evaluador</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {%- for evaluacion in evaluaciones|filter(e => e.empleado != e.evaluador and e.evaluador != null) %}
+                            <tr>
+                                <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
+                                <td>{{ evaluacion.empleado.persona }}</td>
+                                <td>{{ evaluacion.evaluador.persona.docIdentidad }}</td>
+                                <td>{{ evaluacion.evaluador.persona }}</td>
+                                <td>
+{#                                    <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">#}
+                                        <span class="mx-1 fas fa-trash" title="Desasignar"></span>
+{#                                    </a>#}
+                                </td>
+                            </tr>
+                        {%- endfor %}
+                        </tbody>
+                    </table>
                 </div>
                 {# Empleados que rechazan la evaluación #}
                 <div class="tab-pane fade text-left" id="vert-tabs-rechazan"
                      role="tabpanel" aria-labelledby="vert-tabs-rechazan-tab" tabindex="0">
-                    ...
+                    <table class="tabla-condensada" id="datosRechazan">
+                        <thead class="cabecera-condensada">
+                        <tr>
+                            <th>Unidad</th>
+                            <th>Doc. empleado</th>
+                            <th>Nombre empleado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {%- for evaluacion in evaluaciones|filter(e => e.evaluador == null) %}
+                            <tr>
+                                <td>
+                                    {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
+                                    : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
+                                </td>
+                                <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
+                                <td>{{ evaluacion.empleado.persona }}</td>
+                                <td>
+{#                                    <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">#}
+                                        <span class="mx-1 fas fa-check" title="Activar evaluación"></span>
+{#                                    </a>#}
+                                </td>
+                            </tr>
+                        {%- endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -97,46 +158,27 @@
 {% block js %}
     {{ parent() }}
     <script type="module">
-        $('#datosEmpleados').dataTable({
+        const config = {
             buttons: [
                 {
                     extend: 'copy',
-                    exportOptions: {
-                        columns: [0, 1],
-                    },
                     text: '<i class="fas fa-copy"></i>',
                     titleAttr: 'Copiar',
                 },
                 {
                     extend: 'print',
-                    exportOptions: {
-                        columns: [0, 1],
-                    },
                     text: '<i class="fas fa-print"></i>',
                     titleAttr: 'Imprimir',
                 },
                 {
                     extend: 'csv',
-                    exportOptions: {
-                        columns: [0, 1],
-                    },
                     text: '<i class="fas fa-file-csv"></i>',
                     titleAttr: 'Generar fichero CSV',
                 },
                 {
                     extend: 'excelHtml5',
-                    exportOptions: {
-                        columns: [0, 1],
-                    },
                     text: '<i class="fas fa-file-excel"></i>',
                     titleAttr: 'Generar fichero Excel',
-                },
-            ],
-            columnDefs: [
-                {
-                    targets: [2],
-                    orderable: false,
-                    searchable: false,
                 },
             ],
             dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +
@@ -145,45 +187,87 @@
             language: {
                 url: '{{ asset("includes/datatable.es.json") }}',
             },
+        };
+        $('#datosEmpleados').dataTable({
+            ...config,
+            columnDefs: [
+                {
+                    targets: [3],
+                    orderable: false,
+                    searchable: false,
+                },
+            ],
+            order: [
+                [0, 'asc'],
+                [1, 'asc'],
+            ],
+        });
+        $('#datosEvaluadores').dataTable({
+            ...config,
+            columnDefs: [
+                {
+                    targets: [4],
+                    orderable: false,
+                    searchable: false,
+                },
+            ],
+            order: [
+                [0, 'asc'],
+                [2, 'asc'],
+            ],
+        });
+        $('#datosRechazan').dataTable({
+            ...config,
+            columnDefs: [
+                {
+                    targets: [3],
+                    orderable: false,
+                    searchable: false,
+                },
+            ],
+            order: [
+                [0, 'asc'],
+                [1, 'asc'],
+            ],
         });
         const dialogoEmpleados = $('#dialogoEmpleados');
         const dialogoEvaluadores = $('#dialogoEvaluadores');
         // Carga de empleados
         $('#cargarEmpleados').on('click', function (e) {
             e.preventDefault();
-            dialogoEmpleados.show();
+            dialogoEmpleados.fadeIn('fast');
             $('.cargar').each(function () {
                 $(this).addClass('disabled');
             });
         });
         $('#dialogoEmpleadosCancelar').on('click', function () {
-            dialogoEmpleados.hide();
+            dialogoEmpleados.fadeOut('fast');
             $('.cargar').each(function () {
                 $(this).removeClass('disabled');
             });
         });
         $('#dialogoEmpleadosAceptar').on('click', function () {
-            dialogoEmpleados.hide();
-            $('#cargandoEmpleados').show();
+            dialogoEmpleados.fadeOut('fast');
+            $('#cargandoEmpleados').fadeIn('fast');
             window.location.href = $('#cargarEmpleados').data('url');
         });
         // Cargar evaluadores
         $('#cargarEvaluadores').on('click', function (e) {
             e.preventDefault();
-            dialogoEvaluadores.show();
+            dialogoEvaluadores.fadeIn('fast');
             $('.cargar').each(function () {
                 $(this).addClass('disabled');
             });
         });
         $('#dialogoEvaluadoresCancelar').on('click', function () {
-            dialogoEvaluadores.hide();
+            dialogoEvaluadores.fadeOut('fast');
             $('.cargar').each(function () {
                 $(this).removeClass('disabled');
             });
         });
         $('#dialogoEvaluadoresAceptar').on('click', function () {
-            dialogoEvaluadores.hide();
-            $('#cargandoEvaluadores').show();
+            dialogoEvaluadores.fadeOut('fast');
+            $('#cargandoEvaluadores').fadeIn('fast');
             // window.location.href = $('#cargarEvaluadores').data('url');
         });
         $(window).on('unload', function () {

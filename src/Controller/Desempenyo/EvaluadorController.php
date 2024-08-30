@@ -16,6 +16,7 @@ use App\Service\MessageGenerator;
 use App\Service\RutaActual;
 use App\Service\SirhusLock;
 use DateTimeImmutable;
+use Exception;
 use RedisException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
@@ -43,15 +44,25 @@ class EvaluadorController extends AbstractController
         defaults: ['titulo' => 'Evaluadores de Cuestionario de Competencias'],
         methods: ['GET']
     )]
-    public function index(Cuestionario $cuestionario): Response
+    public function index(Request $request, Cuestionario $cuestionario): Response
     {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         //$evaluaciones = $this->evaluaRepository->findByEvaluacion($cuestionario, EvaluaRepository::AUTOEVALUACION);
         $evaluaciones = $this->evaluaRepository->findAll();
+        $this->redis = RedisAdapter::createConnection((string) $request->server->get('REDIS_URL'));
+        try {
+            $datos = json_decode($this->redis->get('autoevaluacion'), true);
+            if ($datos['finalizado']) {
+                $ultimo = new DateTimeImmutable($datos['inicio']['date'], new \DateTimeZone($datos['inicio']['timezone']));
+            }
+        } catch (Exception) {
+            $ultimo = null;
+        }
 
         return $this->render('intranet/desempenyo/admin/evaluador/index.html.twig', [
             'cuestionario' => $cuestionario,
             'evaluaciones' => $evaluaciones,
+            'volcado_empleados' => $ultimo,
         ]);
     }
 
@@ -118,7 +129,7 @@ class EvaluadorController extends AbstractController
         if ($datos['nuevos'] > 0) {
             $this->evaluaRepository->flush();
             $datos['duracion'] = microtime(true) - $inicio;
-            $this->generator->logAndFlash('success', 'Se han registrado autoevaluaciones', [
+            $this->generator->logAndFlash('success', 'Volcado de autoevaluaciones', [
                 'cuestionario' => $cuestionario->getCodigo(),
                 'nuevos' => $datos['nuevos'],
                 'duracion' => $datos['duracion'],
