@@ -1,0 +1,78 @@
+{% extends path(aplicacion.ruta) ~ '/admin/index.html.twig' %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <div class="pagina-seccion">
+        Última carga de datos: {{ ultimo is defined ? ultimo|date('Y-m-d H:i:s') : 'sin fecha' }}
+    </div>
+
+    <div class="pagina-seccion">Volcado de datos de evaluación</div>
+    <div class="alert alert-info">
+        El volcado de datos actualizará todas las relaciones entre empleados y sus evaluadores de competencias,
+        teniendo en cuenta que odas las personas deben pertenecer activamente a la plantilla actual de la Universidad de
+        Sevilla.<br>
+        Los datos se cargarán usando un <strong>fichero CSV</strong> que contenga al menos los siguientes campos:<br>
+        DOC_EMPLEADO, DOC_EVALUADOR
+    </div>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button id="cargar" class="btn btn-primary my-4">
+            <span class="fas fa-upload"></span> Cargar fichero
+        </button>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin') }}">Administrador</a></li>
+{% endblock %}
+
+{%  block modal %}
+    {{- include('layout/_dialogo_confirmar.html.twig', {pregunta: '¿Cargar evaluadores de empleados?'}) }}
+    {{- include('layout/_dialogo_cargar.html.twig', {mensaje: 'Cargando evaluadores', progreso: true}) }}
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+        // Confirmar el volcado, mostrar progreso de carga y cerrar diálogo al finalizar
+        cargar.on('click', function (e) {
+            e.preventDefault();
+            if (!$('#volcado_fichero_csv').val()) {
+                dialogo.hide();
+                return false;
+            }
+            $('#textoDialogo').html('<p>Se actualizarán los datos de evaluadores y empleados para la evaluación del '
+                + 'desempeño de la plantilla.<p>'
+                + '<p>El proceso de carga puede tardar un tiempo.</p>');
+            dialogo.fadeIn('fast');
+        });
+        $('#cancelar').on('click', function () {
+            dialogo.fadeOut('fast');
+        });
+        $('#aceptar').on('click', function () {
+            modalCarga.fadeIn('fast');
+            {#let url = "{{ path('intranet_plantilla_admin_volcado_progreso', {'tipo': tipo})|escape('js') }}"#}
+            // setInterval(function () {
+            //     $.ajax({
+            //         type: 'POST',
+            //         url: url,
+            //         async: true,
+            //         success: function (response) {
+            //             let porcentaje = response.total !== 0 ? 100 * response.linea / response.total : 0;
+            //             barra.width(porcentaje.toFixed() + '%').html(response.linea + ' (' + porcentaje.toFixed() + '%)');
+            //         },
+            //         error: function () {
+            //             barra.width('0%').html('Sin datos');
+            //         }
+            //     });
+            // }, 3000);
+            cargar.parent().submit();
+        });
+        $(window).on('unload', function () {
+            modalCarga.hide();
+        });
+    </script>
+{% endblock %}

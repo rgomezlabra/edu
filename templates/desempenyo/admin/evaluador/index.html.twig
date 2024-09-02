@@ -138,7 +138,7 @@
         </button>
     </li>
     <li class="nav-item me-2">
-        <a class="btn btn-primary cargar" id="cargarEvaluadores"
+        <a class="btn btn-primary"
            href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_evaluador_carga', {id: cuestionario.id}) }}">
             <span class="fas fa-file-download"></span> Cargar evaluadores
         </a>
@@ -153,9 +153,7 @@
 {%  block modal %}
     {{- include('layout/_dialogo_confirmar.html.twig') }}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoEmpleados', pregunta: '¿Cargar datos de empleados para su autoevaluación?'}) }}
-    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoEvaluadores', pregunta: '¿Cargar evaluadores de empleados?'}) }}
     {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoEmpleados', mensaje: 'Cargando empleados', progreso: false}) }}
-    {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoEvaluadores', mensaje: 'Cargando evaluadores', progreso: true}) }}
 {% endblock %}
 
 {% block js %}
@@ -264,7 +262,6 @@
 
         // Carga de empleados
         const dialogoEmpleados = $('#dialogoEmpleados');
-        const dialogoEvaluadores = $('#dialogoEvaluadores');
         $('#cargarEmpleados').on('click', function (e) {
             e.preventDefault();
             dialogoEmpleados.fadeIn('fast');
@@ -283,28 +280,8 @@
             $('#cargandoEmpleados').fadeIn('fast');
             window.location.href = $('#cargarEmpleados').data('url');
         });
-        // Cargar evaluadores
-        $('#cargarEvaluadores').on('click', function (e) {
-            e.preventDefault();
-            dialogoEvaluadores.fadeIn('fast');
-            $('.cargar').each(function () {
-                $(this).addClass('disabled');
-            });
-        });
-        $('#dialogoEvaluadoresCancelar').on('click', function () {
-            dialogoEvaluadores.fadeOut('fast');
-            $('.cargar').each(function () {
-                $(this).removeClass('disabled');
-            });
-        });
-        $('#dialogoEvaluadoresAceptar').on('click', function () {
-            dialogoEvaluadores.fadeOut('fast');
-            $('#cargandoEvaluadores').fadeIn('fast');
-            // window.location.href = $('#cargarEvaluadores').data('url');
-        });
         $(window).on('unload', function () {
             $('#cargandoEmpleados').hide();
-            $('#cargandoEvaluadores').hide();
         });
     </script>
 {% endblock %}

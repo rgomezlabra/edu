@@ -179,7 +179,7 @@ class EvaluadorController extends AbstractController
         if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
-            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? '/');
+            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
         }
 
         $form = $this->createForm(VolcadoType::class);
@@ -251,10 +251,13 @@ class EvaluadorController extends AbstractController
                 ]);
             }
 
-            return $this->redirectToRoute('intranet_desempenyo_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('intranet_desempenyo_admin_cuestionario_evaluador_index', [
+                'id' => $cuestionario,
+            ], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('intranet/desempenyo/admin/evaluador/index.html.twig', [
+        return $this->render('intranet/desempenyo/admin/evaluador/volcado.html.twig', [
+            'form' => $form->createView(),
             'cuestionario' => $cuestionario,
         ]);
     }
