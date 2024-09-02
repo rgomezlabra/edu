@@ -115,9 +115,10 @@
                                 <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
                                 <td>{{ evaluacion.empleado.persona }}</td>
                                 <td>
-{#                                    <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">#}
-                                        <span class="mx-1 fas fa-check" title="Activar evaluación"></span>
-{#                                    </a>#}
+                                    <a class="recuperar" href="" data-persona="{{ evaluacion.empleado.persona }}"
+                                       data-url="{{ path(aplicacion.ruta ~ '_admin_cuestionario_evaluador_recupera', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
+                                        <span class="mx-1 fas fa-check" title="Recuperar evaluación"></span>
+                                    </a>
                                 </td>
                             </tr>
                         {%- endfor %}
@@ -150,7 +151,7 @@
 {% endblock %}
 
 {%  block modal %}
-    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRechazar'}) }}
+    {{- include('layout/_dialogo_confirmar.html.twig') }}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoEmpleados', pregunta: '¿Cargar datos de empleados para su autoevaluación?'}) }}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoEvaluadores', pregunta: '¿Cargar evaluadores de empleados?'}) }}
     {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoEmpleados', mensaje: 'Cargando empleados', progreso: false}) }}
@@ -233,24 +234,32 @@
             ],
         });
 
-        // Verificar rechazo de autoevaluación
-        const dialogoRechazar = $('#dialogoRechazar');
+        // Verificar rechazo y recuperación de autoevaluación
+        const dialogo = $('#dialogo');
         $('.rechazar').on('click', function (e) {
             e.preventDefault();
-            $('#dialogoRechazarPregunta').html('¿Rechazar evaluaciones para ' + $(this).data('persona') + '?');
-            dialogoRechazar.fadeIn('fast').data('url', $(this).data('url'));
-            $('.cargar, .rechazar').each(function () {
+            $('#pregunta').html('¿Rechazar evaluaciones para ' + $(this).data('persona') + '?');
+            dialogo.fadeIn('fast').data('url', $(this).data('url'));
+            $('.cargar').each(function () {
                 $(this).addClass('disabled');
             });
         });
-        $('#dialogoRechazarCancelar').on('click', function () {
-            dialogoRechazar.fadeOut('fast').data('url', '');
-            $('.cargar, .rechazar').each(function () {
+        $('.recuperar').on('click', function (e) {
+            e.preventDefault();
+            $('#pregunta').html('¿Volver a aceptar evaluaciones para ' + $(this).data('persona') + '?');
+            dialogo.fadeIn('fast').data('url', $(this).data('url'));
+            $('.cargar').each(function () {
+                $(this).addClass('disabled');
+            });
+        });
+        $('#cancelar').on('click', function () {
+            dialogo.fadeOut('fast').data('url', '');
+            $('.cargar').each(function () {
                 $(this).removeClass('disabled');
             });
         });
-        $('#dialogoRechazarAceptar').on('click', function () {
-            window.location.href = dialogoRechazar.data('url');
+        $('#aceptar').on('click', function () {
+            window.location.href = dialogo.data('url');
         });
 
         // Carga de empleados
@@ -259,7 +268,7 @@
         $('#cargarEmpleados').on('click', function (e) {
             e.preventDefault();
             dialogoEmpleados.fadeIn('fast');
-            $('.cargar, .rechazar').each(function () {
+            $('.cargar').each(function () {
                 $(this).addClass('disabled');
             });
         });

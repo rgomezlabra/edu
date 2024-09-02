@@ -239,13 +239,13 @@ class EvaluadorController extends AbstractController
             }
 
             if ($nuevos > 0) {
-                $this->generator->logAndFlash('info', 'Nuevos evaluadores cargados.', [
+                $this->generator->logAndFlash('info', 'Nuevos evaluadores cargados', [
                     'nuevos' => $nuevos,
                     'descartados' => $descartados,
                     'duracion' => microtime(true) - $inicio,
                 ]);
             } else {
-                $this->generator->logAndFlash('warning', 'No se han cargado evaluadores nuevos.', [
+                $this->generator->logAndFlash('warning', 'No se han cargado evaluadores nuevos', [
                     'descartados' => $descartados,
                     'duracion' => microtime(true) - $inicio,
                 ]);
@@ -263,8 +263,7 @@ class EvaluadorController extends AbstractController
     #[Route(
         path: '/{cuestionario}/evaluador/rechaza/{empleado?}',
         name: 'evaluador_rechaza',
-        defaults: ['titulo' => 'Cargar Evaluadores de Empleados'],
-        methods: ['GET', 'POST']
+        methods: ['GET']
     )]
     public function rechaza(
         EmpleadoRepository $empleadoRepository,
@@ -295,7 +294,7 @@ class EvaluadorController extends AbstractController
             'evaluador' => $empleado,
         ]);
         if (!$evalua instanceof Evalua) {
-            $this->generator->logAndFlash('warning', 'El empleado no existe o no es autoevaluable.', [
+            $this->generator->logAndFlash('warning', 'El empleado no existe o no es evaluable', [
                 'cuestionario' => $cuestionario->getCodigo(),
                 'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
             ]);
@@ -308,7 +307,63 @@ class EvaluadorController extends AbstractController
             ->setFechaRechazo(new DateTimeImmutable())
         ;
         $evaluaRepository->save($evalua, true);
-        $this->generator->logAndFlash('info', 'El empleado ha sido marcado como no evaluable.', [
+        $this->generator->logAndFlash('info', 'El empleado ha sido marcado como no evaluable', [
+            'cuestionario' => $cuestionario->getCodigo(),
+            'empleado' => $empleado?->getPersona()->getUsuario()->getUvus(),
+        ]);
+
+        return $this->redirectToRoute($ruta, ['id' => $cuestionario->getId()]);
+    }
+
+    /** Recupera la evaluación de un empleado que la había rechazado previamente. */
+    #[Route(
+        path: '/{cuestionario}/evaluador/recupera/{empleado?}',
+        name: 'evaluador_recupera',
+        methods: ['GET']
+    )]
+    public function recupera(
+        EmpleadoRepository $empleadoRepository,
+        EvaluaRepository $evaluaRepository,
+        Cuestionario     $cuestionario,
+        ?Empleado        $empleado = null,
+    ): Response {
+        if ($empleado instanceof Empleado) {
+            // Solo administrador puede recuperar a otro empleado
+            $this->denyAccessUnlessGranted('admin');
+            $ruta = sprintf(
+                '%s_%s_cuestionario_evaluador_index',
+                $this->actual->getAplicacion()?->getRuta() ?? '',
+                $this->actual->getRol()?->getRuta() ?? ''
+            );
+        } else {
+            // Buscar usuario actual como empleado
+            /** @var Usuario $usuario */
+            $usuario = $this->getUser();
+            $empleado = $empleadoRepository->findOneByUsuario($usuario);
+            $ruta = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
+        }
+
+        // Comprobar si el empleado ha rechazado la evaluación
+        $evalua = $evaluaRepository->findOneBy([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'evaluador' => null,
+        ]);
+        if (!$evalua instanceof Evalua) {
+            $this->generator->logAndFlash('warning', 'El empleado no existe o no había solicitado rechazar evaluación', [
+                'cuestionario' => $cuestionario->getCodigo(),
+                'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
+            ]);
+
+            return $this->redirectToRoute($ruta, ['id' => $cuestionario->getId()]);
+        }
+
+        $evalua
+            ->setEvaluador($empleado)
+            ->setFechaRechazo(null)
+        ;
+        $evaluaRepository->save($evalua, true);
+        $this->generator->logAndFlash('info', 'El empleado vuelve a ser evaluable', [
             'cuestionario' => $cuestionario->getCodigo(),
             'empleado' => $empleado?->getPersona()->getUsuario()->getUvus(),
         ]);
