@@ -5,6 +5,8 @@ namespace App\Entity\Desempenyo;
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Plantilla\Empleado;
 use App\Repository\Desempenyo\EvaluaRepository;
+use DateTimeImmutable;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -12,7 +14,11 @@ use Doctrine\ORM\Mapping as ORM;
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
 #[ORM\Entity(repositoryClass: EvaluaRepository::class)]
-#[ORM\Table(name: 'desempemnyo_evalua')]
+#[ORM\Table(name: 'desempenyo_evalua')]
+#[ORM\Index(
+    columns: ['cuestionario_id', 'empleado_id', 'evaluador_id'],
+    name: 'desempenyo_cuestionario_empleado_evaluador_idx'
+)]
 class Evalua
 {
     #[ORM\Id]
@@ -30,6 +36,9 @@ class Evalua
     #[ORM\ManyToOne(targetEntity: Cuestionario::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?Cuestionario $cuestionario = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $fecha_rechazo = null;
 
     public function getId(): ?int
     {
@@ -70,5 +79,15 @@ class Evalua
         $this->cuestionario = $cuestionario;
 
         return $this;
+    }
+
+    public function getFechaRechazo(): ?DateTimeImmutable
+    {
+        return $this->fecha_rechazo;
+    }
+
+    public function setFechaRechazo(?DateTimeImmutable $fecha_rechazo): void
+    {
+        $this->fecha_rechazo = $fecha_rechazo;
     }
 }

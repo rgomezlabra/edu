@@ -53,9 +53,10 @@
                                 <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
                                 <td>{{ evaluacion.empleado.persona }}</td>
                                 <td>
-{#                                    <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">#}
+                                    <a class="rechazar" href="" data-persona="{{ evaluacion.empleado.persona }}"
+                                       data-url="{{ path(aplicacion.ruta ~ '_admin_cuestionario_evaluador_rechaza', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                                         <span class="mx-1 fas fa-remove" title="Rechazar evaluación"></span>
-{#                                    </a>#}
+                                    </a>
                                 </td>
                             </tr>
                         {%- endfor %}
@@ -149,6 +150,7 @@
 {% endblock %}
 
 {%  block modal %}
+    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRechazar'}) }}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoEmpleados', pregunta: '¿Cargar datos de empleados para su autoevaluación?'}) }}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoEvaluadores', pregunta: '¿Cargar evaluadores de empleados?'}) }}
     {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoEmpleados', mensaje: 'Cargando empleados', progreso: false}) }}
@@ -230,13 +232,34 @@
                 [1, 'asc'],
             ],
         });
+
+        // Verificar rechazo de autoevaluación
+        const dialogoRechazar = $('#dialogoRechazar');
+        $('.rechazar').on('click', function (e) {
+            e.preventDefault();
+            $('#dialogoRechazarPregunta').html('¿Rechazar evaluaciones para ' + $(this).data('persona') + '?');
+            dialogoRechazar.fadeIn('fast').data('url', $(this).data('url'));
+            $('.cargar, .rechazar').each(function () {
+                $(this).addClass('disabled');
+            });
+        });
+        $('#dialogoRechazarCancelar').on('click', function () {
+            dialogoRechazar.fadeOut('fast').data('url', '');
+            $('.cargar, .rechazar').each(function () {
+                $(this).removeClass('disabled');
+            });
+        });
+        $('#dialogoRechazarAceptar').on('click', function () {
+            window.location.href = dialogoRechazar.data('url');
+        });
+
+        // Carga de empleados
         const dialogoEmpleados = $('#dialogoEmpleados');
         const dialogoEvaluadores = $('#dialogoEvaluadores');
-        // Carga de empleados
         $('#cargarEmpleados').on('click', function (e) {
             e.preventDefault();
             dialogoEmpleados.fadeIn('fast');
-            $('.cargar').each(function () {
+            $('.cargar, .rechazar').each(function () {
                 $(this).addClass('disabled');
             });
         });

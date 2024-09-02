@@ -34,19 +34,20 @@
                         <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {'id': cuestionario.id}) }}">
                             <span class="mx-1 fas fa-eye" title="Ver"></span>
                         </a>
-                        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_edit', {'id': cuestionario.id}) }}">
-                            <span class="mx-1 fas fa-edit" title="Editar"></span>
-                        </a>
                         <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_evaluador_index', {'id': cuestionario.id}) }}">
                             <span class="mx-1 fas fa-user-check" title="Evaluadores"></span>
                         </a>
-{#                        <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {'id': cuestionario.id}) }}">#}
-                            <span class="mx-1 fas fa-arrow-right" title="Grupos de preguntas"></span>
-{#                        </a>#}
                         {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO')
                             or cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::ARCHIVADO') %}
 {#                            <a href="{{ path(aplicacion.ruta ~ '_admin_formulario_index', {'cuestionario': cuestionario.id}) }}">#}
                                 <span class="mx-1 fas fa-list-check" title="Formularios entregados"></span>
+{#                            </a>#}
+                        {%- else %}
+                            <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_edit', {'id': cuestionario.id}) }}">
+                                <span class="mx-1 fas fa-edit" title="Editar"></span>
+                            </a>
+{#                            <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {'id': cuestionario.id}) }}">#}
+                            <span class="mx-1 fas fa-arrow-right" title="Grupos de preguntas"></span>
 {#                            </a>#}
                         {%- endif %}
                     </td>

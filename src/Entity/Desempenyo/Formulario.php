@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
 #[ORM\Entity(repositoryClass: FormularioRepository::class)]
-#[ORM\Table(name: 'desempemnyo_formulario')]
+#[ORM\Table(name: 'desempenyo_formulario')]
 class Formulario
 {
     #[ORM\Id]
@@ -27,7 +27,7 @@ class Formulario
     #[ORM\JoinColumn(nullable: false)]
     private ?Empleado $evaluador = null;
 
-    #[ORM\ManyToOne(targetEntity: Formulario::class)]
+    #[ORM\OneToOne(targetEntity: Formulario::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?Formulario $formulario = null;
 

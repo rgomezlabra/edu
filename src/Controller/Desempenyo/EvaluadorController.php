@@ -7,6 +7,7 @@ namespace App\Controller\Desempenyo;
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Desempenyo\Evalua;
 use App\Entity\Plantilla\Empleado;
+use App\Entity\Sistema\Usuario;
 use App\Form\Util\VolcadoType;
 use App\Repository\Desempenyo\EvaluaRepository;
 use App\Repository\Plantilla\EmpleadoRepository;
@@ -16,6 +17,7 @@ use App\Service\MessageGenerator;
 use App\Service\RutaActual;
 use App\Service\SirhusLock;
 use DateTimeImmutable;
+use DateTimeZone;
 use Exception;
 use RedisException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -50,13 +52,18 @@ class EvaluadorController extends AbstractController
         //$evaluaciones = $this->evaluaRepository->findByEvaluacion($cuestionario, EvaluaRepository::AUTOEVALUACION);
         $evaluaciones = $this->evaluaRepository->findAll();
         $this->redis = RedisAdapter::createConnection((string) $request->server->get('REDIS_URL'));
+        $ultimo = null;
+
         try {
-            $datos = json_decode($this->redis->get('autoevaluacion'), true);
-            if ($datos['finalizado']) {
-                $ultimo = new DateTimeImmutable($datos['inicio']['date'], new \DateTimeZone($datos['inicio']['timezone']));
+            /** @var array<array-key, mixed> $datos */
+            $datos = json_decode((string) $this->redis->get('autoevaluacion'), true);
+            if (true === $datos['finalizado']) {
+                $ultimo = new DateTimeImmutable(
+                    (string) $datos['inicio']['date'],
+                    new DateTimeZone((string) $datos['inicio']['timezone'])
+                );
             }
         } catch (Exception) {
-            $ultimo = null;
         }
 
         return $this->render('intranet/desempenyo/admin/evaluador/index.html.twig', [
@@ -91,8 +98,6 @@ class EvaluadorController extends AbstractController
 
         $inicio = microtime(true);
         $this->redis = RedisAdapter::createConnection((string) $request->server->get('REDIS_URL'));
-        // ¿Borrar autoevaluadores anteriores antes de cargar empleados activos?
-        //$this->evaluaRepository->deleteAutoevaluacion($cuestionario);
         $empleados = $empleadoRepository->findCesados(false);
         $datos = [
             'inicio' => new DateTimeImmutable(),
@@ -102,6 +107,7 @@ class EvaluadorController extends AbstractController
             'duracion' => 0,
             'finalizado' => false,
         ];
+
         foreach ($empleados as $empleado) {
             ++$datos['actual'];
             if (!$this->evaluaRepository->findOneBy([
@@ -251,5 +257,62 @@ class EvaluadorController extends AbstractController
         return $this->render('intranet/desempenyo/admin/evaluador/index.html.twig', [
             'cuestionario' => $cuestionario,
         ]);
+    }
+
+    /** Rechazar la evaluación de un empleado. */
+    #[Route(
+        path: '/{cuestionario}/evaluador/rechaza/{empleado?}',
+        name: 'evaluador_rechaza',
+        defaults: ['titulo' => 'Cargar Evaluadores de Empleados'],
+        methods: ['GET', 'POST']
+    )]
+    public function rechaza(
+        EmpleadoRepository $empleadoRepository,
+        EvaluaRepository $evaluaRepository,
+        Cuestionario     $cuestionario,
+        ?Empleado        $empleado = null,
+    ): Response {
+        if ($empleado instanceof Empleado) {
+            // Solo administrador puede rechazar a otro empleado
+            $this->denyAccessUnlessGranted('admin');
+            $ruta = sprintf(
+                '%s_%s_cuestionario_evaluador_index',
+                $this->actual->getAplicacion()?->getRuta() ?? '',
+                $this->actual->getRol()?->getRuta() ?? ''
+            );
+        } else {
+            // Buscar usuario actual como empleado
+            /** @var Usuario $usuario */
+            $usuario = $this->getUser();
+            $empleado = $empleadoRepository->findOneByUsuario($usuario);
+            $ruta = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
+        }
+
+        // Comprobar si el empleado puede autoevaluarse
+        $evalua = $evaluaRepository->findOneBy([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'evaluador' => $empleado,
+        ]);
+        if (!$evalua instanceof Evalua) {
+            $this->generator->logAndFlash('warning', 'El empleado no existe o no es autoevaluable.', [
+                'cuestionario' => $cuestionario->getCodigo(),
+                'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
+            ]);
+
+            return $this->redirectToRoute($ruta, ['id' => $cuestionario->getId()]);
+        }
+
+        $evalua
+            ->setEvaluador(null)
+            ->setFechaRechazo(new DateTimeImmutable())
+        ;
+        $evaluaRepository->save($evalua, true);
+        $this->generator->logAndFlash('info', 'El empleado ha sido marcado como no evaluable.', [
+            'cuestionario' => $cuestionario->getCodigo(),
+            'empleado' => $empleado?->getPersona()->getUsuario()->getUvus(),
+        ]);
+
+        return $this->redirectToRoute($ruta, ['id' => $cuestionario->getId()]);
     }
 }
