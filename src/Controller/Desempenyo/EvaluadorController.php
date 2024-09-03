@@ -27,7 +27,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(path: '/intranet/desempenyo/admin/cuestionario', name: 'intranet_desempenyo_admin_cuestionario_')]
+#[Route(path: '/intranet/desempenyo/admin/cuestionario', name: 'intranet_desempenyo_admin_evaluador_')]
 class EvaluadorController extends AbstractController
 {
     private object $redis;
@@ -42,13 +42,13 @@ class EvaluadorController extends AbstractController
 
     #[Route(
         path: '/{id}/evaluador/',
-        name: 'evaluador_index',
+        name: 'index',
         defaults: ['titulo' => 'Evaluadores de Cuestionario de Competencias'],
         methods: ['GET']
     )]
     public function index(Request $request, Cuestionario $cuestionario): Response
     {
-        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
+        $this->denyAccessUnlessGranted('admin');
         //$evaluaciones = $this->evaluaRepository->findByEvaluacion($cuestionario, EvaluaRepository::AUTOEVALUACION);
         $evaluaciones = $this->evaluaRepository->findAll();
         $this->redis = RedisAdapter::createConnection((string) $request->server->get('REDIS_URL'));
@@ -76,7 +76,7 @@ class EvaluadorController extends AbstractController
     /** Cargar empleados activos para autoevaluación que no hayan solicitado exclusión en un cuestionario. */
     #[Route(
         path: '/{id}/evaluador/auto',
-        name: 'evaluador_auto',
+        name: 'auto',
         defaults: ['titulo' => 'Cargar Empleados para Autoevaluación'],
         methods: ['GET']
     )]
@@ -165,7 +165,7 @@ class EvaluadorController extends AbstractController
     /** Cargar datos que relacionan empleado con su evaluador para el cuestionario indicado. */
     #[Route(
         path: '/{id}/evaluador/carga',
-        name: 'evaluador_carga',
+        name: 'carga',
         defaults: ['titulo' => 'Cargar Evaluadores de Empleados'],
         methods: ['GET', 'POST']
     )]
@@ -265,7 +265,7 @@ class EvaluadorController extends AbstractController
     /** Rechazar la evaluación de un empleado. */
     #[Route(
         path: '/{cuestionario}/evaluador/rechaza/{empleado?}',
-        name: 'evaluador_rechaza',
+        name: 'rechaza',
         methods: ['GET']
     )]
     public function rechaza(
@@ -321,7 +321,7 @@ class EvaluadorController extends AbstractController
     /** Recupera la evaluación de un empleado que la había rechazado previamente. */
     #[Route(
         path: '/{cuestionario}/evaluador/recupera/{empleado?}',
-        name: 'evaluador_recupera',
+        name: 'recupera',
         methods: ['GET']
     )]
     public function recupera(

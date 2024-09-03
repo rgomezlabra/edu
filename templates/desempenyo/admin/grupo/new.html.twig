@@ -1,0 +1,16 @@
+{% extends path(aplicacion.ruta) ~ '/admin/cuestionario/index.html.twig' %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    {{ include(path(aplicacion.ruta) ~ '/admin/cuestionario/_form.html.twig') }}
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item">
+        <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {'id': grupo.cuestionario.id}) }}">Grupos</a>
+    </li>
+{% endblock %}
+
+{% block botones %}{% endblock %}

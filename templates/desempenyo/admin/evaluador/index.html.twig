@@ -1,4 +1,4 @@
-{% extends path(aplicacion.ruta) ~ '/admin/index.html.twig' %}
+{% extends path(aplicacion.ruta) ~ '/admin/cuestionario/index.html.twig' %}
 
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
@@ -54,7 +54,7 @@
                                 <td>{{ evaluacion.empleado.persona }}</td>
                                 <td>
                                     <a class="rechazar" href="" data-persona="{{ evaluacion.empleado.persona }}"
-                                       data-url="{{ path(aplicacion.ruta ~ '_admin_cuestionario_evaluador_rechaza', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
+                                       data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_rechaza', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                                         <span class="mx-1 fas fa-remove" title="Rechazar evaluación"></span>
                                     </a>
                                 </td>
@@ -102,6 +102,7 @@
                             <th>Unidad</th>
                             <th>Doc. empleado</th>
                             <th>Nombre empleado</th>
+                            <th>Fecha solicitud</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
@@ -114,9 +115,10 @@
                                 </td>
                                 <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
                                 <td>{{ evaluacion.empleado.persona }}</td>
+                                <td>{{ evaluacion.fechaRechazo|date('Y-m-d') }}</td>
                                 <td>
                                     <a class="recuperar" href="" data-persona="{{ evaluacion.empleado.persona }}"
-                                       data-url="{{ path(aplicacion.ruta ~ '_admin_cuestionario_evaluador_recupera', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
+                                       data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_recupera', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                                         <span class="mx-1 fas fa-check" title="Recuperar evaluación"></span>
                                     </a>
                                 </td>
@@ -133,13 +135,13 @@
 {% block botones %}
     <li class="nav-item me-2">
         <button class="btn btn-primary cargar" id="cargarEmpleados"
-           data-url="{{ path(aplicacion.ruta ~ '_admin_cuestionario_evaluador_auto', {id: cuestionario.id}) }}">
+           data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_auto', {id: cuestionario.id}) }}">
             <span class="fas fa-person-arrow-down-to-line"></span> Cargar empleados
         </button>
     </li>
     <li class="nav-item me-2">
         <a class="btn btn-primary"
-           href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_evaluador_carga', {id: cuestionario.id}) }}">
+           href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id}) }}">
             <span class="fas fa-file-download"></span> Cargar evaluadores
         </a>
     </li>
@@ -148,6 +150,9 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">Cuestionarios</a></li>
+    <li class="breadcrumb-item">
+        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {'id': cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
+    </li>
 {% endblock %}
 
 {%  block modal %}
@@ -221,14 +226,13 @@
             ...config,
             columnDefs: [
                 {
-                    targets: [3],
+                    targets: [4],
                     orderable: false,
                     searchable: false,
                 },
             ],
             order: [
-                [0, 'asc'],
-                [1, 'asc'],
+                [3, 'desc'],
             ],
         });
 

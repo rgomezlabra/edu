@@ -1,4 +1,4 @@
-{% extends path(aplicacion.ruta) ~ '/admin/index.html.twig' %}
+{% extends path(aplicacion.ruta) ~ '/admin/cuestionario/index.html.twig' %}
 
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
@@ -12,7 +12,8 @@
         El volcado de datos actualizará todas las relaciones entre empleados y sus evaluadores de competencias,
         teniendo en cuenta que odas las personas deben pertenecer activamente a la plantilla actual de la Universidad de
         Sevilla.<br>
-        Los datos se cargarán usando un <strong>fichero CSV</strong> que contenga al menos los siguientes campos:<br>
+        Los datos se cargarán usando un <strong>fichero CSV</strong> que contenga al menos los siguientes campos
+        separados por comas:<br>
         DOC_EMPLEADO, DOC_EVALUADOR
     </div>
 
@@ -26,7 +27,10 @@
 
 {% block migas %}
     {{ parent() }}
-    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin') }}">Administrador</a></li>
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">Cuestionarios</a></li>
+    <li class="breadcrumb-item">
+        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {'id': cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
+    </li>
 {% endblock %}
 
 {%  block modal %}
@@ -54,21 +58,6 @@
         });
         $('#aceptar').on('click', function () {
             modalCarga.fadeIn('fast');
-            {#let url = "{{ path('intranet_plantilla_admin_volcado_progreso', {'tipo': tipo})|escape('js') }}"#}
-            // setInterval(function () {
-            //     $.ajax({
-            //         type: 'POST',
-            //         url: url,
-            //         async: true,
-            //         success: function (response) {
-            //             let porcentaje = response.total !== 0 ? 100 * response.linea / response.total : 0;
-            //             barra.width(porcentaje.toFixed() + '%').html(response.linea + ' (' + porcentaje.toFixed() + '%)');
-            //         },
-            //         error: function () {
-            //             barra.width('0%').html('Sin datos');
-            //         }
-            //     });
-            // }, 3000);
             cargar.parent().submit();
         });
         $(window).on('unload', function () {
