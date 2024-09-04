@@ -14,23 +14,50 @@
     <p class="">{{ aplicacion.descripcion }}</p>
 
     {#- Acciones comunes. #}
-    <div class="lead">
-        <div class="pagina-seccion">Autoevaluación del desempaño</div>
-        <ul>
+    <div class="my-4">
+        <div class="pagina-seccion">Fase para la autoevaluación del desempeño</div>
+        <div class="my-2">
+            <em class="me-2 fas fa-info-circle text-info"></em>
+            Dirigida a todas las personas empleadas del PTGAS: la autoevaluación de las competencias se
+            realiza mediante la cumplimentación del cuestionario de competencias. Cada conducta incluida en el
+            cuestionario deberá ser valorada por la propia persona empleada pública, aplicando una escala Likert de 1 a
+            10 (Art. 9.1 y Art. 11 del Acuerdo por el que se Regula la Evaluación del Desempeño del PTGAS de las
+            Universidades Públicas Andaluzas).
+        </div>
+        <div>
+            La escala Likert queda definida en <a href="#documenots">documentos de interés</a>.
+            A fin de homogeneizar los criterios de calificación, cada persona empleada pública debe consultar este
+            documento <strong>antes de comenzar su autoevaluación</strong> y aplicar la escala Lickert conforme a sus
+            indicaciones.
+        </div>
+        <ul class="lead my-3">
             <li>
 {#                <a href="{{ path(aplicacion.ruta ~ '_evalua_index') }}">#}
-                    Formulario para autoevaluación de competencias
+                    Cuestionario para autoevaluación de competencias
 {#                </a>#}
             </li>
             <li>Comprobar evaluadores</li>
             <li>Incidencias para autoevaluación</li>
             <li class="alert alert-primary">Solicito no participar en el proceso de autoevaluación del desempeño (o revocar solicitud)</li>
         </ul>
-        <div class="pagina-seccion">Evaluación de otras personas</div>
+        <div class="pagina-seccion">Fase para la evaluación del desempeño de otras personas</div>
+        <div>Los responsables deben evaluar a las personas asignadas.</div>
         <ul>
-            <li>Formulario de evaluación de competencias de otras personas</li>
-            <li>Comprobar evaluados</li>
+            <li>Cuestionario de evaluación de competencias de otras personas</li>
+            <li>Comprobar relación de personas a evaluar</li>
             <li>Incidencias de evaluación</li>
+        </ul>
+        <div class="pagina-seccion">Resultados de la evaluación</div>
+        <ul>
+            <li>Resultado parcial de la autoevaluación</li>
+            <li>Resultado parcial de la evaluación del responsable</li>
+            <li>Resultado provisional del proceso de evaluación del desempeño</li>
+            <li>Resultado final del proceso de evaluación del desempeño</li>
+        </ul>
+        <div class="pagina-seccion" id="documenots">Documentos de interés</div>
+        <ul>
+            <li>Texto del acuerdo</li>
+            <li>Escala Lickert</li>
         </ul>
     </div>
 

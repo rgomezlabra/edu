@@ -1,0 +1,130 @@
+{% extends path(aplicacion.ruta) ~ '/admin/pregunta/index.html.twig' %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <div class="container-fluid py-4 g-4">
+        <div class="row py-2">
+            <div class="fila-campo">Orden</div>
+            <div class="fila-valor">{{ pregunta.orden }}</div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Pregunta</div>
+            <div class="fila-valor">{{ pregunta.titulo }}</div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Descripción</div>
+            <div class="fila-valor">{{ pregunta.descripcion|raw }}</div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Texto de ayuda</div>
+            <div class="fila-valor">{{ pregunta.ayuda }}</div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Tipo de pregunta</div>
+            <div class="fila-valor">
+                {{ tipos[pregunta.tipo].leyenda|default('desconocido') }}
+                {% if tipos[pregunta.tipo].etiqueta is defined %}({{ tipos[pregunta.tipo].etiqueta|lower }}){% endif %}
+            </div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Opciones del tipo</div>
+            <div class="fila-valor">
+                {%- for opcion, valor in pregunta.opciones %}
+                    <span class="me-4">
+                        {{ opcion|capitalize }}:
+                        {% if valor is same as true %}sí{% elseif valor is same as false %}no{% elseif valor is iterable %}{{ valor|join(', ') }}{% else %}{{ valor }}{% endif %}
+                    </span>
+                {%- endfor %}
+            </div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Pregunta activa</div>
+            <div class="fila-valor">
+                {%- if pregunta.activa -%}
+                    Sí <sup><em class="fas fa-check text-success }}"></em></sup>
+                {%- else -%}
+                    No <sup><em class="fas fa-times text-danger }}"></em></sup>
+                {%- endif -%}
+            </div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Pregunta opcional</div>
+            <div class="fila-valor">
+                {%- if pregunta.opcional -%}
+                    Sí <sup><em class="fas fa-check text-success }}"></em></sup>
+                {%- else -%}
+                    No <sup><em class="fas fa-times text-danger }}"></em></sup>
+                {%- endif -%}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block botones %}
+    {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
+        <li class="boton-inferior nav-item me-2">
+            <a class="btn btn-primary"
+               href="{{ path(aplicacion.ruta ~ '_admin_pregunta_edit', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'pregunta': pregunta.id}) }}">
+                <span class="fas fa-edit"></span> Editar
+            </a>
+        </li>
+    {%- endif %}
+    <li class="nav-item me-2">
+        <a id="simula" class="btn btn-primary" href="">
+            <span class="fas fa-video"></span> Simular
+        </a>
+    </li>
+    {%- if pregunta.grupo.cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
+        <li class="boton-inferior nav-item ms-5 me-2">
+            {{ include('intranet/cuestiona/admin/pregunta/_delete_form.html.twig') }}
+        </li>
+    {%- endif %}
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item">
+        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">Preguntas</a>
+    </li>
+{% endblock %}
+
+{% block modal %}
+    <div class="modal fade" id="modalSimula" tabindex="-1" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content p-4">
+                <div class="h2">{{ pregunta.titulo }} {% if not pregunta.opcional %}*{% endif %}</div>
+                <div>{{ pregunta.descripcion|raw }}</div>
+                <div class="my-4 p-2">
+                    {%- if tipos[pregunta.tipo].fichero is defined %}
+                        {{ include('intranet/cuestiona/admin/pregunta/_pregunta_' ~ tipos[pregunta.tipo].fichero ~ '.html.twig')  }}
+                    {%- else %}
+                        <div class="alert alert-warning">Tipo de pregunta desconocido.</div>
+                    {%- endif %}
+                </div>
+                <div class="text-info">
+                    {%- if pregunta.ayuda -%}<em class="fas fa-info-circle me-2"></em>{{ pregunta.ayuda|raw }}{% endif %}
+                </div>
+                <div>
+                    <button id="enviar" class="btn btn-primary float-end">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+        import { Modal } from 'bootstrap';
+
+        const modalSimula = new Modal('#modalSimula')
+        $('#simula').on('click', function (e) {
+            e.preventDefault();
+            modalSimula.show();
+        });
+        $('#enviar').on('click', function () {
+            modalSimula.hide();
+        });
+    </script>
+{% endblock %}

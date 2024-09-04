@@ -1,0 +1,294 @@
+{% extends path(aplicacion.ruta) ~ '/admin/grupo/index.html.twig' %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <div class="pagina-seccion">
+        Cuestionario {{ cuestionario.codigo }}{% if grupo != null %} / {{ grupo.titulo }}{% endif %}
+    </div>
+    <div class="my-4">
+        <table class="tabla-condensada" id="datosPreguntas">
+            <thead class="cabecera-condensada">
+                <tr>
+                    <th>{% if grupo == null %}Grupo{% endif %}</th>
+                    <th>Orden</th>
+                    <th class="text-center">Activo</th>
+                    <th>Título</th>
+                    <th class="text-start">Tipo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            {%- for pregunta in preguntas %}
+                <tr class="fila" data-id="{{ pregunta.id }}">
+                    {%- if grupo == null %}
+                        <td>{{ pregunta.grupo.orden }}</td>
+                    {%- else %}
+                        <td>
+                            {%- if preguntas|length > 1 %}
+                                <span class="badge-secondary" title="Reordenar preguntas"><em class="fas fa-sort"></em></span>
+                            {%- endif %}
+                        </td>
+                    {%- endif %}
+                    <td>{{ pregunta.orden }}</td>
+                    <td class="text-center">
+                        {%- if pregunta.activa -%}
+                            Sí <sup><em class="fas fa-check text-success }}"></em></sup>
+                        {%- else -%}
+                            No <sup><em class="fas fa-times text-danger }}"></em></sup>
+                        {%- endif -%}
+                    </td>
+                    <td>{{ pregunta.titulo }}</td>
+                    <td class="text-start">{{ tipos[pregunta.tipo].leyenda|default(pregunta.tipo) }}</td>
+                    <td>
+                        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_show', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'pregunta': pregunta.id}) }}">
+                            <span class="mx-1 fas fa-eye" title="Ver"></span>
+                        </a>
+                        {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
+                            <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_edit', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'pregunta': pregunta.id}) }}">
+                                <span class="mx-1 fas fa-edit" title="Editar"></span>
+                            </a>
+                        {%- endif %}
+                    </td>
+                </tr>
+            {%- endfor %}
+            </tbody>
+            {%- if grupo != null and preguntas|length > 1 %}
+                <caption>
+                    <em class="fas fa-info-circle text-info"></em>
+                    El orden de las preguntas se modifica seleccionando y arrastrando el icono de la fila deseada.
+                    Al finalizar, los cambios pueden grabarse pulsando sobre el botón de guardar.
+                </caption>
+            {%- endif %}
+        </table>
+    </div>
+{% endblock %}
+
+{% block botones %}
+    {%- if grupo != null %}
+        {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
+            <li class="nav-item me-2">
+                <button id="crear" class="btn btn-primary"><span class="fas fa-plus"></span> Crear pregunta</button>
+            </li>
+        {%- elseif preguntas|length > 1 %}
+            <li class="nav-item me-2">
+                <a id="ordenar" class="btn btn-primary disabled" href=""><span class="fas fa-save"></span> Grabar orden</a>
+            </li>
+            <div id="aviso" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body"></div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        {%- endif %}
+    {%- endif %}
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {'id': cuestionario.id}) }}">Grupos</a></li>
+    <li class="breadcrumb-item text-truncate" style="max-width: 15%">
+        <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_show', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">{{ grupo.titulo }}</a>
+    </li>
+{% endblock %}
+
+{% block modal %}
+    {%- set tipos %}
+        {{- render(controller('App\\Controller\\Cuestiona\\PreguntaController::getTipos')) }}
+    {%- endset %}
+    {%- set tipos = tipos|json_decode %}
+    {%- set etiquetas = tipos|map(t => t.etiqueta)|reduce((unicos, elem) => elem in unicos ? unicos : unicos|merge([elem]), []) %}
+    <div class="modal fade" id="modalTipos" tabindex="-1" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content p-4">
+                <div class="h3">Elegir tipo de pregunta</div>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <button class="nav-link w-15 active" id="nav-defecto-tab" data-bs-toggle="tab" data-bs-target="#nav-defecto"
+                            type="button" role="tab" aria-controls="nav-defecto" aria-selected="true">
+                        Por defecto
+                    </button>
+                    {%- for etiqueta in etiquetas %}
+                        <button class="nav-link w-15" id="nav-{{ loop.index }}-tab" data-bs-toggle="tab"
+                                data-bs-target="#nav-{{ loop.index }}" type="button" role="tab"
+                                aria-controls="nav-{{ loop.index }}" aria-selected="true">
+                            {{ etiqueta }}
+                        </button>
+                    {%- endfor %}
+                </div>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="nav-defecto"
+                         role="tabpanel" aria-labelledby="nav-defecto-tab" tabindex="0">
+                        <table class="tabla-condensada">
+                            <thead class="cabecera-condensada">
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Ejemplo</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {%- for id, tipo in tipos|filter((i, t) => i in opciones|keys) %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_new', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'tipo': id, 'opciones': opciones[id]}) }}">
+                                            {{ tipo.leyenda }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {{- include('intranet/cuestiona/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {'ejemplo': true, }, ignore_missing = true) }}
+                                    </td>
+                                </tr>
+                            {%- endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {%- for etiqueta in etiquetas %}
+                    <div class="tab-content" id="nav-tabContent">
+                        <div class="tab-pane fade" id="nav-{{ loop.index }}" role="tabpanel"
+                             aria-labelledby="nav-{{ loop.index }}-tab" tabindex="0">
+                            <table class="tabla-condensada">
+                                <thead class="cabecera-condensada">
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Ejemplo</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {%- for id, tipo in tipos|filter(t => t.etiqueta == etiqueta) %}
+                                    <tr>
+                                        <td>{{ id }}:
+                                            <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_new', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'tipo': id}) }}">
+                                                {{ tipo.leyenda }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            {{- include('intranet/cuestiona/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {'ejemplo': true, }, ignore_missing = true) }}
+                                        </td>
+                                    </tr>
+                                {%- endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {%- endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+        import { Modal, Toast } from 'bootstrap';
+
+        const modalTips = new Modal('#modalTipos');
+        const ordenar = $('#ordenar');
+        const preguntas = $('#datosPreguntas').dataTable({
+            buttons: [
+                {
+                    extend: 'copy',
+                    exportOptions: {
+                        columns: [1, 2, 3,4],
+                    },
+                    text: '<i class="fas fa-copy"></i>',
+                    titleAttr: 'Copiar',
+                },
+                {
+                    extend: 'print',
+                    exportOptions: {
+                        columns: [1, 2, 3,4],
+                        stripHtml: false,
+                    },
+                    text: '<i class="fas fa-print"></i>',
+                    titleAttr: 'Imprimir',
+                },
+                {
+                    extend: 'csv',
+                    exportOptions: {
+                        columns: [1, 2, 3,4],
+                    },
+                    text: '<i class="fas fa-file-csv"></i>',
+                    titleAttr: 'Generar fichero CSV',
+                },
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: [1, 2, 3,4],
+                    },
+                    text: '<i class="fas fa-file-excel"></i>',
+                    titleAttr: 'Generar fichero Excel',
+                },
+            ],
+            columnDefs: [
+                {
+                    targets: [1, 4],
+                    type: 'num',
+                },
+                {
+                    orderable: false,
+                    targets: '_all'
+                },
+                {
+                    targets: [4],
+                    searchable: false,
+                },
+            ],
+            dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +
+                '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            language: {
+                url: '{{ asset("includes/datatable.es.json") }}',
+            },
+            order: [
+                [1, 'asc'],
+            ],
+            rowReorder: {
+                dataSrc: 1,
+                selector: 'td:first-child',
+            },
+        }).on('row-reordered.dt', function (e, diff) {
+            // Activar botón de reordenar
+            if (diff.length > 0) {
+                ordenar.removeClass('disabled');
+            }
+        });
+        // Aviso de resultado
+        const aviso = new Toast('#aviso', {
+            autohide: true,
+            delay: 3000,
+        });
+        const mensaje = $('#aviso').find('.toast-body');
+        // Reordenar preguntas
+        ordenar.on('click', function (e) {
+            e.preventDefault();
+            let orden = [];
+            $('.fila').each(function () {
+                orden.push($(this).data('id'));
+            });
+            $.ajax({
+                type: 'POST',
+                url: "{{ path(aplicacion.ruta ~ '_admin_pregunta_orden', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}",
+                data: {'orden': orden},
+                dataType: 'JSON',
+                async: true,
+                success: function () {
+                    mensaje.html('Orden de las preguntas actualizado.');
+                    $('#aviso').addClass('text-bg-warning').removeClass('text-bg-danger');
+                    aviso.show();
+                    ordenar.addClass('disabled');
+                },
+                error: function (xhr) {
+                    let texto = xhr['responseJSON']['mensaje'] ?? 'Se ha producido un error al guardar los datos.';
+                    mensaje.html('<small>' + texto + '</small>');
+                    $('#aviso').addClass('text-bg-danger').removeClass('text-bg-warning');
+                    aviso.show();
+                },
+            });
+        });
+        // Modal para elegir el tipo de pregunta
+        $('#crear').on('click', function (e) {
+            e.preventDefault();
+            modalTips.show();
+        });
+    </script>
+{% endblock %}

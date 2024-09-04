@@ -31,9 +31,9 @@
                                 <span class="mx-1 fas fa-edit" title="Editar"></span>
                             </a>
                         {%- endif %}
-{#                        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">#}
-                            <span class="mx-1 fas fa-arrow-right" title="Preguntas"></span>
-{#                        </a>#}
+                        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">
+                            <span class="mx-1 fas fa-question-circle" title="Preguntas"></span>
+                        </a>
                     </td>
                 </tr>
             {%- endfor %}

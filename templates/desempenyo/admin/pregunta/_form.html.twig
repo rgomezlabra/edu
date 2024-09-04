@@ -1,0 +1,13 @@
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+    <div class="ejemplos visually-hidden">
+        {%- for id, tipo in tipos %}
+            <div id="ejemplo-{{ id }}" data-tipo="{{ id }}">
+                {{- include('intranet/cuestiona/admin/pregunta/_pregunta_' ~ tipo.fichero|default ~ '.html.twig', {'ejemplo': true}, ignore_missing = true) }}
+            </div>
+        {%- endfor %}
+    </div>
+    <div class="linea-botones">
+        <button class="btn btn-primary"><span class="fas fa-save"></span> {{ button_label|default('Guardar') }}</button>
+    </div>
+{{ form_end(form) }}
