@@ -54,7 +54,7 @@ class PreguntaController extends AbstractController
                 'min' => 1,
                 'max' => 10,
                 'observaciones' => true,
-            ]
+            ],
         ];
 
         return $this->render(sprintf('%s/admin/pregunta/index.html.twig', $aplic?->rutaToTemplateDir() ?? ''), [

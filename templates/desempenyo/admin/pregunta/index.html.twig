@@ -1,4 +1,8 @@
 {% extends path(aplicacion.ruta) ~ '/admin/grupo/index.html.twig' %}
+{%- set tipos %}
+    {{- render(controller('App\\Controller\\Cuestiona\\PreguntaController::getTipos')) }}
+{%- endset %}
+{%- set tipos = tipos|json_decode %}
 
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
@@ -6,7 +10,7 @@
     <div class="pagina-seccion">
         Cuestionario {{ cuestionario.codigo }}{% if grupo != null %} / {{ grupo.titulo }}{% endif %}
     </div>
-    <div class="my-4">
+    <div class="mt-4">
         <table class="tabla-condensada" id="datosPreguntas">
             <thead class="cabecera-condensada">
                 <tr>
@@ -93,84 +97,34 @@
 {% endblock %}
 
 {% block modal %}
-    {%- set tipos %}
-        {{- render(controller('App\\Controller\\Cuestiona\\PreguntaController::getTipos')) }}
-    {%- endset %}
-    {%- set tipos = tipos|json_decode %}
     {%- set etiquetas = tipos|map(t => t.etiqueta)|reduce((unicos, elem) => elem in unicos ? unicos : unicos|merge([elem]), []) %}
     <div class="modal fade" id="modalTipos" tabindex="-1" aria-hidden="true" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog modal-lg">
             <div class="modal-content p-4">
                 <div class="h3">Elegir tipo de pregunta</div>
-                <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                    <button class="nav-link w-15 active" id="nav-defecto-tab" data-bs-toggle="tab" data-bs-target="#nav-defecto"
-                            type="button" role="tab" aria-controls="nav-defecto" aria-selected="true">
-                        Por defecto
-                    </button>
-                    {%- for etiqueta in etiquetas %}
-                        <button class="nav-link w-15" id="nav-{{ loop.index }}-tab" data-bs-toggle="tab"
-                                data-bs-target="#nav-{{ loop.index }}" type="button" role="tab"
-                                aria-controls="nav-{{ loop.index }}" aria-selected="true">
-                            {{ etiqueta }}
-                        </button>
-                    {%- endfor %}
-                </div>
-                <div class="tab-content" id="nav-tabContent">
-                    <div class="tab-pane fade show active" id="nav-defecto"
-                         role="tabpanel" aria-labelledby="nav-defecto-tab" tabindex="0">
-                        <table class="tabla-condensada">
-                            <thead class="cabecera-condensada">
+                    <table class="tabla-condensada">
+                        <thead class="cabecera-condensada">
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Ejemplo</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {%- for id, tipo in tipos|filter((t, i) => opciones is defined and i in opciones|keys) %}
                             <tr>
-                                <th>Tipo</th>
-                                <th>Ejemplo</th>
+                                <td>
+                                    <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_new', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'tipo': id, 'opciones': opciones[id]|json_encode}) }}">
+                                        {{ tipo.leyenda }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {{- include('intranet/cuestiona/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {'ejemplo': true, }, ignore_missing = true) }}
+                                </td>
                             </tr>
-                            </thead>
-                            <tbody>
-                            {%- for id, tipo in tipos|filter((i, t) => i in opciones|keys) %}
-                                <tr>
-                                    <td>
-                                        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_new', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'tipo': id, 'opciones': opciones[id]}) }}">
-                                            {{ tipo.leyenda }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        {{- include('intranet/cuestiona/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {'ejemplo': true, }, ignore_missing = true) }}
-                                    </td>
-                                </tr>
-                            {%- endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                        {%- endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                {%- for etiqueta in etiquetas %}
-                    <div class="tab-content" id="nav-tabContent">
-                        <div class="tab-pane fade" id="nav-{{ loop.index }}" role="tabpanel"
-                             aria-labelledby="nav-{{ loop.index }}-tab" tabindex="0">
-                            <table class="tabla-condensada">
-                                <thead class="cabecera-condensada">
-                                <tr>
-                                    <th>Tipo</th>
-                                    <th>Ejemplo</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {%- for id, tipo in tipos|filter(t => t.etiqueta == etiqueta) %}
-                                    <tr>
-                                        <td>{{ id }}:
-                                            <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_new', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'tipo': id}) }}">
-                                                {{ tipo.leyenda }}
-                                            </a>
-                                        </td>
-                                        <td>
-                                            {{- include('intranet/cuestiona/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {'ejemplo': true, }, ignore_missing = true) }}
-                                        </td>
-                                    </tr>
-                                {%- endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                {%- endfor %}
             </div>
         </div>
     </div>

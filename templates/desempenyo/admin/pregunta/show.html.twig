@@ -93,17 +93,19 @@
     <div class="modal fade" id="modalSimula" tabindex="-1" aria-hidden="true" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog modal-xl">
             <div class="modal-content p-4">
-                <div class="h2">{{ pregunta.titulo }} {% if not pregunta.opcional %}*{% endif %}</div>
-                <div>{{ pregunta.descripcion|raw }}</div>
-                <div class="my-4 p-2">
-                    {%- if tipos[pregunta.tipo].fichero is defined %}
-                        {{ include('intranet/cuestiona/admin/pregunta/_pregunta_' ~ tipos[pregunta.tipo].fichero ~ '.html.twig')  }}
-                    {%- else %}
-                        <div class="alert alert-warning">Tipo de pregunta desconocido.</div>
-                    {%- endif %}
+                <div class="row h3">
+                    <div class="col-5">Pregunta</div>
+                    <div class="col-2">Valoración</div>
+                    <div class="col-5">Evidencias</div>
                 </div>
-                <div class="text-info">
-                    {%- if pregunta.ayuda -%}<em class="fas fa-info-circle me-2"></em>{{ pregunta.ayuda|raw }}{% endif %}
+                <div class="row">
+                    <div class="col-5">
+                        <div class="fw-bold">
+                            {{ pregunta.titulo }} {% if not pregunta.opcional %}*{% endif %}
+                        </div>
+                        <div>{{ pregunta.descripcion|raw }}</div>
+                    </div>
+                    {{ include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipos[pregunta.tipo].fichero ~ '.html.twig')  }}
                 </div>
                 <div>
                     <button id="enviar" class="btn btn-primary float-end">Enviar</button>
