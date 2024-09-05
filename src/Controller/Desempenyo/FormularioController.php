@@ -73,13 +73,8 @@ class FormularioController extends AbstractController
 
     /** Rellenar formulario. */
     #[Route(
-        path: '/cuestiona/{codigo}',
-        name: 'portal_cuestiona_formulario_rellenar',
-        methods: ['GET']
-    )]
-    #[Route(
-        path: '/intranet/cuestiona/formulario/{codigo}',
-        name: 'intranet_cuestiona_formulario_rellenar',
+        path: '/intranet/desempenyo/formulario/{codigo}',
+        name: 'intranet_desempenyo_formulario_rellenar',
         methods: ['GET']
     )]
     public function rellenar(
@@ -89,14 +84,13 @@ class FormularioController extends AbstractController
         RutaActual             $actual,
         string                 $codigo
     ): Response {
-        $cuestionario = $cuestionarioRepository->findOneBy(['url' => $request->getRequestUri(), 'privado' => $actual->rutaEnIntranet()]);
+        $cuestionario = $cuestionarioRepository->findOneBy(['url' => $request->getRequestUri()]);
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
 
             return $this->redirectToRoute('inicio');
         }
 
-        $plantilla = $actual->rutaEnIntranet() ? 'intranet/cuestiona/formulario.html.twig' : 'portal/cuestiona/formulario.html.twig';
         $formulario = $cuestionario->isEditable() ? $formularioRepository->findOneBy(['cuestionario' => $cuestionario, 'usuario' => $this->getUser()]) : null;
         if ($formulario instanceof Formulario) {
             if ($formulario->getEnviado() instanceof DateTimeImmutable) {
@@ -112,7 +106,7 @@ class FormularioController extends AbstractController
             ;
         }
 
-        return $this->render($plantilla, [
+        return $this->render(sprintf('%s/formulario.html.twig', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? ''), [
             'formulario' => $formulario,
             'codigo' => $codigo,
         ]);
@@ -120,13 +114,8 @@ class FormularioController extends AbstractController
 
     /** Guardar el formulario. */
     #[Route(
-        path: '/cuestiona/{codigo}',
-        name: 'portal_cuestiona_formulario_guardar',
-        methods: ['POST']
-    )]
-    #[Route(
-        path: '/intranet/cuestiona/formulario/{codigo}',
-        name: 'intranet_cuestiona_formulario_guardar',
+        path: '/intranet/desempenyo/formulario/{codigo}',
+        name: 'intranet_desempenyo_formulario_guardar',
         methods: ['POST']
     )]
     public function guardar(

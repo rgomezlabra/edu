@@ -15,7 +15,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use function Symfony\Component\String\u;
 
 /**
  * Controlador para gestionar cuestionarios para evaluación de competencias.
@@ -195,9 +194,9 @@ class CuestionarioController extends AbstractController
                 ->setEstado($publicado)
                 ->setUrl(
                     sprintf(
-                        '%s/evalua/%s-%s',
-                        u($this->actual->getAplicacion()?->getRuta())->replace('_', '/'),
-                        (new Slug())((string)$cuestionario->getCodigo()),
+                        '/%s/formulario/%s-%s',
+                        $this->actual->getAplicacion()?->rutaToTemplateDir() ?? '',
+                        (new Slug())((string) $cuestionario->getCodigo()),
                         uniqid()
                     )
                 )

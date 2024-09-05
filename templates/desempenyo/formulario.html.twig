@@ -1,0 +1,108 @@
+{% extends path(aplicacion.ruta) ~ '/index.html.twig' %}
+
+{% block content %}
+    {%- set tipos_preguntas -%}
+        {{ render(controller('App\\Controller\\Cuestiona\\PreguntaController::getTipos')) }}
+    {%- endset -%}
+
+    <div class="pagina-titulo">{{ formulario.cuestionario.titulo }}</div>
+
+    <form method="post" action="{{ path(aplicacion.ruta ~ '_formulario_guardar', {'codigo': codigo}) }}">
+    <div class="d-flex align-items-start">
+        <div class="col-3 col-sm-2 me-3">
+            <div class="nav flex-column nav-pills h-100" id="vert-tabs-tab" role="tablist" aria-orientation="vertical">
+                {%- if formulario.cuestionario.bienvenida %}
+                    <a class="nav-link show active" id="vert-tabs-bienvenida-tab" role="tab"
+                       data-bs-toggle="pill" href="#vert-tabs-bienvenida" aria-controls="vert-tabs-bienvenida"
+                       aria-selected="true">
+                        Página de bienvenida
+                    </a>
+                {%- endif %}
+                {#- Páginas de grupos de preguntas #}
+                {%- for grupo in formulario.cuestionario.grupos|sort((a, b) => a.orden <=> b.orden) %}
+                    <a class="nav-link" id="vert-tabs-{{ grupo.orden }}-tab" role="tab"
+                       data-bs-toggle="pill" href="#vert-tabs-{{ grupo.orden }}" aria-controls="vert-tabs-{{ grupo.orden }}"
+                       aria-selected="false">
+                        {{ grupo.titulo }}
+                    </a>
+                {%- endfor %}
+                {%- if formulario.cuestionario.bienvenida %}
+                    <a class="nav-link" id="vert-tabs-despedida-tab" role="tab"
+                       data-bs-toggle="pill" href="#vert-tabs-despedida" aria-controls="vert-tabs-despedida"
+                       aria-selected="false">
+                        Página de despedida
+                    </a>
+                {%- endif %}
+            </div>
+        </div>
+        <div class="col-9 col-sm-10">
+            <div class="tab-content" id="vert-tabs-tabContent">
+                {#- Página de bienvenida #}
+                <div class="tab-pane fade text-left show active" id="vert-tabs-bienvenida"
+                     role="tabpanel" aria-labelledby="vert-tabs-bienvenida-tab" tabindex="0">
+                    <div>{{ formulario.cuestionario.descripcion|raw }}</div>
+                    <div>{{ formulario.cuestionario.bienvenida|raw }}</div>
+                </div>
+                {#- Páginas de grupos de preguntas #}
+                    {%- for grupo in formulario.cuestionario.grupos %}
+                        <div class="tab-pane fade text-left" id="vert-tabs-{{ grupo.orden }}"
+                             role="tabpanel" aria-labelledby="vert-tabs-{{ grupo.orden }}-tab" tabindex="0">
+                            <div class="pagina-seccion">{{ grupo.titulo }}</div>
+                            <div class="my-2">{{ grupo.descripcion|raw }}</div>
+                            {#- Preguntas del grupo #}
+                            <div class="d-grid">
+                                <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
+                                    <div class="col-5">Pregunta</div>
+                                    <div class="col-2">Valoración</div>
+                                    <div class="col-5">Evidencias</div>
+                                </div>
+                                {%- set puntos = 0 %}
+                                {%- for pregunta in grupo.preguntas %}
+                                    {%- set tipo = (tipos_preguntas|json_decode)[pregunta.tipo] %}
+                                    <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
+                                        <div class="col-5">
+                                            <div class="fw-bold">
+                                                {{ pregunta.titulo }} {% if not pregunta.opcional %}*{% endif %}
+                                            </div>
+                                            <div>{{ pregunta.descripcion|raw }}</div>
+                                        </div>
+                                        {{- include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {'etiqueta': 'preg_' ~ pregunta.id}) }}
+                                    </div>
+                                    {%- if loop.last %}
+                                        <div class="row fw-bold bg-tertiary">
+                                            <div class="col-5 text-end">Media</div>
+                                            <div class="col-2">{{ puntos }}</div>
+                                        </div>
+                                    {%- endif %}
+                                {%- endfor %}
+                            </div>
+                            {%- if loop.last %}
+                                <input type="hidden" name="_token"
+                                       value="{{ csrf_token(codigo ~ '.' ~ formulario.cuestionario.id) }}">
+                                <button class="btn btn-primary">Enviar</button>
+                            {%- endif %}
+                        </div>
+                    {%- endfor %}
+                {#- Página de despedida #}
+                <div class="tab-pane fade text-left" id="vert-tabs-despedida" role="tabpanel"
+                     aria-labelledby="vert-tabs-despedida-tab" tabindex="0">
+                    <div>{{ formulario.cuestionario.despedida|default|raw }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>
+{% endblock %}
+
+{% block botones %}
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+    </script>
+{% endblock %}
