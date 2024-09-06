@@ -5,7 +5,9 @@
         {{ render(controller('App\\Controller\\Cuestiona\\PreguntaController::getTipos')) }}
     {%- endset -%}
 
+    <div class="badge-primary rounded-pill float-end">{{ app.user.persona }}</div>
     <div class="pagina-titulo">{{ formulario.cuestionario.titulo }}</div>
+    <div class="border-bottom border-3 m-3">{{ formulario.cuestionario.descripcion|raw }}</div>
 
     <form method="post" action="{{ path(aplicacion.ruta ~ '_formulario_guardar', {'codigo': codigo}) }}">
     <div class="d-flex align-items-start">
@@ -15,7 +17,7 @@
                     <a class="nav-link show active" id="vert-tabs-bienvenida-tab" role="tab"
                        data-bs-toggle="pill" href="#vert-tabs-bienvenida" aria-controls="vert-tabs-bienvenida"
                        aria-selected="true">
-                        Página de bienvenida
+                        Comenzar la evaluación
                     </a>
                 {%- endif %}
                 {#- Páginas de grupos de preguntas #}
@@ -23,14 +25,14 @@
                     <a class="nav-link" id="vert-tabs-{{ grupo.orden }}-tab" role="tab"
                        data-bs-toggle="pill" href="#vert-tabs-{{ grupo.orden }}" aria-controls="vert-tabs-{{ grupo.orden }}"
                        aria-selected="false">
-                        {{ grupo.titulo }}
+                        <span class="ms-3">{{ grupo.titulo }}</span>
                     </a>
                 {%- endfor %}
                 {%- if formulario.cuestionario.bienvenida %}
                     <a class="nav-link" id="vert-tabs-despedida-tab" role="tab"
                        data-bs-toggle="pill" href="#vert-tabs-despedida" aria-controls="vert-tabs-despedida"
                        aria-selected="false">
-                        Página de despedida
+                        Finalizar la evaluación
                     </a>
                 {%- endif %}
             </div>
@@ -40,7 +42,6 @@
                 {#- Página de bienvenida #}
                 <div class="tab-pane fade text-left show active" id="vert-tabs-bienvenida"
                      role="tabpanel" aria-labelledby="vert-tabs-bienvenida-tab" tabindex="0">
-                    <div>{{ formulario.cuestionario.descripcion|raw }}</div>
                     <div>{{ formulario.cuestionario.bienvenida|raw }}</div>
                 </div>
                 {#- Páginas de grupos de preguntas #}
@@ -99,6 +100,11 @@
 
 {% block migas %}
     {{ parent() }}
+    <li class="breadcrumb-item">
+        <a href="{{ path(aplicacion.ruta) }}">
+            <em class="me-1 fas {{ aplicacion.icono }}"></em>{{ aplicacion.nombreCorto }}
+        </a>
+    </li>
 {% endblock %}
 
 {% block js %}

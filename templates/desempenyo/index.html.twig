@@ -13,69 +13,129 @@
     </div>
     <p class="">{{ aplicacion.descripcion }}</p>
 
+    {%- set activos = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO')) %}
     {#- Acciones comunes. #}
     <div class="my-4">
-        <div class="pagina-seccion">Fase para la autoevaluación del desempeño</div>
-        <div class="container-fluid my-2">
-            <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
-            Dirigida a todas las personas empleadas del PTGAS: la autoevaluación de las competencias se
-            realiza mediante la cumplimentación del cuestionario de competencias. Cada conducta incluida en el
-            cuestionario deberá ser valorada por la propia persona empleada pública, aplicando una escala Likert de 1 a
-            10, y podrá señalar una o varias conductas específicas que sirvan como justificación y
-            evidencia del valor dado en cada una de las conductas del cuestionario.
-        </div>
-        <div class="container-fluid my-2">
-            La autoevaluación por parte de la persona empleada pública tendrá un valor ponderado
-            del 34%, con respecto al máximo de los 60 puntos con los que se puntúan las competencias profesionales.
-        </div>
-        <div class="container-fluid my-2">
-            La escala Likert queda definida en <a href="#documenots">documentos de interés</a>.
-            A fin de homogeneizar los criterios de calificación, cada persona empleada pública debe consultar este
-            documento <strong>antes de comenzar su autoevaluación</strong> y aplicar la escala Lickert conforme a sus
-            indicaciones.
-        </div>
-        <ul class="lead my-3">
-            <li>
-{#                <a href="{{ path(aplicacion.ruta ~ '_evalua_index') }}">#}
-                    Cuestionario para autoevaluación de competencias
-{#                </a>#}
-            </li>
-            <li>Comprobar evaluadores</li>
-            <li>Incidencias para autoevaluación</li>
-            <li class="alert alert-primary">Solicito no participar en el proceso de autoevaluación del desempeño (o revocar solicitud)</li>
-        </ul>
-        <div class="pagina-seccion">Fase para la evaluación por parte de los responsables</div>
-        <div class="container-fluid my-2">
-            <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
-            Esta fase va dirigida al responsable superior jerárquico, que deberá responder el cuestionario evaluando a
-            cada persona a su cargo. Deberá señalar una o varias conductas específicas que sirvan como justificación y
-            evidencia del valor dado en cada una de las conductas del cuestionario. La evaluación de la Universidad
-            tiene un valor ponderado del 66% del valor total, con respecto al máximo de 60 puntos con los que se puntúan
-            las competencias profesionales.
-        </div>
-        <ul class="lead my-3">
-            <li>Cuestionario de evaluación de competencias de otras personas</li>
-            <li>Comprobar relación de personas a evaluar</li>
-            <li>Incidencias de evaluación</li>
-        </ul>
-        <div class="pagina-seccion">Fase para la evaluación por parte de otras personas evaluadoras</div>
-        <div class="container-fluid my-2">
-            <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
-            Esta fase va dirigida a otras personas evaluadoras que intervienen en el proceso de evaluación.
-        </div>
-        <div class="pagina-seccion">Resultados de la evaluación</div>
-        <ul class="lead my-3">
-            <li>Resultado parcial de la autoevaluación</li>
-            <li>Resultado parcial de la evaluación del responsable</li>
-            <li>Resultado parcial de la evaluación con la participación de otras personas evaluadoras</li>
-            <li>Resultado provisional del proceso de evaluación del desempeño</li>
-            <li>Resultado final del proceso de evaluación del desempeño</li>
-        </ul>
-        <div class="pagina-seccion" id="documenots">Documentos de interés</div>
-        <ul class="lead my-3">
-            <li>Texto del acuerdo</li>
-            <li>Escala Lickert</li>
-        </ul>
+        {%- if activos|length == 0 %}
+            <div class="alert alert-warning">En este momento, no hay cuestionarios activos.</div>
+        {%- else %}
+            {#- Autoevaluación #}
+            <div class="pagina-seccion">Fase para la autoevaluación del desempeño</div>
+            <div class="container-fluid my-2">
+                <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
+                Dirigida a todas las personas empleadas del PTGAS: la autoevaluación de las competencias se
+                realiza mediante la cumplimentación del cuestionario de competencias. Cada conducta incluida en el
+                cuestionario deberá ser valorada por la propia persona empleada pública, aplicando una escala Likert de 1 a
+                10, y podrá señalar una o varias conductas específicas que sirvan como justificación y
+                evidencia del valor dado en cada una de las conductas del cuestionario.
+            </div>
+            <div class="container-fluid my-2">
+                La autoevaluación por parte de la persona empleada pública tendrá un valor ponderado
+                del 34%, con respecto al máximo de los 60 puntos con los que se puntúan las competencias profesionales.
+            </div>
+            <div class="container-fluid my-2">
+                La escala Likert queda definida en <a href="#documenots">documentos de interés</a>.
+                A fin de homogeneizar los criterios de calificación, cada persona empleada pública debe consultar este
+                documento <strong>antes de comenzar su autoevaluación</strong> y aplicar la escala Lickert conforme a sus
+                indicaciones.
+            </div>
+            <ul class="lead my-3">
+                {%- if activos[0].fechaAlta > date() %}
+                    <div class="alert alert-warning">
+                        El cuestionario estará disponible entre los días {{ activos[0].fechaAlta|date('d/m/Y') }} y
+                        {{ activos[0].fechaBaja|date('d/m/Y') }}. Puede consultar el texto en el apartado
+                        <a href="#documentos">documentos de interés</a>.
+                    </div>
+                {%- elseif activos[0].fechaBaja < date() %}
+                    <div class="alert alert-warning">
+                        El plazo para cumplimentar el cuestionario terminó el día {{ activos[0].fechaBaja|date('d/m/Y') }}.
+                        Si existe de una incidencia, puede comunicarla en el apartado
+                        <a href="#incidencias">Comunicar incidencias del proceso de autoevaluación</a>.
+                    </div>
+                {%- elseif evaluados|length == 0 %}
+                    <div class="alert alert-warning">
+                        El empleado actualmente no tiene cuestionario asignado.
+                        Si existe de una incidencia, puede comunicarla en el apartado
+                        <a href="#incidencias">Comunicar incidencias del proceso de autoevaluación</a>.
+                    </div>
+                {%- elseif evaluados|filter(e => e.evaluador == null)|length > 0 %}
+                    <div class="alert alert-warning">
+                        El empleado ha solicitado no ser evaluado.
+                    </div>
+                {%- else %}
+                    <li><a href="{{ activos[0].url }}">Cuestionario para autoevaluación de competencias</a></li>
+                {%- endif %}
+                <li>Comprobar sus evaluadores</li>
+                <li>Comunicar incidencias del proceso de autoevaluación</li>
+                {%- if activos[0].fechaBaja >= date() %}
+                    {%- if evaluados|filter(e => e.evaluador != null)|length > 0 %}
+                        <li class="alert alert-primary">
+                            Solicito no participar en el proceso de autoevaluación del desempeño
+                        </li>
+                    {%- else %}
+                        <li class="alert alert-success">
+                            Volver a activar su participación (solo disponible hasta el día {{ activos[0].fechaBaja|date('d/m/Y') }},
+                            inclusive)
+                        </li>
+                    {%- endif %}
+                {%- endif %}
+            </ul>
+            {%- if activos|length > 0 and evaluaciones|filter(e => e.empleado != e.evaluador)|length > 0 %}
+                <div class="pagina-seccion">Fase para la evaluación por parte de los responsables</div>
+                <div class="container-fluid my-2">
+                    <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
+                    Esta fase va dirigida al responsable superior jerárquico, que deberá responder el cuestionario evaluando a
+                    cada persona a su cargo. Deberá señalar una o varias conductas específicas que sirvan como justificación y
+                    evidencia del valor dado en cada una de las conductas del cuestionario. La evaluación de la Universidad
+                    tiene un valor ponderado del 66% del valor total, con respecto al máximo de 60 puntos con los que se puntúan
+                    las competencias profesionales.
+                </div>
+                <ul class="lead my-3">
+                    {%- if activos[0].fechaAlta > date() %}
+                        <div class="alert alert-warning">
+                            El cuestionario estará disponible entre los días {{ activos[0].fechaAlta|date('d/m/Y') }} y
+                            {{ activos[0].fechaBaja|date('d/m/Y') }}. Puede consultar el texto en el apartado
+                            <a href="#documentos">documentos de interés</a>.
+                        </div>
+                    {%- elseif activos[0].fechaBaja < date() %}
+                        <div class="alert alert-warning">
+                            El plazo para cumplimentar el cuestionario terminó el día {{ activos[0].fechaBaja|date('d/m/Y') }}.
+                            Si existe de una incidencia, puede comunicarla en el apartado
+                            <a href="#incidencias">Comunicar incidencias de evaluación por parte del responsable</a>.
+                        </div>
+                    {%- else %}
+                        <li>Cuestionario de evaluación de competencias de otras personas</li>
+                    {%- endif %}
+                    <li>Comprobar relación de personas a evaluar</li>
+                    <li>Comunicar incidencias de evaluación por parte del responsable</li>
+                </ul>
+                <div class="pagina-seccion">Fase para la evaluación por parte de otras personas evaluadoras</div>
+                <div class="container-fluid my-2">
+                    <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
+                    Esta fase va dirigida a otras personas evaluadoras que intervienen en el proceso de evaluación.
+                </div>
+                <div class="pagina-seccion">Resultados del proceso de evaluación activo</div>
+                <ul class="lead my-3">
+                    <li>Resultado parcial de la autoevaluación</li>
+                    <li>Resultado parcial de la evaluación del responsable</li>
+                    <li>Resultado parcial de la evaluación con la participación de otras personas evaluadoras</li>
+                    <li>Resultado provisional del proceso de evaluación del desempeño</li>
+                    <li>Resultado final del proceso de evaluación del desempeño</li>
+                </ul>
+            {%- endif %}
+            <div class="pagina-seccion" id="documentos">Documentos de interés del procedimiento activo</div>
+            <ul class="lead my-3">
+                <li>Texto del acuerdo</li>
+                <li>Escala Lickert</li>
+                <li>Cuestionario 2024</li>
+            </ul>
+        {%- endif %}
+        {%- if cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Sistema\\Estado::ARCHIVADO'))|length > 0 %}
+            <div class="pagina-seccion">Resultados de evaluaciones anteriores</div>
+            <ul class="lead my-3">
+                ...
+            </ul>
+        {%- endif %}
     </div>
 
     {#- Mostrar roles de la aplicación con permiso para el usuario. #}
