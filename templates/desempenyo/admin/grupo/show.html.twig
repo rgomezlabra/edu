@@ -9,6 +9,10 @@
             <div class="fila-valor">{{ grupo.orden }}</div>
         </div>
         <div class="row py-2">
+            <div class="fila-campo">Código</div>
+            <div class="fila-valor">{{ grupo.codigo }}</div>
+        </div>
+        <div class="row py-2">
             <div class="fila-campo">Título</div>
             <div class="fila-valor">{{ grupo.titulo }}</div>
         </div>
@@ -39,7 +43,7 @@
         <li class="boton-inferior nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {'cuestionario': grupo.cuestionario.id, 'grupo': grupo.id}) }}">
-                <span class="fas fa-question"></span> Preguntas
+                <span class="fas fa-question-circle"></span> Preguntas
             </a>
         </li>
     {%- endif %}

@@ -17,7 +17,7 @@
                     <th>{% if grupo == null %}Grupo{% endif %}</th>
                     <th>Orden</th>
                     <th class="text-center">Activo</th>
-                    <th>Título</th>
+                    <th>Pregunta</th>
                     <th class="text-start">Tipo</th>
                     <th>Acciones</th>
                 </tr>
@@ -42,7 +42,7 @@
                             No <sup><em class="fas fa-times text-danger }}"></em></sup>
                         {%- endif -%}
                     </td>
-                    <td>{{ pregunta.titulo }}</td>
+                    <td>{{ pregunta }}</td>
                     <td class="text-start">{{ tipos[pregunta.tipo].leyenda|default(pregunta.tipo) }}</td>
                     <td>
                         <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_show', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'pregunta': pregunta.id}) }}">
@@ -92,7 +92,7 @@
     {{ parent() }}
     <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {'id': cuestionario.id}) }}">Grupos</a></li>
     <li class="breadcrumb-item text-truncate" style="max-width: 15%">
-        <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_show', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">{{ grupo.titulo }}</a>
+        <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_show', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">{{ grupo.codigo }}</a>
     </li>
 {% endblock %}
 

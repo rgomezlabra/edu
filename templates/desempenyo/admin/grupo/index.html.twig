@@ -10,7 +10,7 @@
                 <tr>
                     <th></th>
                     <th>Orden</th>
-                    <th>Título</th>
+                    <th>Grupo</th>
                     <th>Preguntas</th>
                     <th>Acciones</th>
                 </tr>
@@ -20,7 +20,7 @@
                 <tr class="fila" data-id="{{ grupo.id }}">
                     <td><span class="badge-secondary" title="Reordenar grupos"><em class="fas fa-sort"></em></span></td>
                     <td>{{ grupo.orden }}</td>
-                    <td>{{ grupo.titulo }}</td>
+                    <td>{{ grupo }}</td>
                     <td>{{ grupo.preguntas|length }}</td>
                     <td>
                         <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_show', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">
@@ -129,7 +129,7 @@
                 },
                 {
                     searchable: false,
-                    targets: [0, 4],
+                    targets: [0, 3],
                 },
             ],
             dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +

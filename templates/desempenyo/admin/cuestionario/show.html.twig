@@ -82,12 +82,12 @@
             <span class="mx-1 fas fa-user-check"></span> Evaluadores
         </a>
     </li>
-    <li class="nav-item me-2">
-        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_edit', {'id': cuestionario.id}) }}">
-            <span class="mx-1 fas fa-edit"></span> Editar
-        </a>
-    </li>
     {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
+        <li class="nav-item me-2">
+            <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_edit', {'id': cuestionario.id}) }}">
+                <span class="mx-1 fas fa-edit"></span> Editar
+            </a>
+        </li>
         <li class="nav-item me-2">
             <a id="activa" class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_activar', {'id': cuestionario.id}) }}">
                 <span class="fas fa-check"></span> Activar

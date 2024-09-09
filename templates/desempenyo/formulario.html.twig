@@ -48,7 +48,7 @@
                     {%- for grupo in formulario.cuestionario.grupos %}
                         <div class="tab-pane fade text-left" id="vert-tabs-{{ grupo.orden }}"
                              role="tabpanel" aria-labelledby="vert-tabs-{{ grupo.orden }}-tab" tabindex="0">
-                            <div class="pagina-seccion">{{ grupo.titulo }}</div>
+                            <div class="pagina-seccion">{{ grupo }}</div>
                             <div class="my-2">{{ grupo.descripcion|raw }}</div>
                             {#- Preguntas del grupo #}
                             <div class="d-grid">
@@ -62,10 +62,7 @@
                                     {%- set tipo = (tipos_preguntas|json_decode)[pregunta.tipo] %}
                                     <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
                                         <div class="col-5">
-                                            <div class="fw-bold">
-                                                {{ pregunta.titulo }} {% if not pregunta.opcional %}*{% endif %}
-                                            </div>
-                                            <div>{{ pregunta.descripcion|raw }}</div>
+                                            <div class="fw-bold" title="{{ pregunta.descripcion|raw }}">{{ pregunta }}</div>
                                         </div>
                                         {{- include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {'etiqueta': 'preg_' ~ pregunta.id}) }}
                                     </div>
