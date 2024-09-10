@@ -3,13 +3,16 @@
 namespace App\Controller\Desempenyo;
 
 use App\Entity\Cuestiona\Cuestionario;
-use App\Entity\Cuestiona\Formulario;
+use App\Entity\Cuestiona\Formulario as CuestionaFormulario;
 use App\Entity\Cuestiona\Pregunta;
 use App\Entity\Cuestiona\Respuesta;
+use App\Entity\Desempenyo\Formulario;
+use App\Entity\Sistema\Usuario;
 use App\Repository\Cuestiona\CuestionarioRepository;
-use App\Repository\Cuestiona\FormularioRepository;
 use App\Repository\Cuestiona\PreguntaRepository;
 use App\Repository\Cuestiona\RespuestaRepository;
+use App\Repository\Desempenyo\FormularioRepository;
+use App\Repository\Plantilla\EmpleadoRepository;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
 use DateTimeImmutable;
@@ -40,9 +43,8 @@ class FormularioController extends AbstractController
     )]
     public function index(Request $request, CuestionarioRepository $cuestionarioRepository): Response
     {
-        $rol = (string) $this->actual->getRol()?->getRuta();
-        $this->denyAccessUnlessGranted($rol);
-        $cuestionario = $cuestionarioRepository->find($request->query->get('cuestionario'));
+        $this->denyAccessUnlessGranted('admin');
+        $cuestionario = $cuestionarioRepository->find($request->query->getString('cuestionario'));
         if (!$cuestionario instanceof Cuestionario || $cuestionario->getAutor() !== $this->getUser()) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
@@ -51,7 +53,7 @@ class FormularioController extends AbstractController
 
         return $this->render('intranet/cuestiona/admin/formulario/index.html.twig', [
             'cuestionario' => $cuestionario,
-            'formularios' => $this->formularioRepository->findByEntregados($cuestionario),
+            'formularios' => $this->formularioRepository->findByCuestionario($cuestionario),
         ]);
     }
 
@@ -66,7 +68,7 @@ class FormularioController extends AbstractController
         $this->denyAccessUnlessGranted('admin');
 
         return $this->render('intranet/cuestiona/admin/formulario/show.html.twig', [
-            'cuestionario' => $formulario->getCuestionario(),
+            'cuestionario' => $formulario->getFormulario()?->getCuestionario(),
             'formulario' => $formulario,
         ]);
     }
@@ -78,10 +80,9 @@ class FormularioController extends AbstractController
         methods: ['GET']
     )]
     public function rellenar(
-        Request $request,
+        Request                $request,
         CuestionarioRepository $cuestionarioRepository,
-        FormularioRepository   $formularioRepository,
-        RutaActual             $actual,
+        EmpleadoRepository     $empleadoRepository,
         string                 $codigo
     ): Response {
         $cuestionario = $cuestionarioRepository->findOneBy(['url' => $request->getRequestUri()]);
@@ -91,18 +92,28 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute('inicio');
         }
 
-        $formulario = $cuestionario->isEditable() ? $formularioRepository->findOneBy(['cuestionario' => $cuestionario, 'usuario' => $this->getUser()]) : null;
+        // TODO por el momento, solo autoevaluación
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        $empleado = $empleadoRepository->findOneByUsuario($usuario);
+        $formulario = $this->formularioRepository->findByCuestionario($cuestionario, $empleado, $empleado)[0] ?? null;
         if ($formulario instanceof Formulario) {
-            if ($formulario->getEnviado() instanceof DateTimeImmutable) {
+            if ($formulario->getFormulario()?->getFechaEnvio() instanceof DateTimeImmutable) {
                 $this->addFlash('warning', 'El formulario ya ha sido enviado previamente.');
 
                 return $this->redirectToRoute('inicio');
             }
         } else {
+            $cuestionaFormulario = new CuestionaFormulario();
+            $cuestionaFormulario
+                ->setCuestionario($cuestionario)
+                ->setUsuario($usuario)
+            ;
             $formulario = new Formulario();
             $formulario
-                ->setCuestionario($cuestionario)
-                ->setUsuario($this->getUser())
+                ->setFormulario($cuestionaFormulario)
+                ->setEmpleado($empleado)
+                ->setEvaluador($empleado)
             ;
         }
 
