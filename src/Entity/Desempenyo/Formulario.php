@@ -2,6 +2,7 @@
 
 namespace App\Entity\Desempenyo;
 
+use App\Entity\Cuestiona\Formulario as CuestionaFormulario;
 use App\Entity\Plantilla\Empleado;
 use App\Repository\Desempenyo\FormularioRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -27,9 +28,9 @@ class Formulario
     #[ORM\JoinColumn(nullable: false)]
     private ?Empleado $evaluador = null;
 
-    #[ORM\OneToOne(targetEntity: Formulario::class)]
+    #[ORM\OneToOne(targetEntity: CuestionaFormulario::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Formulario $formulario = null;
+    private ?CuestionaFormulario $formulario = null;
 
     public function getId(): ?int
     {
@@ -60,12 +61,12 @@ class Formulario
         return $this;
     }
 
-    public function getFormulario(): ?Formulario
+    public function getFormulario(): ?CuestionaFormulario
     {
         return $this->formulario;
     }
 
-    public function setFormulario(?Formulario $formulario): static
+    public function setFormulario(?CuestionaFormulario $formulario): static
     {
         $this->formulario = $formulario;
 
