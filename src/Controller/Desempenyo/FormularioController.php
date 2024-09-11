@@ -9,6 +9,7 @@ use App\Entity\Cuestiona\Respuesta;
 use App\Entity\Desempenyo\Formulario;
 use App\Entity\Sistema\Usuario;
 use App\Repository\Cuestiona\CuestionarioRepository;
+use App\Repository\Cuestiona\FormularioRepository as CuestionaFormularioRepository;
 use App\Repository\Cuestiona\PreguntaRepository;
 use App\Repository\Cuestiona\RespuestaRepository;
 use App\Repository\Desempenyo\FormularioRepository;
@@ -117,8 +118,14 @@ class FormularioController extends AbstractController
             ;
         }
 
+        $respuestas = [];
+        foreach ($formulario->getFormulario()?->getRespuestas() ?? [] as $respuesta) {
+            $respuestas[$respuesta->getPregunta()?->getId()] = $respuesta->getValor();
+        }
+
         return $this->render(sprintf('%s/formulario.html.twig', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? ''), [
             'formulario' => $formulario,
+            'respuestas' => $respuestas,
             'codigo' => $codigo,
         ]);
     }
@@ -132,12 +139,15 @@ class FormularioController extends AbstractController
     public function guardar(
         Request                $request,
         CuestionarioRepository $cuestionarioRepository,
-        FormularioRepository   $formularioRepository,
+        EmpleadoRepository     $empleadoRepository,
+        CuestionaFormularioRepository $cuestionFormularioRepository,
         PreguntaRepository     $preguntaRepository,
         RespuestaRepository    $respuestaRepository,
         string                 $codigo,
     ): Response {
-        $cuestionario = $cuestionarioRepository->findOneBy(['url' => '/cuestiona/' . $codigo]);
+        $cuestionario = $cuestionarioRepository->findOneBy([
+            'url' => sprintf('/%s/formulario/%s', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? '', $codigo),
+        ]);
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe.');
 
@@ -151,14 +161,26 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute('inicio');
         }
 
-        // TODO verificar si el formulario es editable
-        $formulario = $formularioRepository->findOneBy(['cuestionario' => $cuestionario, 'usuario' => $this->getUser()]);
-        if (!$formulario instanceof Formulario) {
+        // TODO por el momento, solo autoevaluación
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        $empleado = $empleadoRepository->findOneByUsuario($usuario);
+        $formulario = $this->formularioRepository->findByCuestionario($cuestionario, $empleado, $empleado)[0] ?? null;
+        if ($formulario instanceof Formulario) {
+            $cuestionaFormulario = $formulario->getFormulario();
+        } else {
             // Nuevo formulario
+            $cuestionaFormulario = new CuestionaFormulario();
+            $cuestionaFormulario
+                ->setCuestionario($cuestionario)
+                ->setUsuario($usuario)
+            ;
             $formulario = new Formulario();
             $formulario
-                ->setCuestionario($cuestionario)
-                ->setUsuario($this->getUser());
+                ->setFormulario($cuestionaFormulario)
+                ->setEmpleado($empleado)
+                ->setEvaluador($empleado)
+            ;
         }
 
         /**
@@ -166,36 +188,32 @@ class FormularioController extends AbstractController
          * @var string|string[] $valor
          */
         foreach ($request->request->all() as $clave => $valor) {
-            $pregunta = $preguntaRepository->find((int) u($clave)->after('-')->toString());
+            $pregunta = $preguntaRepository->find((int) u($clave)->after('_')->toString());
             if ($pregunta instanceof Pregunta) {
-                $respuesta = $formulario->getRespuestas()->filter(static fn (Respuesta $respuesta) => $respuesta->getFormulario() === $formulario && $respuesta->getPregunta() === $pregunta)->first();
+                $respuesta = $cuestionaFormulario->getRespuestas()->filter(static fn (Respuesta $respuesta) => $respuesta->getFormulario() === $formulario->getFormulario() && $respuesta->getPregunta() === $pregunta)->first();
                 if (!$respuesta instanceof Respuesta) {
                     $respuesta = new Respuesta();
                     $respuesta
-                        ->setFormulario($formulario)
+                        ->setFormulario($cuestionaFormulario)
                         ->setPregunta($pregunta)
                     ;
                 }
 
                 // TODO puede ser necesario verificar validez de datos
-                if (0 === u($clave)->indexOf('preg-')) {
+                if (0 === u($clave)->indexOf('preg_')) {
                     $respuesta->setValor([...$respuesta->getValor(), ...['valor' => $valor]]);
-                } elseif (0 === u($clave)->indexOf('observa-')) {
+                } elseif (0 === u($clave)->indexOf('observa_')) {
                     $respuesta->setValor([...$respuesta->getValor(), ...['observa' => $valor]]);
                 }
-
-                $formulario->addRespuesta($respuesta);
+                $respuestaRepository->save($respuesta);
+                $cuestionaFormulario->addRespuesta($respuesta);
             }
         }
 
-        // Grabar datos
-        foreach ($formulario->getRespuestas() as $respuesta) {
-            $respuestaRepository->save($respuesta);
-        }
+        $cuestionaFormulario->setFechaGrabacion(new DateTimeImmutable());
+        $cuestionFormularioRepository->save($cuestionaFormulario);
+        $this->formularioRepository->save($formulario, true);
 
-        $formulario->setEnviado(new DateTimeImmutable());
-        $formularioRepository->save($formulario, true);
-
-        return $this->redirectToRoute('cuestiona_index');
+        return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'inicio');
     }
 }

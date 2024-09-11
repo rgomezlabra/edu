@@ -1,23 +1,22 @@
 {% set preg = etiqueta|default('preg_0') %}
-    {%- if ejemplo is defined %}
-        <label>1 <input type="range" disabled min="1" max="10" value="8" /> 10</label>
-    {% else %}
-        {%- set salida = preg|regex_replace('/preg_/', 'salida_') %}
-        {%- set observa = preg|regex_replace('/preg_/', 'observa_') %}
-        {%- if pregunta.opciones.observaciones|default(false) %}<div class="col-2">{% endif %}
-            <label>
-                {{ pregunta.opciones.min|default }}
-                <input class="w-75" type="range" id="{{ preg }}" name="{{ preg }}"
-                       min="{{ pregunta.opciones.min|default }}" max="{{ pregunta.opciones.max|default }}"
-                       onload="{{ salida }}.value = this.value" oninput="{{ salida }}.value = this.value" />
-                {{ pregunta.opciones.max|default }}
-            </label>
-            <output class="mx-5" id="{{ salida }}" name="{{ salida }}" for="{{ preg }}"></output>
-        {%- if pregunta.opciones.observaciones|default(false) %}</div>{% endif %}
-        {%- if pregunta.opciones.observaciones|default(false) %}
-            <label class="col-5"><input class="w-100" type="text" name="{{ observa }}" /></label>
-        {%- endif %}
+{% if ejemplo is defined %}
+    <label>1 <input type="range" disabled min="1" max="10" value="8" /> 10</label>
+{% else %}
+    {%- set salida = preg|regex_replace('/preg_/', 'salida_') %}
+    {%- set observa = preg|regex_replace('/preg_/', 'observa_') %}
+    {%- if pregunta.opciones.observaciones|default(false) %}<div class="col-2">{% endif %}
+        <label>
+            {{ pregunta.opciones.min|default }}
+            <input class="w-75" type="range" id="{{ preg }}" name="{{ preg }}" value="{{ valor.valor|default }}"
+                   min="{{ pregunta.opciones.min|default }}" max="{{ pregunta.opciones.max|default }}"
+                   onload="{{ salida }}.value = this.value" oninput="{{ salida }}.value = 'Puntuación: ' + this.value" />
+            {{ pregunta.opciones.max|default }}
+        </label>
+        <output class="mx-3 mb-2 fw-bold text-info" id="{{ salida }}" name="{{ salida }}" for="{{ preg }}"></output>
+    {%- if pregunta.opciones.observaciones|default(false) %}</div>{% endif %}
+    {%- if pregunta.opciones.observaciones|default(false) %}
+        <label class="col-5"><input class="w-100" type="text" name="{{ observa }}" value="{{ valor.observa|default }}" /></label>
     {%- endif %}
-</label>
+{% endif %}
 
-<script>document.getElementById('{{ salida|default }}').innerHTML = {{ preg }}.value;</script>
+<script>document.getElementById('{{ salida|default }}').innerHTML = 'Puntuación: ' + {{ preg }}.value;</script>
