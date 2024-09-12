@@ -6,12 +6,15 @@ use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Cuestiona\Formulario as CuestionaFormulario;
 use App\Entity\Cuestiona\Pregunta;
 use App\Entity\Cuestiona\Respuesta;
+use App\Entity\Desempenyo\Evalua;
 use App\Entity\Desempenyo\Formulario;
+use App\Entity\Plantilla\Empleado;
 use App\Entity\Sistema\Usuario;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Cuestiona\FormularioRepository as CuestionaFormularioRepository;
 use App\Repository\Cuestiona\PreguntaRepository;
 use App\Repository\Cuestiona\RespuestaRepository;
+use App\Repository\Desempenyo\EvaluaRepository;
 use App\Repository\Desempenyo\FormularioRepository;
 use App\Repository\Plantilla\EmpleadoRepository;
 use App\Service\MessageGenerator;
@@ -32,6 +35,7 @@ class FormularioController extends AbstractController
     public function __construct(
         private readonly MessageGenerator     $generator,
         private readonly RutaActual           $actual,
+        private readonly EvaluaRepository     $evaluaRepository,
         private readonly FormularioRepository $formularioRepository,
     ) {
     }
@@ -76,27 +80,45 @@ class FormularioController extends AbstractController
 
     /** Rellenar formulario. */
     #[Route(
-        path: '/intranet/desempenyo/formulario/{codigo}',
+        path: '/intranet/desempenyo/formulario/{codigo}/{evalua?}',
         name: 'intranet_desempenyo_formulario_rellenar',
+        requirements: ['codigo' => '[a-z0-9-]+', 'evalua' => '\d+'],
         methods: ['GET']
     )]
     public function rellenar(
         Request                $request,
         CuestionarioRepository $cuestionarioRepository,
         EmpleadoRepository     $empleadoRepository,
-        string                 $codigo
+        string                 $codigo,
+        ?int                   $evalua,
     ): Response {
-        $cuestionario = $cuestionarioRepository->findOneBy(['url' => $request->getRequestUri()]);
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        if (null === $evalua) {
+            $cuestionario = $cuestionarioRepository->findOneBy(['url' => $request->getRequestUri()]);
+            $empleado = $empleadoRepository->findOneByUsuario($usuario);
+            $evaluador = $empleado;
+        } else {
+            $cuestionario = $cuestionarioRepository->findOneBy([
+                'url' => u($request->getRequestUri())->before("/$evalua")->toString(),
+            ]);
+            $empleado = $empleadoRepository->find($evalua);
+            $evaluador = $empleadoRepository->findOneByUsuario($usuario);
+        }
+
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
 
             return $this->redirectToRoute('inicio');
+        } elseif (!$empleado instanceof Empleado || !$evaluador instanceof Empleado) {
+            $this->addFlash('warning', 'No se encuentran datos de empleado.');
+
+            return $this->redirectToRoute('inicio');
+        } elseif (!$this->isEvaluable($cuestionario, $empleado, $evaluador)) {
+            return $this->redirectToRoute('inicio');
         }
 
-        // TODO por el momento, solo autoevaluación
-        /** @var Usuario $usuario */
-        $usuario = $this->getUser();
-        $empleado = $empleadoRepository->findOneByUsuario($usuario);
+        $respuestas = [];
         $formulario = $this->formularioRepository->findByCuestionario($cuestionario, $empleado, $empleado)[0] ?? null;
         if ($formulario instanceof Formulario) {
             if ($formulario->getFormulario()?->getFechaEnvio() instanceof DateTimeImmutable) {
@@ -114,11 +136,10 @@ class FormularioController extends AbstractController
             $formulario
                 ->setFormulario($cuestionaFormulario)
                 ->setEmpleado($empleado)
-                ->setEvaluador($empleado)
+                ->setEvaluador($evaluador)
             ;
         }
 
-        $respuestas = [];
         foreach ($formulario->getFormulario()?->getRespuestas() ?? [] as $respuesta) {
             $respuestas[$respuesta->getPregunta()?->getId()] = $respuesta->getValor();
         }
@@ -137,35 +158,43 @@ class FormularioController extends AbstractController
         methods: ['POST']
     )]
     public function guardar(
-        Request                $request,
-        CuestionarioRepository $cuestionarioRepository,
-        EmpleadoRepository     $empleadoRepository,
+        Request                       $request,
+        CuestionarioRepository        $cuestionarioRepository,
+        EmpleadoRepository            $empleadoRepository,
         CuestionaFormularioRepository $cuestionFormularioRepository,
-        PreguntaRepository     $preguntaRepository,
-        RespuestaRepository    $respuestaRepository,
-        string                 $codigo,
+        PreguntaRepository            $preguntaRepository,
+        RespuestaRepository           $respuestaRepository,
+        string                        $codigo,
     ): Response {
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        $empleado = $empleadoRepository->find($request->request->getInt('empleado'));
+        $evaluador = $empleadoRepository->find($request->request->getInt('evaluador'));
         $cuestionario = $cuestionarioRepository->findOneBy([
             'url' => sprintf('/%s/formulario/%s', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? '', $codigo),
         ]);
+        $token = sprintf('%s.%d', $codigo, (int) $cuestionario?->getId());
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe.');
 
             return $this->redirectToRoute('inicio');
-        }
-
-        $token = sprintf('%s.%d', $codigo, (int) $cuestionario->getId());
-        if (!$this->isCsrfTokenValid($token, (string) $request->request->get('_token'))) {
+        } elseif (!$this->isCsrfTokenValid($token, $request->request->getString('_token'))) {
             $this->generator->logAndFlash('error', 'Token de validación incorrecto');
 
             return $this->redirectToRoute('inicio');
+        } elseif (!$empleado instanceof Empleado || !$evaluador instanceof Empleado) {
+            $this->addFlash('warning', 'No se encuentran datos de empleado.');
+
+            return $this->redirectToRoute('inicio');
+        } elseif ($evaluador !== $empleadoRepository->findOneByUsuario($usuario)) {
+            $this->addFlash('warning', 'El usuario no corresponde con el evaluador del formulario.');
+
+            return $this->redirectToRoute('inicio');
+        } elseif (!$this->isEvaluable($cuestionario, $empleado, $evaluador)) {
+            return $this->redirectToRoute('inicio');
         }
 
-        // TODO por el momento, solo autoevaluación
-        /** @var Usuario $usuario */
-        $usuario = $this->getUser();
-        $empleado = $empleadoRepository->findOneByUsuario($usuario);
-        $formulario = $this->formularioRepository->findByCuestionario($cuestionario, $empleado, $empleado)[0] ?? null;
+        $formulario = $this->formularioRepository->findByCuestionario($cuestionario, $empleado, $evaluador)[0] ?? null;
         if ($formulario instanceof Formulario) {
             $cuestionaFormulario = $formulario->getFormulario();
         } else {
@@ -179,7 +208,7 @@ class FormularioController extends AbstractController
             $formulario
                 ->setFormulario($cuestionaFormulario)
                 ->setEmpleado($empleado)
-                ->setEvaluador($empleado)
+                ->setEvaluador($evaluador)
             ;
         }
 
@@ -215,5 +244,29 @@ class FormularioController extends AbstractController
         $this->formularioRepository->save($formulario, true);
 
         return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'inicio');
+    }
+
+    /** Comprobar si el empleado puede ser evaluado por el evaluador. */
+    private function isEvaluable(Cuestionario $cuestionario, Empleado $empleado, Empleado $evaluador): bool
+    {
+        if (!$this->evaluaRepository->findOneBy([
+                'cuestionario' => $cuestionario,
+                'empleado' => $empleado,
+                'evaluador' => $evaluador,
+            ]) instanceof Evalua) {
+            $this->addFlash('warning', 'El empleado no es evaluable.');
+
+            return false;
+        } elseif ($this->evaluaRepository->findOneBy([
+                'cuestionario' => $cuestionario,
+                'empleado' => $empleado,
+                'evaluador' => null,
+            ]) instanceof Evalua) {
+            $this->addFlash('warning', 'El empleado ha solicitado no ser evaluado.');
+
+            return false;
+        }
+
+        return true;
     }
 }
