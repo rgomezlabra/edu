@@ -66,20 +66,40 @@ class EvaluaRepository extends ServiceEntityRepository
      * de otro empleado o solicitud de no evaluación).
      * @return Evalua[]
      */
-    public function findByEvaluacion(Cuestionario $cuestionario, int $tipo = self::AUTOEVALUACION): array
+    public function findByEvaluacion(array $criterios): array
     {
-        $condicion = match ($tipo) {
-            self::EVALUACION => 'evalua.empleado != evalua.evaluador AND evalua.evaluador IS NOT NULL',
-            self::NO_EVALUACION => 'evalua.evaluador IS NULL',
-            default => 'evalua.empleado = evalua.evaluador'
-        };
+        $qb = $this->createQueryBuilder('evalua');
+        foreach ($criterios as $criterio => $valor) {
+            switch ($criterio) {
+                case 'cuestionario':
+                    $qb->join('evalua.cuestionario', 'cuestionario')
+                        ->andWhere('cuestionario.id = :cuestionario')
+                        ->setParameter('cuestionario', $valor->getId())
+                    ;
+                    break;
+                case 'empleado':
+                    $qb->join('evalua.empleado', 'empleado')
+                        ->andWhere('empleado.id = :empleado')
+                        ->setParameter('empleado', $valor->getId())
+                    ;
+                    break;
+                case 'evaluador':
+                    $qb->join('evalua.evaluador', 'evaluador')
+                        ->andWhere('evaluador.id = :evaluador')
+                        ->setParameter('evaluador', $valor->getId())
+                    ;
+                    break;
+                case 'tipo':
+                    $condicion = match ($valor) {
+                        self::AUTOEVALUACION => 'evalua.empleado = evalua.evaluador',
+                        self::EVALUACION => 'evalua.empleado != evalua.evaluador AND evalua.evaluador IS NOT NULL',
+                        self::NO_EVALUACION => 'evalua.evaluador IS NULL',
+                        default => ''
+                    };
+                    $qb->andWhere($condicion);
+            }
+        }
 
-        return $this->createQueryBuilder('evalua')
-            ->andWhere('evalua.cuestionario = :cuestionario')
-            ->andWhere($condicion)
-            ->setParameter('cuestionario', $cuestionario)
-            ->getQuery()
-            ->getResult()
-        ;
+        return $qb->getQuery()->getResult();
     }
 }

@@ -3,7 +3,7 @@
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
 
-    <div class="pagina-seccion">
+    <div class="container-fluid">
         Última carga de datos: {{ ultimo is defined ? ultimo|date('Y-m-d H:i:s') : 'sin fecha' }}
     </div>
 

@@ -78,6 +78,35 @@ class FormularioController extends AbstractController
         ]);
     }
 
+    #[Route(
+        path: '/intranet/desempenyo/formulario/{codigo}/evaluador',
+        name: 'intranet_desempenyo_formulario_evaluador_index',
+        methods: ['GET']
+    )]
+    public function indexEvaluador(
+        Request                $request,
+        CuestionarioRepository $cuestionarioRepository,
+        EmpleadoRepository     $empleadoRepository,
+        string                 $codigo,
+    ) {
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        $empleado = $empleadoRepository->findOneByUsuario($usuario);
+        $cuestionario = $cuestionarioRepository->findOneBy([
+            'url' => u($request->getRequestUri())->beforeLast("/")->toString(),
+        ]);
+        if (!$cuestionario instanceof Cuestionario) {
+            $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
+
+            return $this->redirectToRoute('inicio');
+        } elseif (!$empleado instanceof Empleado) {
+            $this->addFlash('warning', 'No se encuentran datos de empleado.');
+
+            return $this->redirectToRoute('inicio');
+        }
+dd($this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario, 'empleado' => $empleado, 'tipo' => EvaluaRepository::EVALUACION]));
+    }
+
     /** Rellenar formulario. */
     #[Route(
         path: '/intranet/desempenyo/formulario/{codigo}/{evalua?}',

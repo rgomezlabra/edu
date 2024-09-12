@@ -27,7 +27,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(path: '/intranet/desempenyo/admin/cuestionario', name: 'intranet_desempenyo_admin_evaluador_')]
+#[Route(path: '/intranet/desempenyo', name: 'intranet_desempenyo_')]
 class EvaluadorController extends AbstractController
 {
     private object $redis;
@@ -41,8 +41,8 @@ class EvaluadorController extends AbstractController
     }
 
     #[Route(
-        path: '/{id}/evaluador/',
-        name: 'index',
+        path: '/admin/cuestionario/{id}/evaluador/',
+        name: 'admin_evaluador_index',
         defaults: ['titulo' => 'Evaluadores de Cuestionario de Competencias'],
         methods: ['GET']
     )]
@@ -75,8 +75,8 @@ class EvaluadorController extends AbstractController
 
     /** Cargar empleados activos para autoevaluación que no hayan solicitado exclusión en un cuestionario. */
     #[Route(
-        path: '/{id}/evaluador/auto',
-        name: 'auto',
+        path: '/admin/cuestionario/{id}/evaluador/auto',
+        name: 'admin_evaluador_auto',
         defaults: ['titulo' => 'Cargar Empleados para Autoevaluación'],
         methods: ['GET']
     )]
@@ -164,8 +164,8 @@ class EvaluadorController extends AbstractController
 
     /** Cargar datos que relacionan empleado con su evaluador para el cuestionario indicado. */
     #[Route(
-        path: '/{id}/evaluador/carga',
-        name: 'carga',
+        path: '/admin/cuestionario/{id}/evaluador/carga',
+        name: 'admin_evaluador_carga',
         defaults: ['titulo' => 'Cargar Evaluadores de Empleados'],
         methods: ['GET', 'POST']
     )]
@@ -188,8 +188,8 @@ class EvaluadorController extends AbstractController
             $inicio = microtime(true);
             $this->redis = RedisAdapter::createConnection((string) $request->server->get('REDIS_URL'));
             $campos = [
-                'EMPLEADO',     // Documento empleado
-                'EVALUADOR',    // Documento evaluador
+                'DOC_EMPLEADO',     // Documento empleado
+                'DOC_EVALUADOR',    // Documento evaluador
             ];
             $lineas = [];
             $nuevos = 0;
@@ -204,7 +204,7 @@ class EvaluadorController extends AbstractController
                     'fichero' => $fichero->getClientOriginalName(),
                 ]);
 
-                return $this->redirectToRoute((string)$request->attributes->get('_route'));
+                return $this->redirectToRoute((string) $request->attributes->get('_route'), ['id' => $cuestionario->getId()]);
             }
 
             while (($datos = $csv->leer($campos)) !== null) {
@@ -216,17 +216,17 @@ class EvaluadorController extends AbstractController
             // Grabar datos
             /** @var string[] $linea */
             foreach ($lineas as $linea) {
-                $persona = $personaRepository->findOneBy(['doc_identidad' => $linea['EMPLEADO']]);
+                $persona = $personaRepository->findOneBy(['doc_identidad' => $linea['DOC_EMPLEADO']]);
                 $empleado = $empleadoRepository->findOneBy(['persona' => $persona]);
-                $persona = $personaRepository->findOneBy(['doc_identidad' => $linea['VALIDADOR']]);
-                $validador = $empleadoRepository->findOneBy(['persona' => $persona]);
-                if ($empleado instanceof Empleado && $validador instanceof Empleado) {
-                    if (0 === $this->evaluaRepository->count(['empleado' => $empleado, 'validador' => $validador, 'cuestionario' => $cuestionario])) {
+                $persona = $personaRepository->findOneBy(['doc_identidad' => $linea['DOC_EVALUADOR']]);
+                $evaluador = $empleadoRepository->findOneBy(['persona' => $persona]);
+                if ($empleado instanceof Empleado && $evaluador instanceof Empleado) {
+                    if (0 === $this->evaluaRepository->count(['empleado' => $empleado, 'evaluador' => $evaluador, 'cuestionario' => $cuestionario])) {
                         $evaluacion = new Evalua();
                         $evaluacion
                             ->setCuestionario($cuestionario)
                             ->setEmpleado($empleado)
-                            ->setEvaluador($validador)
+                            ->setEvaluador($evaluador)
                         ;
                         $this->evaluaRepository->save($evaluacion, true);
                         ++$nuevos;
@@ -251,8 +251,8 @@ class EvaluadorController extends AbstractController
                 ]);
             }
 
-            return $this->redirectToRoute('intranet_desempenyo_admin_cuestionario_evaluador_index', [
-                'id' => $cuestionario,
+            return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', [
+                'id' => $cuestionario->getId(),
             ], Response::HTTP_SEE_OTHER);
         }
 
@@ -264,15 +264,15 @@ class EvaluadorController extends AbstractController
 
     /** Rechazar la evaluación de un empleado. */
     #[Route(
-        path: '/{cuestionario}/evaluador/rechaza/{empleado?}',
-        name: 'rechaza',
+        path: '/admin/cuestionario/{cuestionario}/evaluador/rechaza/{empleado?}',
+        name: 'admin_evaluador_rechaza',
         methods: ['GET']
     )]
     public function rechaza(
         EmpleadoRepository $empleadoRepository,
-        EvaluaRepository $evaluaRepository,
-        Cuestionario     $cuestionario,
-        ?Empleado        $empleado = null,
+        EvaluaRepository   $evaluaRepository,
+        Cuestionario       $cuestionario,
+        ?Empleado          $empleado = null,
     ): Response {
         if ($empleado instanceof Empleado) {
             // Solo administrador puede rechazar a otro empleado
@@ -320,15 +320,15 @@ class EvaluadorController extends AbstractController
 
     /** Recupera la evaluación de un empleado que la había rechazado previamente. */
     #[Route(
-        path: '/{cuestionario}/evaluador/recupera/{empleado?}',
-        name: 'recupera',
+        path: '/admin/cuestionario/{cuestionario}/evaluador/recupera/{empleado?}',
+        name: 'admin_evaluador_recupera',
         methods: ['GET']
     )]
     public function recupera(
         EmpleadoRepository $empleadoRepository,
-        EvaluaRepository $evaluaRepository,
-        Cuestionario     $cuestionario,
-        ?Empleado        $empleado = null,
+        EvaluaRepository   $evaluaRepository,
+        Cuestionario       $cuestionario,
+        ?Empleado          $empleado = null,
     ): Response {
         if ($empleado instanceof Empleado) {
             // Solo administrador puede recuperar a otro empleado
