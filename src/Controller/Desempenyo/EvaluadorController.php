@@ -49,7 +49,6 @@ class EvaluadorController extends AbstractController
     public function index(Request $request, Cuestionario $cuestionario): Response
     {
         $this->denyAccessUnlessGranted('admin');
-        //$evaluaciones = $this->evaluaRepository->findByEvaluacion($cuestionario, EvaluaRepository::AUTOEVALUACION);
         $evaluaciones = $this->evaluaRepository->findAll();
         $this->redis = RedisAdapter::createConnection((string) $request->server->get('REDIS_URL'));
         $ultimo = null;
@@ -284,6 +283,7 @@ class EvaluadorController extends AbstractController
             );
         } else {
             // Buscar usuario actual como empleado
+            $this->denyAccessUnlessGranted(null, ['relacion' => null]);
             /** @var Usuario $usuario */
             $usuario = $this->getUser();
             $empleado = $empleadoRepository->findOneByUsuario($usuario);
@@ -339,6 +339,7 @@ class EvaluadorController extends AbstractController
                 $this->actual->getRol()?->getRuta() ?? ''
             );
         } else {
+            $this->denyAccessUnlessGranted(null, ['relacion' => null]);
             // Buscar usuario actual como empleado
             /** @var Usuario $usuario */
             $usuario = $this->getUser();

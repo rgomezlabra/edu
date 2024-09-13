@@ -65,7 +65,7 @@
                 {%- else %}
                     <li><a href="{{ activos[0].url }}">Cuestionario para autoevaluación de competencias</a></li>
                 {%- endif %}
-                <li>Comprobar sus evaluadores</li>
+                <li><a href="{{ activos[0].url ~ '/evaluador' }}">Comprobar sus evaluadores</a></li>
                 <li>Comunicar incidencias del proceso de autoevaluación</li>
                 {%- if activos[0].fechaBaja >= date() %}
                     {%- if evaluados|filter(e => e.evaluador != null)|length > 0 %}
@@ -104,9 +104,8 @@
                             <a href="#incidencias">Comunicar incidencias de evaluación por parte del responsable</a>.
                         </div>
                     {%- else %}
-                        <li>Cuestionario de evaluación de competencias de otras personas</li>
+                        <li><a href="{{ activos[0].url ~ '/empleado' }}">Comprobar relación de personas a evaluar</a></li>
                     {%- endif %}
-                    <li>Comprobar relación de personas a evaluar</li>
                     <li>Comunicar incidencias de evaluación por parte del responsable</li>
                 </ul>
                 <div class="pagina-seccion">Fase para la evaluación por parte de otras personas evaluadoras</div>

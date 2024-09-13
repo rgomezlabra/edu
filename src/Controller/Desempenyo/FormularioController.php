@@ -81,14 +81,15 @@ class FormularioController extends AbstractController
     #[Route(
         path: '/intranet/desempenyo/formulario/{codigo}/evaluador',
         name: 'intranet_desempenyo_formulario_evaluador_index',
+        defaults: ['titulo' => 'Evaluadores Asignados para el Cuestionario'],
         methods: ['GET']
     )]
     public function indexEvaluador(
         Request                $request,
         CuestionarioRepository $cuestionarioRepository,
         EmpleadoRepository     $empleadoRepository,
-        string                 $codigo,
-    ) {
+    ): Response {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
         $empleado = $empleadoRepository->findOneByUsuario($usuario);
@@ -104,7 +105,62 @@ class FormularioController extends AbstractController
 
             return $this->redirectToRoute('inicio');
         }
-dd($this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario, 'empleado' => $empleado, 'tipo' => EvaluaRepository::EVALUACION]));
+
+        return $this->render(sprintf('%s/evaluador.html.twig', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? ''), [
+            'evaluaciones' => $this->evaluaRepository->findByEvaluacion([
+                'cuestionario' => $cuestionario,
+                'empleado' => $empleado,
+                'tipo' => EvaluaRepository::EVALUACION,
+            ]),
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+        ]);
+    }
+
+    #[Route(
+        path: '/intranet/desempenyo/formulario/{codigo}/empleado',
+        name: 'intranet_desempenyo_formulario_empleado_index',
+        defaults: ['titulo' => 'Empleados Asignados para el Cuestionario'],
+        methods: ['GET']
+    )]
+    public function indexEmpleado(
+        Request                $request,
+        CuestionarioRepository $cuestionarioRepository,
+        EmpleadoRepository     $empleadoRepository,
+    ): Response {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        $evaluador = $empleadoRepository->findOneByUsuario($usuario);
+        $cuestionario = $cuestionarioRepository->findOneBy([
+            'url' => u($request->getRequestUri())->beforeLast("/")->toString(),
+        ]);
+        if (!$cuestionario instanceof Cuestionario) {
+            $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
+
+            return $this->redirectToRoute('inicio');
+        } elseif (!$evaluador instanceof Empleado) {
+            $this->addFlash('warning', 'No se encuentran datos de empleado.');
+
+            return $this->redirectToRoute('inicio');
+        }
+
+        $evaluaciones = $this->evaluaRepository->findByEvaluacion([
+            'cuestionario' => $cuestionario,
+            'evaluador' => $evaluador,
+            'tipo' => EvaluaRepository::EVALUACION,
+        ]);
+        if ([] === $evaluaciones) {
+            $this->addFlash('warning', 'El usuario es un evaluador.');
+
+            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'inicio');
+        }
+
+        return $this->render(sprintf('%s/empleado.html.twig', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? ''), [
+            'evaluaciones' => $evaluaciones,
+            'cuestionario' => $cuestionario,
+            'evaluador' => $evaluador,
+        ]);
     }
 
     /** Rellenar formulario. */
@@ -121,6 +177,7 @@ dd($this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario, '
         string                 $codigo,
         ?int                   $evalua,
     ): Response {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
         if (null === $evalua) {
@@ -195,6 +252,7 @@ dd($this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario, '
         RespuestaRepository           $respuestaRepository,
         string                        $codigo,
     ): Response {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
         $empleado = $empleadoRepository->find($request->request->getInt('empleado'));

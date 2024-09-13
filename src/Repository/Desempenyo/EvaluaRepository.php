@@ -4,6 +4,7 @@ namespace App\Repository\Desempenyo;
 
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Desempenyo\Evalua;
+use App\Entity\Plantilla\Empleado;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -62,8 +63,9 @@ class EvaluaRepository extends ServiceEntityRepository
     }
 
     /**
-     * Buscar todos los datos de evaluación para un cuestionario según el tipo solicitado (autoevaluación, evaluación
-     * de otro empleado o solicitud de no evaluación).
+     * Buscar datos de evaluación para los criterios de búsqueda indicados (cuestionario, empleado, evaluador y tipo de
+     * evaluación).
+     * @param  int[]|Cuestionario[]|Empleado[] $criterios
      * @return Evalua[]
      */
     public function findByEvaluacion(array $criterios): array

@@ -1,0 +1,106 @@
+{% extends path(aplicacion.ruta) ~ '/index.html.twig' %}
+
+{% block content %}
+    <div class="badge-primary rounded-pill float-end">{{ evaluador.persona }}</div>
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <div class="pagina-seccion">Cuestionario {{ cuestionario.titulo }}</div>
+    <div class="my-4">
+        <table class="tabla-condensada" id="datosEmpleados">
+            <thead class="cabecera-condensada">
+                <tr>
+                    <th>Unidad</th>
+                    <th>Empleado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            {%- for evaluacion in evaluaciones %}
+                <tr>
+                    <td></td>
+                    <td>{{ evaluacion.empleado.persona }}</td>
+                    <td>
+{#                        <a href="{{ path(aplicacion.ruta ~ '_formulario_rellenar', {codigo: cuestionario.codigo, evalua: evaluacion.empleado.id}) }}">#}
+                        <a href="{{ cuestionario.url ~ '/' ~ evaluacion.empleado.id }}">
+                            <span class="mx-1 fas fa-user-pen" title="Evaluar"></span>
+                        </a>
+{#                        <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {'id': cuestionario.id}) }}">#}
+{#                            <span class="mx-1 fas fa-object-group" title="Grupos de preguntas"></span>#}
+{#                        </a>#}
+                    </td>
+                </tr>
+            {%- endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block botones %}
+    <li class="nav-item me-2">
+{#        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_new') }}">#}
+            <span class="fas fa-plus"></span> Incidencia
+{#        </a>#}
+    </li>
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item">
+        <a href="{{ path(aplicacion.ruta) }}">
+            <em class="me-1 fas {{ aplicacion.icono }}"></em>{{ aplicacion.nombreCorto }}
+        </a>
+    </li>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+        $('#datosEmpleados').dataTable({
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="fas fa-copy"></i>',
+                    titleAttr: 'Copiar',
+                },
+                {
+                    extend: 'print',
+                    exportOptions: {
+                        columns: [0, 1],
+                        stripHtml: false,
+                    },
+                    text: '<i class="fas fa-print"></i>',
+                    titleAttr: 'Imprimir',
+                },
+                {
+                    extend: 'csv',
+                    exportOptions: {
+                        columns: [0, 1],
+                    },
+                    text: '<i class="fas fa-file-csv"></i>',
+                    titleAttr: 'Generar fichero CSV',
+                },
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: [0, 1],
+                    },
+                    text: '<i class="fas fa-file-excel"></i>',
+                    titleAttr: 'Generar fichero Excel',
+                },
+            ],
+            columnDefs: [
+                {
+                    targets: [2],
+                    orderable: false,
+                    searchable: false,
+                },
+            ],
+            dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +
+                '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            language: {
+                url: '{{ asset("includes/datatable.es.json") }}',
+            },
+        });
+    </script>
+{% endblock %}
