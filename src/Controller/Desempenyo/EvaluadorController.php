@@ -11,7 +11,6 @@ use App\Entity\Sistema\Usuario;
 use App\Form\Util\VolcadoType;
 use App\Repository\Desempenyo\EvaluaRepository;
 use App\Repository\Plantilla\EmpleadoRepository;
-use App\Repository\Sistema\PersonaRepository;
 use App\Service\Csv;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
@@ -50,7 +49,7 @@ class EvaluadorController extends AbstractController
     {
         $this->denyAccessUnlessGranted('admin');
         $evaluaciones = $this->evaluaRepository->findAll();
-        $this->redis = RedisAdapter::createConnection((string) $request->server->get('REDIS_URL'));
+        $this->redis = RedisAdapter::createConnection($request->server->getString('REDIS_URL'));
         $ultimo = null;
 
         try {
@@ -92,11 +91,11 @@ class EvaluadorController extends AbstractController
         } elseif (null === $this->lock->acquire()) {
             $this->addFlash('warning', 'Recurso bloqueado por otra operación de carga.');
 
-            return $this->redirectToRoute((string) $request->attributes->get('_route'));
+            return $this->redirectToRoute($request->attributes->getString('_route'));
         }
 
         $inicio = microtime(true);
-        $this->redis = RedisAdapter::createConnection((string) $request->server->get('REDIS_URL'));
+        $this->redis = RedisAdapter::createConnection($request->server->getString('REDIS_URL'));
         $empleados = $empleadoRepository->findCesados(false);
         $datos = [
             'inicio' => new DateTimeImmutable(),
@@ -148,16 +147,16 @@ class EvaluadorController extends AbstractController
             $this->redis->set('autoevaluacion', json_encode($datos));
         } catch (RedisException) {
         }
+
         $this->lock->release();
 
         return $this->redirectToRoute(
             sprintf(
-            '%s_%s_cuestionario_evaluador_index',
+                '%s_%s_evaluador_index',
                 $this->actual->getAplicacion()?->getRuta() ?? '',
                 $this->actual->getRol()?->getRuta() ?? ''
-            ), [
-                'id' => $cuestionario->getId(),
-            ]
+            ),
+            ['id' => $cuestionario->getId()]
         );
     }
 
@@ -171,7 +170,6 @@ class EvaluadorController extends AbstractController
     public function cargarEvaluacion(
         Request            $request,
         EmpleadoRepository $empleadoRepository,
-        PersonaRepository  $personaRepository,
         Cuestionario       $cuestionario,
     ): Response {
         $this->denyAccessUnlessGranted('admin');
@@ -185,7 +183,7 @@ class EvaluadorController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $inicio = microtime(true);
-            $this->redis = RedisAdapter::createConnection((string) $request->server->get('REDIS_URL'));
+            $this->redis = RedisAdapter::createConnection($request->server->getString('REDIS_URL'));
             $campos = [
                 'DOC_EMPLEADO',     // Documento empleado
                 'DOC_EVALUADOR',    // Documento evaluador
@@ -203,7 +201,7 @@ class EvaluadorController extends AbstractController
                     'fichero' => $fichero->getClientOriginalName(),
                 ]);
 
-                return $this->redirectToRoute((string) $request->attributes->get('_route'), ['id' => $cuestionario->getId()]);
+                return $this->redirectToRoute($request->attributes->getString('_route'), ['id' => $cuestionario->getId()]);
             }
 
             while (($datos = $csv->leer($campos)) !== null) {
@@ -215,10 +213,8 @@ class EvaluadorController extends AbstractController
             // Grabar datos
             /** @var string[] $linea */
             foreach ($lineas as $linea) {
-                $persona = $personaRepository->findOneBy(['doc_identidad' => $linea['DOC_EMPLEADO']]);
-                $empleado = $empleadoRepository->findOneBy(['persona' => $persona]);
-                $persona = $personaRepository->findOneBy(['doc_identidad' => $linea['DOC_EVALUADOR']]);
-                $evaluador = $empleadoRepository->findOneBy(['persona' => $persona]);
+                $empleado = $empleadoRepository->findOneByDocumento($linea['DOC_EMPLEADO']);
+                $evaluador = $empleadoRepository->findOneByDocumento($linea['DOC_EVALUADOR']);
                 if ($empleado instanceof Empleado && $evaluador instanceof Empleado) {
                     if (0 === $this->evaluaRepository->count(['empleado' => $empleado, 'evaluador' => $evaluador, 'cuestionario' => $cuestionario])) {
                         $evaluacion = new Evalua();
@@ -277,7 +273,7 @@ class EvaluadorController extends AbstractController
             // Solo administrador puede rechazar a otro empleado
             $this->denyAccessUnlessGranted('admin');
             $ruta = sprintf(
-                '%s_%s_cuestionario_evaluador_index',
+                '%s_%s_evaluador_index',
                 $this->actual->getAplicacion()?->getRuta() ?? '',
                 $this->actual->getRol()?->getRuta() ?? ''
             );

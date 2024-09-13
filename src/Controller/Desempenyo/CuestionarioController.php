@@ -11,6 +11,7 @@ use App\Repository\Sistema\EstadoRepository;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
 use App\Service\Slug;
+use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -175,16 +176,16 @@ class CuestionarioController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (null === $cuestionario->getFechaAlta() || null === $cuestionario->getFechaBaja()) {
+            if (!$cuestionario->getFechaAlta() instanceof DateTimeImmutable || !$cuestionario->getFechaBaja() instanceof DateTimeImmutable) {
                 $this->addFlash('warning', 'Las fechas inicial y final son obligatorias.');
 
-                return $this->redirectToRoute((string) $request->attributes->get('_route'), [
+                return $this->redirectToRoute($request->attributes->getString('_route'), [
                     'id' => $cuestionario->getId(),
                 ]);
             } elseif ($cuestionario->getFechaAlta() > $cuestionario->getFechaBaja()) {
                 $this->addFlash('warning', 'La fecha final debe ser posterior o igual a la fecha inicial.');
 
-                return $this->redirectToRoute((string) $request->attributes->get('_route'), [
+                return $this->redirectToRoute($request->attributes->getString('_route'), [
                     'id' => $cuestionario->getId(),
                 ]);
             }

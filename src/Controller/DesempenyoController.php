@@ -31,8 +31,7 @@ class DesempenyoController extends AbstractController
         EmpleadoRepository     $empleadoRepository,
         EvaluaRepository       $evaluaRepository,
         FormularioRepository   $formularioRepository,
-    ): Response
-    {
+    ): Response {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();

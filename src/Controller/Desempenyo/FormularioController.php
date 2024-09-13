@@ -186,7 +186,7 @@ class FormularioController extends AbstractController
             $evaluador = $empleado;
         } else {
             $cuestionario = $cuestionarioRepository->findOneBy([
-                'url' => u($request->getRequestUri())->before("/$evalua")->toString(),
+                'url' => u($request->getRequestUri())->before('/' . $evalua)->toString(),
             ]);
             $empleado = $empleadoRepository->find($evalua);
             $evaluador = $empleadoRepository->findOneByUsuario($usuario);
@@ -321,6 +321,7 @@ class FormularioController extends AbstractController
                 } elseif (0 === u($clave)->indexOf('observa_')) {
                     $respuesta->setValor([...$respuesta->getValor(), ...['observa' => $valor]]);
                 }
+
                 $respuestaRepository->save($respuesta);
                 $cuestionaFormulario->addRespuesta($respuesta);
             }
