@@ -68,14 +68,18 @@
                 <li><a href="{{ activos[0].url ~ '/evaluador' }}">Comprobar sus evaluadores</a></li>
                 <li>Comunicar incidencias del proceso de autoevaluación</li>
                 {%- if activos[0].fechaBaja >= date() %}
-                    {%- if evaluados|filter(e => e.evaluador != null)|length > 0 %}
+                    {%- if evaluados|filter(e => e.evaluador == null)|length == 0 %}
                         <li class="alert alert-primary">
-                            Solicito no participar en el proceso de autoevaluación del desempeño
+                            <a id="rechaza" href="" data-url="{{ activos[0].url ~ '/rechaza' }}">
+                                Solicito no participar en el proceso de autoevaluación del desempeño
+                            </a>
                         </li>
                     {%- else %}
                         <li class="alert alert-success">
-                            Volver a activar su participación (solo disponible hasta el día {{ activos[0].fechaBaja|date('d/m/Y') }},
-                            inclusive)
+                            <a id="recupera"  href="" data-url="{{ activos[0].url ~ '/recupera' }}">
+                                Volver a activar su participación (solo disponible hasta el día
+                                {{ activos[0].fechaBaja|date('d/m/Y') }}, inclusive)
+                            </a>
                         </li>
                     {%- endif %}
                 {%- endif %}
@@ -175,6 +179,43 @@
     <li class="breadcrumb-item"><a href="{{ path('intranet_usuario_aplicacion') }}"><span class="fas fa-tools"></span> Mis Aplicaciones</a></li>
 {% endblock %}
 
+{% block modal %}
+    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRechaza', texto: 'Texto con las implicaciones de rechazar la evaluación.',
+        pregunta: '¿Continuar con la solicitud?'}) }}
+    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRecupera', texto: 'Texto con las implicaciones de recuperar la evaluación.',
+        pregunta: '¿Continuar con la solicitud?'}) }}
+{% endblock %}
+
 {% block js %}
     {{ parent() }}
+    <script type="module">
+        const rechaza = $('#rechaza');
+        const recupera = $('#recupera');
+        const modalRechaza = $('#dialogoRechaza');
+        const modalRecupera = $('#dialogoRecupera');
+        // Rechazar evaluación
+        rechaza.on('click', function (e) {
+            e.preventDefault();
+            modalRechaza.fadeIn('fast');
+        });
+        $('#dialogoRechazaCancelar').on('click', function () {
+            modalRechaza.fadeOut('fast');
+        });
+        $('#dialogoRechazaAceptar').on('click', function () {
+            modalRechaza.fadeOut('fast');
+            window.location.href = rechaza.data('url');
+        });
+        // Recuperar evaluación
+        recupera.on('click', function (e) {
+            e.preventDefault();
+            modalRecupera.fadeIn('fast');
+        });
+        $('#dialogoRecuperaCancelar').on('click', function () {
+            modalRecupera.fadeOut('fast');
+        });
+        $('#dialogoRecuperaAceptar').on('click', function () {
+            modalRecupera.fadeOut('fast');
+            window.location.href = recupera.data('url');
+        });
+    </script>
 {% endblock %}

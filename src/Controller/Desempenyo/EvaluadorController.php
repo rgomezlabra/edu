@@ -9,6 +9,7 @@ use App\Entity\Desempenyo\Evalua;
 use App\Entity\Plantilla\Empleado;
 use App\Entity\Sistema\Usuario;
 use App\Form\Util\VolcadoType;
+use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
 use App\Repository\Plantilla\EmpleadoRepository;
 use App\Service\Csv;
@@ -25,6 +26,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use function Symfony\Component\String\u;
 
 #[Route(path: '/intranet/desempenyo', name: 'intranet_desempenyo_')]
 class EvaluadorController extends AbstractController
@@ -259,33 +261,63 @@ class EvaluadorController extends AbstractController
 
     /** Rechazar la evaluación de un empleado. */
     #[Route(
-        path: '/admin/cuestionario/{cuestionario}/evaluador/rechaza/{empleado?}',
+        path: '/admin/cuestionario/{cuestionario}/evaluador/rechaza/{empleado}',
         name: 'admin_evaluador_rechaza',
         methods: ['GET']
     )]
-    public function rechaza(
-        EmpleadoRepository $empleadoRepository,
-        EvaluaRepository   $evaluaRepository,
-        Cuestionario       $cuestionario,
-        ?Empleado          $empleado = null,
+    public function rechazaAdmin(
+        EvaluaRepository $evaluaRepository,
+        Cuestionario     $cuestionario,
+        Empleado         $empleado,
     ): Response {
-        if ($empleado instanceof Empleado) {
-            // Solo administrador puede rechazar a otro empleado
-            $this->denyAccessUnlessGranted('admin');
-            $ruta = sprintf(
-                '%s_%s_evaluador_index',
-                $this->actual->getAplicacion()?->getRuta() ?? '',
-                $this->actual->getRol()?->getRuta() ?? ''
-            );
-        } else {
-            // Buscar usuario actual como empleado
-            $this->denyAccessUnlessGranted(null, ['relacion' => null]);
-            /** @var Usuario $usuario */
-            $usuario = $this->getUser();
-            $empleado = $empleadoRepository->findOneByUsuario($usuario);
-            $ruta = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
+        $this->denyAccessUnlessGranted('admin');
+        // Comprobar si el empleado puede autoevaluarse
+        $evalua = $evaluaRepository->findOneBy([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'evaluador' => $empleado,
+        ]);
+        if (!$evalua instanceof Evalua) {
+            $this->generator->logAndFlash('warning', 'El empleado no existe o no es evaluable', [
+                'cuestionario' => $cuestionario->getCodigo(),
+                'usuario' => $empleado->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
+            ]);
+
+            return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]);
         }
 
+        $evalua
+            ->setEvaluador(null)
+            ->setFechaRechazo(new DateTimeImmutable())
+        ;
+        $evaluaRepository->save($evalua, true);
+        $this->generator->logAndFlash('info', 'El empleado ha sido marcado como no evaluable', [
+            'cuestionario' => $cuestionario->getCodigo(),
+            'empleado' => $empleado->getPersona()?->getUsuario()->getUvus(),
+        ]);
+
+        return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]);
+    }
+
+    /** Empleado solicita no ser evaluado. */
+    #[Route(
+        path: '/formulario/{codigo}/rechaza',
+        name: 'formulario_rechaza',
+        methods: ['GET']
+    )]
+    public function rechazaEmpleado(
+        Request                $request,
+        CuestionarioRepository $cuestionarioRepository,
+        EmpleadoRepository     $empleadoRepository,
+        EvaluaRepository       $evaluaRepository,
+    ): Response {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
+        // Buscar usuario actual como empleado
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        $empleado = $empleadoRepository->findOneByUsuario($usuario);
+        $ruta = u($request->getRequestUri())->beforeLast('/')->toString();
+        $cuestionario = $cuestionarioRepository->findOneBy(['url' => $ruta]);
         // Comprobar si el empleado puede autoevaluarse
         $evalua = $evaluaRepository->findOneBy([
             'cuestionario' => $cuestionario,
@@ -298,7 +330,7 @@ class EvaluadorController extends AbstractController
                 'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
             ]);
 
-            return $this->redirectToRoute($ruta, ['id' => $cuestionario->getId()]);
+            return $this->redirectToRoute('intranet_desempenyo');
         }
 
         $evalua
@@ -306,12 +338,12 @@ class EvaluadorController extends AbstractController
             ->setFechaRechazo(new DateTimeImmutable())
         ;
         $evaluaRepository->save($evalua, true);
-        $this->generator->logAndFlash('info', 'El empleado ha sido marcado como no evaluable', [
-            'cuestionario' => $cuestionario->getCodigo(),
+        $this->generator->logAndFlash('info', 'El empleado ha solicitado no ser evaluable', [
+            'cuestionario' => $cuestionario?->getCodigo(),
             'empleado' => $empleado?->getPersona()->getUsuario()->getUvus(),
         ]);
 
-        return $this->redirectToRoute($ruta, ['id' => $cuestionario->getId()]);
+        return $this->redirectToRoute('intranet_desempenyo');
     }
 
     /** Recupera la evaluación de un empleado que la había rechazado previamente. */
@@ -320,29 +352,12 @@ class EvaluadorController extends AbstractController
         name: 'admin_evaluador_recupera',
         methods: ['GET']
     )]
-    public function recupera(
-        EmpleadoRepository $empleadoRepository,
-        EvaluaRepository   $evaluaRepository,
-        Cuestionario       $cuestionario,
-        ?Empleado          $empleado = null,
+    public function recuperaAdmin(
+        EvaluaRepository $evaluaRepository,
+        Cuestionario     $cuestionario,
+        ?Empleado        $empleado = null,
     ): Response {
-        if ($empleado instanceof Empleado) {
-            // Solo administrador puede recuperar a otro empleado
-            $this->denyAccessUnlessGranted('admin');
-            $ruta = sprintf(
-                '%s_%s_cuestionario_evaluador_index',
-                $this->actual->getAplicacion()?->getRuta() ?? '',
-                $this->actual->getRol()?->getRuta() ?? ''
-            );
-        } else {
-            $this->denyAccessUnlessGranted(null, ['relacion' => null]);
-            // Buscar usuario actual como empleado
-            /** @var Usuario $usuario */
-            $usuario = $this->getUser();
-            $empleado = $empleadoRepository->findOneByUsuario($usuario);
-            $ruta = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
-        }
-
+        $this->denyAccessUnlessGranted('admin');
         // Comprobar si el empleado ha rechazado la evaluación
         $evalua = $evaluaRepository->findOneBy([
             'cuestionario' => $cuestionario,
@@ -355,7 +370,7 @@ class EvaluadorController extends AbstractController
                 'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
             ]);
 
-            return $this->redirectToRoute($ruta, ['id' => $cuestionario->getId()]);
+            return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]);
         }
 
         $evalua
@@ -368,6 +383,53 @@ class EvaluadorController extends AbstractController
             'empleado' => $empleado?->getPersona()->getUsuario()->getUvus(),
         ]);
 
-        return $this->redirectToRoute($ruta, ['id' => $cuestionario->getId()]);
+        return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]);
+    }
+
+    /** Empleado solicita recuperar la posibilidad de ser evaluado. */
+    #[Route(
+        path: '/formulario/{codigo}/recupera',
+        name: 'formulario_recupera',
+        methods: ['GET']
+    )]
+    public function recuperaEmpleado(
+        Request                $request,
+        CuestionarioRepository $cuestionarioRepository,
+        EmpleadoRepository     $empleadoRepository,
+        EvaluaRepository       $evaluaRepository,
+    ): Response {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
+        // Buscar usuario actual como empleado
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        $empleado = $empleadoRepository->findOneByUsuario($usuario);
+        $ruta = u($request->getRequestUri())->beforeLast('/')->toString();
+        $cuestionario = $cuestionarioRepository->findOneBy(['url' => $ruta]);
+        // Comprobar si el empleado ha rechazado la evaluación
+        $evalua = $evaluaRepository->findOneBy([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'evaluador' => null,
+        ]);
+        if (!$evalua instanceof Evalua) {
+            $this->generator->logAndFlash('warning', 'El empleado no existe o no había solicitado rechazar evaluación', [
+                'cuestionario' => $cuestionario?->getCodigo(),
+                'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
+            ]);
+
+            return $this->redirectToRoute('intranet_desempenyo');
+        }
+
+        $evalua
+            ->setEvaluador($empleado)
+            ->setFechaRechazo(null)
+        ;
+        $evaluaRepository->save($evalua, true);
+        $this->generator->logAndFlash('info', 'El empleado vuelve a ser evaluable', [
+            'cuestionario' => $cuestionario?->getCodigo(),
+            'empleado' => $empleado?->getPersona()->getUsuario()->getUvus(),
+        ]);
+
+        return $this->redirectToRoute('intranet_desempenyo');
     }
 }
