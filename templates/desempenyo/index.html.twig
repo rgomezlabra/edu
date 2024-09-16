@@ -176,13 +176,17 @@
 
 {% block migas %}
     {{ parent() }}
-    <li class="breadcrumb-item"><a href="{{ path('intranet_usuario_aplicacion') }}"><span class="fas fa-tools"></span> Mis Aplicaciones</a></li>
+    <li class="breadcrumb-item">
+        <a href="{{ path('intranet_usuario_aplicacion') }}"><span class="fas fa-tools"></span> Mis Aplicaciones</a>
+    </li>
 {% endblock %}
 
 {% block modal %}
-    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRechaza', texto: 'Texto con las implicaciones de rechazar la evaluación.',
+    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRechaza',
+        texto: 'Texto con las implicaciones de rechazar la evaluación.',
         pregunta: '¿Continuar con la solicitud?'}) }}
-    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRecupera', texto: 'Texto con las implicaciones de recuperar la evaluación.',
+    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRecupera',
+        texto: 'Texto con las implicaciones de recuperar la evaluación.',
         pregunta: '¿Continuar con la solicitud?'}) }}
 {% endblock %}
 

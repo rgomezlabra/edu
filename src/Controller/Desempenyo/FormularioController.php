@@ -205,12 +205,18 @@ class FormularioController extends AbstractController
         }
 
         $respuestas = [];
-        $formulario = $this->formularioRepository->findByCuestionario($cuestionario, $empleado, $empleado)[0] ?? null;
+        $formulario = $this->formularioRepository->findByCuestionario($cuestionario, $empleado, $evaluador)[0] ?? null;
+        foreach ($formulario->getFormulario()?->getRespuestas() ?? [] as $respuesta) {
+            $respuestas[$respuesta->getPregunta()?->getId()] = $respuesta->getValor();
+        }
+
         if ($formulario instanceof Formulario) {
             if ($formulario->getFormulario()?->getFechaEnvio() instanceof DateTimeImmutable) {
-                $this->addFlash('warning', 'El formulario ya ha sido enviado previamente.');
-
-                return $this->redirectToRoute('inicio');
+                return $this->render('intranet/desempenyo/formulario_ver.html.twig', [
+                    'formulario' => $formulario,
+                    'respuestas' => $respuestas,
+                    'codigo' => $codigo,
+                ]);
             }
         } else {
             $cuestionaFormulario = new CuestionaFormulario();
@@ -226,11 +232,7 @@ class FormularioController extends AbstractController
             ;
         }
 
-        foreach ($formulario->getFormulario()?->getRespuestas() ?? [] as $respuesta) {
-            $respuestas[$respuesta->getPregunta()?->getId()] = $respuesta->getValor();
-        }
-
-        return $this->render(sprintf('%s/formulario.html.twig', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? ''), [
+        return $this->render('intranet/desempenyo/formulario.html.twig', [
             'formulario' => $formulario,
             'respuestas' => $respuestas,
             'codigo' => $codigo,
@@ -261,6 +263,7 @@ class FormularioController extends AbstractController
             'url' => sprintf('/%s/formulario/%s', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? '', $codigo),
         ]);
         $token = sprintf('%s.%d', $codigo, (int) $cuestionario?->getId());
+        $enviado = $request->request->getBoolean('enviado');
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe.');
 
@@ -328,10 +331,28 @@ class FormularioController extends AbstractController
         }
 
         $cuestionaFormulario->setFechaGrabacion(new DateTimeImmutable());
+        if ($enviado) {
+            $cuestionaFormulario->setFechaEnvio(new DateTimeImmutable());
+        }
+
         $cuestionFormularioRepository->save($cuestionaFormulario);
         $this->formularioRepository->save($formulario, true);
+        if ($enviado) {
+            $this->generator->logAndFlash('info', 'Formulario enviado correctamente.', [
+                'codigo' => $codigo,
+                'empleado' => $empleado,
+                'evaluador' => $evaluador,
+            ]);
 
-        return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'inicio');
+            return $this->redirectToRoute('intranet_desempenyo');
+        } else {
+            $this->addFlash('info', 'Formulario guardado sin enviar.');
+        }
+
+        return $this->redirectToRoute('intranet_desempenyo_formulario_rellenar', [
+            'codigo' => $codigo,
+            'evalua' => $evaluador->getId(),
+        ]);
     }
 
     /** Comprobar si el empleado puede ser evaluado por el evaluador. */

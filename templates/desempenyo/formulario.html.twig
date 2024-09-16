@@ -80,23 +80,29 @@
                                         {%- endif %}
                                     {%- endfor %}
                                 </div>
-                                {%- if loop.last %}
-                                    <input type="hidden" name="_token"
-                                           value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
-                                    <button class="btn btn-primary">Enviar</button>
-                                {%- endif %}
+                                <div class="linea-botones"></div>
+                                <input type="hidden" name="_token"
+                                       value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
+                                <button class="btn btn-primary"><em class="mx-1 fas fa-save"></em>Grabar</button>
                             </div>
                         {%- endfor %}
                     {#- Página de despedida #}
                     <div class="tab-pane fade text-left" id="vert-tabs-despedida" role="tabpanel"
                          aria-labelledby="vert-tabs-despedida-tab" tabindex="0">
                         <div>{{ formulario.formulario.cuestionario.despedida|default|raw }}</div>
+                        <div class="linea-botones"></div>
+                        <input type="hidden" name="_token"
+                               value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
+                        <button class="btn btn-primary" id="enviar">
+                            <em class="mx-1 fas fa-envelope"></em>Enviar
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
         <input type="hidden" name="empleado" value="{{ formulario.empleado.id }}" />
         <input type="hidden" name="evaluador" value="{{ formulario.evaluador.id }}" />
+        <input type="hidden" name="enviado" id="enviado" value="0" />
     </form>
 {% endblock %}
 
@@ -112,8 +118,29 @@
     </li>
 {% endblock %}
 
+{% block modal %}
+    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoEnviar',
+        texto:'Si envía el cuestionario se guardarán los datos definitivamente y ya no podrán ser editados.',
+        pregunta: '¿Enviar este cuestionario?'}) }}
+{% endblock %}
+
 {% block js %}
     {{ parent() }}
     <script type="module">
+        const enviar = $('#enviar');
+        const enviado = $('#enviado');
+        const modalEnviar = $('#dialogoEnviar');
+        enviado.val(false);
+        enviar.on('click', function (e) {
+            e.preventDefault();
+            modalEnviar.show();
+        });
+        $('#dialogoEnviarCancelar').on('click', function (e) {
+            modalEnviar.hide();
+        });
+        $('#dialogoEnviarAceptar').on('click', function (e) {
+            modalEnviar.hide();
+            enviado.val(true).parent().submit();
+        });
     </script>
 {% endblock %}
