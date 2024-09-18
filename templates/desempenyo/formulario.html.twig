@@ -94,9 +94,22 @@
                         <div class="linea-botones"></div>
                         <input type="hidden" name="_token"
                                value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
-                        <button class="btn btn-primary" id="enviar">
-                            <em class="mx-1 fas fa-envelope"></em>Enviar
-                        </button>
+                        <div class="d-flex">
+                            <button class="btn btn-primary align-self-center" id="enviar">
+                                <em class="mx-1 fas fa-envelope"></em>Enviar
+                            </button>
+                            {#- Avisos #}
+                            <div id="aviso" class="toast text-bg-warning align-self-center mx-2" role="alert"
+                                 aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
+                                <div class="toast-body">
+                                    <div class="d-flex">
+                                        <div>No se han introducido evidencias en todas las preguntas.</div>
+                                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
+                                                aria-label="Close"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -128,18 +141,33 @@
 {% block js %}
     {{ parent() }}
     <script type="module">
+        import { Toast } from 'bootstrap';
         const enviar = $('#enviar');
         const enviado = $('#enviado');
         const modalEnviar = $('#dialogoEnviar');
+        const aviso = new Toast('#aviso');
         enviado.val(false);
         enviar.on('click', function (e) {
             e.preventDefault();
+            {#- Avisar si el evaluador no ha rellenado todas las evidencias #}
+            {%- if formulario.empleado != formulario.evaluador %}
+                let seguir = true;
+                $('[id^="observa_"]').each(function () {
+                    if (!$(this).val()) {
+                        aviso.show();
+                        seguir = false;
+                    }
+                });
+                if (!seguir) {
+                    return false;
+                }
+            {%- endif %}
             modalEnviar.show();
         });
-        $('#dialogoEnviarCancelar').on('click', function (e) {
+        $('#dialogoEnviarCancelar').on('click', function () {
             modalEnviar.hide();
         });
-        $('#dialogoEnviarAceptar').on('click', function (e) {
+        $('#dialogoEnviarAceptar').on('click', function () {
             modalEnviar.hide();
             enviado.val(true).parent().submit();
         });

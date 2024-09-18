@@ -15,7 +15,9 @@
         <output class="mx-3 mb-2 fw-bold text-info" id="{{ salida }}" name="{{ salida }}" for="{{ preg }}"></output>
     {%- if pregunta.opciones.observaciones|default(false) %}</div>{% endif %}
     {%- if pregunta.opciones.observaciones|default(false) %}
-        <label class="col-5"><input class="w-100" type="text" name="{{ observa }}" value="{{ valor.observa|default }}" /></label>
+        <label class="col-5">
+            <input class="w-100" type="text" id="{{ observa }}" name="{{ observa }}" value="{{ valor.observa|default }}" />
+        </label>
     {%- endif %}
 {% endif %}
 
