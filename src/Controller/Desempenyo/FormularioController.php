@@ -99,11 +99,11 @@ class FormularioController extends AbstractController
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
 
-            return $this->redirectToRoute('inicio');
+            return $this->redirectToRoute('intranet_desempenyo');
         } elseif (!$empleado instanceof Empleado) {
             $this->addFlash('warning', 'No se encuentran datos de empleado.');
 
-            return $this->redirectToRoute('inicio');
+            return $this->redirectToRoute('intranet_desempenyo');
         }
 
         return $this->render(sprintf('%s/evaluador.html.twig', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? ''), [
@@ -195,22 +195,24 @@ class FormularioController extends AbstractController
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
 
-            return $this->redirectToRoute('inicio');
+            return $this->redirectToRoute('intranet_desempenyo');
         } elseif (!$empleado instanceof Empleado || !$evaluador instanceof Empleado) {
             $this->addFlash('warning', 'No se encuentran datos de empleado.');
 
-            return $this->redirectToRoute('inicio');
+            return $this->redirectToRoute('intranet_desempenyo');
         } elseif (!$this->isEvaluable($cuestionario, $empleado, $evaluador)) {
-            return $this->redirectToRoute('inicio');
+            return $this->redirectToRoute('intranet_desempenyo');
         }
 
         $respuestas = [];
         $formulario = $this->formularioRepository->findByCuestionario($cuestionario, $empleado, $evaluador)[0] ?? null;
-        foreach ($formulario->getFormulario()?->getRespuestas() ?? [] as $respuesta) {
-            $respuestas[$respuesta->getPregunta()?->getId()] = $respuesta->getValor();
-        }
-
         if ($formulario instanceof Formulario) {
+            foreach ($formulario->getFormulario()?->getRespuestas() ?? [] as $respuesta) {
+                if ($respuesta->getPregunta() instanceof Pregunta) {
+                    $respuestas[$respuesta->getPregunta()->getId()] = $respuesta->getValor();
+                }
+            }
+
             if ($formulario->getFormulario()?->getFechaEnvio() instanceof DateTimeImmutable) {
                 return $this->render('intranet/desempenyo/formulario_ver.html.twig', [
                     'formulario' => $formulario,
@@ -249,7 +251,7 @@ class FormularioController extends AbstractController
         Request                       $request,
         CuestionarioRepository        $cuestionarioRepository,
         EmpleadoRepository            $empleadoRepository,
-        CuestionaFormularioRepository $cuestionFormularioRepository,
+        CuestionaFormularioRepository $cuestionaFormularioRepository,
         PreguntaRepository            $preguntaRepository,
         RespuestaRepository           $respuestaRepository,
         string                        $codigo,
@@ -265,23 +267,23 @@ class FormularioController extends AbstractController
         $token = sprintf('%s.%d', $codigo, (int) $cuestionario?->getId());
         $enviado = $request->request->getBoolean('enviado');
         if (!$cuestionario instanceof Cuestionario) {
-            $this->addFlash('warning', 'El cuestionario solicitado no existe.');
+            $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
 
-            return $this->redirectToRoute('inicio');
+            return $this->redirectToRoute('intranet_desempenyo');
         } elseif (!$this->isCsrfTokenValid($token, $request->request->getString('_token'))) {
             $this->generator->logAndFlash('error', 'Token de validación incorrecto');
 
-            return $this->redirectToRoute('inicio');
+            return $this->redirectToRoute('intranet_desempenyo');
         } elseif (!$empleado instanceof Empleado || !$evaluador instanceof Empleado) {
             $this->addFlash('warning', 'No se encuentran datos de empleado.');
 
-            return $this->redirectToRoute('inicio');
+            return $this->redirectToRoute('intranet_desempenyo');
         } elseif ($evaluador !== $empleadoRepository->findOneByUsuario($usuario)) {
             $this->addFlash('warning', 'El usuario no corresponde con el evaluador del formulario.');
 
             return $this->redirectToRoute('inicio');
         } elseif (!$this->isEvaluable($cuestionario, $empleado, $evaluador)) {
-            return $this->redirectToRoute('inicio');
+            return $this->redirectToRoute('intranet_desempenyo');
         }
 
         $formulario = $this->formularioRepository->findByCuestionario($cuestionario, $empleado, $evaluador)[0] ?? null;
@@ -309,7 +311,9 @@ class FormularioController extends AbstractController
         foreach ($request->request->all() as $clave => $valor) {
             $pregunta = $preguntaRepository->find((int) u($clave)->after('_')->toString());
             if ($pregunta instanceof Pregunta) {
-                $respuesta = $cuestionaFormulario->getRespuestas()->filter(static fn (Respuesta $respuesta) => $respuesta->getFormulario() === $formulario->getFormulario() && $respuesta->getPregunta() === $pregunta)->first();
+                $respuesta = $cuestionaFormulario?->getRespuestas()->filter(
+                    static fn (Respuesta $respuesta) => $respuesta->getFormulario() === $formulario->getFormulario() && $respuesta->getPregunta() === $pregunta
+                )->first();
                 if (!$respuesta instanceof Respuesta) {
                     $respuesta = new Respuesta();
                     $respuesta
@@ -335,7 +339,7 @@ class FormularioController extends AbstractController
             $cuestionaFormulario->setFechaEnvio(new DateTimeImmutable());
         }
 
-        $cuestionFormularioRepository->save($cuestionaFormulario);
+        $cuestionaFormularioRepository->save($cuestionaFormulario);
         $this->formularioRepository->save($formulario, true);
         if ($enviado) {
             $this->generator->logAndFlash('info', 'Formulario enviado correctamente.', [
@@ -351,7 +355,7 @@ class FormularioController extends AbstractController
 
         return $this->redirectToRoute('intranet_desempenyo_formulario_rellenar', [
             'codigo' => $codigo,
-            'evalua' => $evaluador->getId(),
+            'evalua' => $empleado->getId(),
         ]);
     }
 

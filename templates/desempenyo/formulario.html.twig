@@ -72,10 +72,11 @@
                                             {{- include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {
                                                 etiqueta: 'preg_' ~ pregunta.id, valor: respuestas[pregunta.id]|default}) }}
                                         </div>
+                                        {%- set puntos = puntos + respuestas[pregunta.id].valor|default(0) %}
                                         {%- if loop.last %}
                                             <div class="row fw-bold bg-tertiary">
                                                 <div class="col-5 text-end">Media</div>
-                                                <div class="col-2">{{ puntos }}</div>
+                                                <div id="media_{{ grupo.orden }}" class="col-2">{{ (puntos / loop.index)|number_format(2) }}</div>
                                             </div>
                                         {%- endif %}
                                     {%- endfor %}
@@ -141,6 +142,16 @@
         $('#dialogoEnviarAceptar').on('click', function (e) {
             modalEnviar.hide();
             enviado.val(true).parent().submit();
+        });
+        // Actualizar media de puntos
+        $('[id^=preg_]').on('change', function () {
+            let total = 0;
+            const grupo = $(this).closest('.d-grid');
+            const preguntas = grupo.find('[id^=preg_]');
+            preguntas.each(function () {
+                total += parseFloat($(this).val());
+            })
+            grupo.find('[id^=media_]').html((total / preguntas.length).toFixed(2));
         });
     </script>
 {% endblock %}
