@@ -35,8 +35,8 @@ class EvaluadorController extends AbstractController
 
     public function __construct(
         private readonly MessageGenerator $generator,
-        private readonly SirhusLock $lock,
-        private readonly RutaActual $actual,
+        private readonly SirhusLock       $lock,
+        private readonly RutaActual       $actual,
         private readonly EvaluaRepository $evaluaRepository,
     ) {
     }
@@ -86,11 +86,12 @@ class EvaluadorController extends AbstractController
         Cuestionario       $cuestionario,
     ): Response {
         $this->denyAccessUnlessGranted('admin');
+        $ttl = 300; // Periodo de validez de 300 s
         if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
             return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
-        } elseif (null === $this->lock->acquire()) {
+        } elseif (null === $this->lock->acquire($ttl)) {
             $this->addFlash('warning', 'Recurso bloqueado por otra operación de carga.');
 
             return $this->redirectToRoute($request->attributes->getString('_route'));
@@ -181,15 +182,16 @@ class EvaluadorController extends AbstractController
             return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
         }
 
-        $form = $this->createForm(VolcadoType::class);
+        $campos = [
+            'DNI USUARIO',      // Documento empleado
+            'DNI VALIDADOR',    // Documento evaluador
+        ];
+        $form = $this->createForm(VolcadoType::class, ['maxSize' => '256k']);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            set_time_limit(60); // La carga completa puede tardar más de los 30 s. por defecto
             $inicio = microtime(true);
             $this->redis = RedisAdapter::createConnection($request->server->getString('REDIS_URL'));
-            $campos = [
-                'DOC_EMPLEADO',     // Documento empleado
-                'DOC_EVALUADOR',    // Documento evaluador
-            ];
             $lineas = [];
             $nuevos = 0;
             $descartados = 0;
@@ -215,8 +217,8 @@ class EvaluadorController extends AbstractController
             // Grabar datos
             /** @var string[] $linea */
             foreach ($lineas as $linea) {
-                $empleado = $empleadoRepository->findOneByDocumento($linea['DOC_EMPLEADO']);
-                $evaluador = $empleadoRepository->findOneByDocumento($linea['DOC_EVALUADOR']);
+                $empleado = $empleadoRepository->findOneByDocumento($linea['DNI USUARIO']);
+                $evaluador = $empleadoRepository->findOneByDocumento($linea['DNI VALIDADOR']);
                 if ($empleado instanceof Empleado && $evaluador instanceof Empleado) {
                     if (0 === $this->evaluaRepository->count(['empleado' => $empleado, 'evaluador' => $evaluador, 'cuestionario' => $cuestionario])) {
                         $evaluacion = new Evalua();
@@ -256,6 +258,7 @@ class EvaluadorController extends AbstractController
         return $this->render('intranet/desempenyo/admin/evaluador/volcado.html.twig', [
             'form' => $form->createView(),
             'cuestionario' => $cuestionario,
+            'campos' => $campos,
         ]);
     }
 

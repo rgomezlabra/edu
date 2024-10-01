@@ -14,7 +14,7 @@
         Sevilla.<br>
         Los datos se cargarán usando un <strong>fichero CSV</strong> que contenga al menos los siguientes campos
         separados por comas:<br>
-        DOC_EMPLEADO, DOC_EVALUADOR
+        {{ campos|join(', ') }}
     </div>
 
     {{ form_start(form) }}
