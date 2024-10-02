@@ -60,7 +60,7 @@ class EvaluadorController extends AbstractController
             if (true === $datos['finalizado']) {
                 $ultimo = new DateTimeImmutable(
                     (string) $datos['inicio']['date'],
-                    new DateTimeZone((string) $datos['inicio']['timezone'])
+                    new DateTimeZone($datos['inicio']['timezone'] ?? 'UTC')
                 );
             }
         } catch (Exception) {
@@ -71,6 +71,37 @@ class EvaluadorController extends AbstractController
             'evaluaciones' => $evaluaciones,
             'volcado_empleados' => $ultimo,
         ]);
+    }
+
+    #[Route(
+        path: '/admin/cuestionario/{cuestionario}/evaluador/{evalua}/',
+        name: 'admin_evaluador_delete',
+        defaults: ['titulo' => 'Eliminar Asignación de Evaluación'],
+        methods: ['POST']
+    )]
+    public function delete(
+        Request          $request,
+        EvaluaRepository $evaluaRepository,
+        Cuestionario     $cuestionario,
+        Evalua           $evalua
+    ): Response {
+        $this->denyAccessUnlessGranted('admin');
+        $token = sprintf('delete%d-%d', $cuestionario->getId() ?? 0, $evalua->getId() ?? 0);
+        if ($cuestionario->getId() !== $evalua->getCuestionario()?->getId()) {
+            $this->addFlash('warning', 'La evaluación no corresponde a este cuestionario.');
+        } elseif ($this->isCsrfTokenValid($token, $request->request->getString('_token'))) {
+            $evaluaRepository->remove($evalua, true);
+            $this->generator->logAndFlash('info', 'Evaluación eliminada correctamente', [
+                'id' => $evalua->getId(),
+                'codigo' => $cuestionario->getCodigo(),
+                'empleado' => $evalua->getEmpleado()?->getPersona(),
+                'evaluador' => $evalua->getEvaluador()?->getPersona(),
+            ]);
+        }
+
+        return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', [
+            'id' => $cuestionario->getId(),
+        ], Response::HTTP_SEE_OTHER);
     }
 
     /** Cargar empleados activos para autoevaluación que no hayan solicitado exclusión en un cuestionario. */
