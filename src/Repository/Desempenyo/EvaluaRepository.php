@@ -96,7 +96,7 @@ class EvaluaRepository extends ServiceEntityRepository
                         self::AUTOEVALUACION => 'evalua.empleado = evalua.evaluador',
                         self::EVALUACION => 'evalua.empleado != evalua.evaluador AND evalua.evaluador IS NOT NULL',
                         self::NO_EVALUACION => 'evalua.evaluador IS NULL',
-                        default => ''
+                        default => 'evalua.empleado IS NULL'
                     };
                     $qb->andWhere($condicion);
             }

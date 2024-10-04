@@ -5,209 +5,210 @@
     <div class="pagina-titulo">{{ titulo }}</div>
 
     <div class="pagina-seccion">Cuestionario {{ cuestionario.codigo }}</div>
-    <div class="container-fluid">
-        <div class="nav nav-pills m-1" id="vert-tabs-tab" role="tablist">
-            <a class="nav-link show active" id="vert-tabs-empleados-tab" role="tab"
-               data-bs-toggle="pill" href="#vert-tabs-empleados" aria-controls="vert-tabs-empleados"
-               aria-selected="true">
-                Autoevaluación
-            </a>
-            <a class="nav-link" id="vert-tabs-evaluadores-tab" role="tab"
-               data-bs-toggle="pill" href="#vert-tabs-evaluadores" aria-controls="vert-tabs-evaluadores"
-               aria-selected="true">
-                Evaluadores
-            </a>
-            <a class="nav-link" id="vert-tabs-rechazan-tab" role="tab"
-               data-bs-toggle="pill" href="#vert-tabs-rechazan" aria-controls="vert-tabs-rechazan"
-               aria-selected="true">
-                Rechazan evaluación
-            </a>
-            <a class="nav-link" id="vert-tabs-sinevaluador-tab" role="tab"
-               data-bs-toggle="pill" href="#vert-tabs-sinevaluador" aria-controls="vert-tabs-sinevaluador"
-               aria-selected="true">
-                Empleados sin evaluador
-            </a>
-        </div>
-        <div class="tab-content" id="vert-tabs-tabContent">
-            {#- Empleados para autoevaluación #}
-            <div class="tab-pane fade text-left show active" id="vert-tabs-empleados"
-                 role="tabpanel" aria-labelledby="vert-tabs-empleados-tab" tabindex="0">
-                {%- if evaluaciones|length > 0 %}
-                    <div class="badge-info">
-                        Último volcado de datos: {{ volcado_empleados ? volcado_empleados|date('d/m/Y, H:i') : 'sin datos' -}}
-                    </div>
-                {%- endif %}
-                <table class="tabla-condensada" id="datosEmpleados">
-                    <thead class="cabecera-condensada">
-                        <tr>
-                            <th>Unidad</th>
-                            <th>Doc. empleado</th>
-                            <th>Nombre empleado</th>
-                            <th data-dt-order="disable">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {%- for evaluacion in evaluaciones|filter(e => e.empleado == e.evaluador) %}
-                        <tr>
-                            <td>
-                                {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
-                                    : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
-                            </td>
-                            <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
-                            <td>{{ evaluacion.empleado.persona }}</td>
-                            <td>
-                                <a class="rechazar" href="" data-persona="{{ evaluacion.empleado.persona }}"
-                                   data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_rechaza', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
-                                    <span class="mx-1 fas fa-remove" title="Rechazar evaluación"></span>
-                                </a>
-                            </td>
-                        </tr>
-                    {%- endfor %}
-                    </tbody>
-                </table>
+    {%- if tipo == constant('App\\Repository\\Desempenyo\\EvaluaRepository::AUTOEVALUACION') %}
+        {#- Empleados para autoevaluación #}
+        {%- if evaluaciones|length > 0 %}
+            <div class="badge-info">
+                Último volcado de datos: {{ volcado_empleados ? volcado_empleados|date('d/m/Y, H:i') : 'sin datos' -}}
             </div>
-            {#- Relación de valuadores y empleados #}
-            <div class="tab-pane fade text-left" id="vert-tabs-evaluadores"
-                 role="tabpanel" aria-labelledby="vert-tabs-evaluadores-tab" tabindex="0">
-                <table class="tabla-condensada" id="datosEvaluadores">
-                    <thead class="cabecera-condensada">
-                    <tr>
-                        <th colspan="6" data-dt-order="disable">Empleado</th>
-                        <th colspan="6" data-dt-order="disable">Evaluador</th>
-                        <th rowspan="2" data-dt-order="disable">Acciones</th>
-                    </tr>
-                    <tr>
-                        <th>Unidad</th>
-                        <th>Nombre</th>
-                        <th><span title="Grupo y nivel">Gr./Niv.</span></th>
-                        <th><span title="Antigüedad total">Antig.</span></th>
-                        <th>Vigente</th>
-                        <th>Avisos</th>
-                        <th>Unidad</th>
-                        <th>Nombre</th>
-                        <th><span title="Grupo y nivel">Gr./Niv.</span></th>
-                        <th><span title="Antigüedad total">Antig.</span></th>
-                        <th>Vigente</th>
-                        <th>Avisos</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {%- for evaluacion in evaluaciones|filter(e => e.empleado != e.evaluador and e.evaluador != null) %}
-                        {%- set plazaEmpleado = evaluacion.empleado.plazaOcupada ?: evaluacion.empleado.plazaTitular %}
-                        {%- set plazaEvaluador = evaluacion.evaluador.plazaOcupada ?: evaluacion.evaluador.plazaTitular %}
-                        <tr {% if plazaEmpleado.unidad|default != plazaEvaluador.unidad|default %}class="table-info" {% endif %}>
-                            <td>
-                                <span title="{{ plazaEmpleado.unidad.nombre|default }}">{{ plazaEmpleado.subunidad.codigo|default }}</span>
-                            </td>
-                            <td>{{ evaluacion.empleado.persona }}</td>
-                            <td>{{ evaluacion.empleado.grupo.nombre ~ (evaluacion.empleado.nivel > 0 ? '/' ~ evaluacion.empleado.nivel) }}</td>
-                            <td>
-                                {{- plazaEmpleado.ocupantes[0].antiguedad|default -}}
-                            </td>
-                            <td>
-                                {{- plazaEmpleado.ocupantes[0].enOcupada|default ?: evaluacion.empleado.vigente|date('Y-m-d') -}}
-                            </td>
-                            <td>
-                                {%- if evaluacion.empleado.ausencia -%}
-                                    <sup class="badge bg-warning mx-1" title="{{ avisos[1] }}">1</sup>
-                                {%- endif %}
-                                {%- if date(evaluacion.empleado.vigente) > date() -%}
-                                    <sup class="badge bg-warning mx-1" title="{{ avisos[2] }}">2</sup>
-                                {%- endif -%}
-                            </td>
-                            <td><span title="{{ plazaEvaluador.unidad.nombre|default }}">{{ plazaEvaluador.subunidad.codigo|default }}</span></td>
-                            <td>{{ evaluacion.evaluador.persona }}</td>
-                            <td>{{ evaluacion.evaluador.grupo.nombre ~ (evaluacion.evaluador.nivel > 0 ? '/' ~ evaluacion.evaluador.nivel) }}</td>
-                            <td>
-                                {{- plazaEvaluador.ocupantes[0].antiguedad|default -}}
-                            </td>
-                            <td>
-                                {{- plazaEvaluador.ocupantes[0].enTitular|default -}}
-                            </td>
-                            <td>
-                                {%- if evaluacion.evaluador.ausencia -%}
-                                    <sup class="badge bg-warning mx-1" title="{{ avisos[1] }}">1</sup>
-                                {%- endif %}
-                                {%- if date(evaluacion.evaluador.vigente) > date() -%}
-                                    <sup class="badge bg-warning mx-1" title="{{ avisos[2] }}">2</sup>
-                                {%- endif -%}
-                            </td>
-                            <td>
-                                <form method="post"
-                                      action="{{ path(aplicacion.ruta ~ '_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion.id}) }}"
-                                      onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluacion.evaluador.persona }} sobre {{ evaluacion.empleado.persona }}?');">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cuestionario.id ~ '-' ~ evaluacion.id) }}">
-                                    <button class="border-0 text-primary">
-                                        <span class="mx-1 fas fa-trash" title="Desasignar"></span>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    {%- endfor %}
-                    </tbody>
-                    <caption>
-                        <span class="me-4">Avisos:</span>
-                        {%- for indice, aviso in avisos -%}
-                            <span class="me-4"><sup class="badge-warning">{{ indice }}</sup> {{ aviso }}</span>
-                        {%- endfor -%}
-                    </caption>
-                </table>
-            </div>
-            {# Empleados que rechazan la evaluación #}
-            <div class="tab-pane fade text-left" id="vert-tabs-rechazan"
-                 role="tabpanel" aria-labelledby="vert-tabs-rechazan-tab" tabindex="0">
-                <table class="tabla-condensada" id="datosRechazan">
-                    <thead class="cabecera-condensada">
-                    <tr>
-                        <th>Unidad</th>
-                        <th>Doc. empleado</th>
-                        <th>Nombre empleado</th>
-                        <th>Fecha solicitud</th>
-                        <th data-dt-order="disable">Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {%- for evaluacion in evaluaciones|filter(e => e.evaluador == null) %}
-                        <tr>
-                            <td>
-                                {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
-                                : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
-                            </td>
-                            <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
-                            <td>{{ evaluacion.empleado.persona }}</td>
-                            <td>{{ evaluacion.fechaRechazo|date('Y-m-d') }}</td>
-                            <td>
-                                <a class="recuperar" href="" data-persona="{{ evaluacion.empleado.persona }}"
-                                   data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_recupera', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
-                                    <span class="mx-1 fas fa-check" title="Recuperar evaluación"></span>
-                                </a>
-                            </td>
-                        </tr>
-                    {%- endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="tab-pane fade text-left" id="vert-tabs-sinevaluador"
-                 role="tabpanel" aria-labelledby="vert-tabs-sinevaluador-tab" tabindex="0">
-                ...
-            </div>
-        </div>
-    </div>
+        {%- endif %}
+        <table class="tabla-condensada" id="datosEmpleados">
+            <caption class="caption-top">Autoevaluación</caption>
+            <thead class="cabecera-condensada">
+                <tr>
+                    <th>Unidad</th>
+                    <th>Doc. empleado</th>
+                    <th>Nombre empleado</th>
+                    <th data-dt-order="disable">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            {%- for evaluacion in evaluaciones|filter(e => e.empleado == e.evaluador) %}
+                <tr>
+                    <td>
+                        {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
+                            : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
+                    </td>
+                    <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
+                    <td>{{ evaluacion.empleado.persona }}</td>
+                    <td>
+                        <a class="rechazar" href="" data-persona="{{ evaluacion.empleado.persona }}"
+                           data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_rechaza', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
+                            <span class="mx-1 fas fa-remove" title="Rechazar evaluación"></span>
+                        </a>
+                    </td>
+                </tr>
+            {%- endfor %}
+            </tbody>
+        </table>
+    {%- elseif tipo == constant('App\\Repository\\Desempenyo\\EvaluaRepository::EVALUACION') %}
+        {#- Relación de valuadores y empleados #}
+        <table class="tabla-condensada" id="datosEvaluadores">
+            <thead class="cabecera-condensada">
+            <tr>
+                <th colspan="6" data-dt-order="disable">Empleado</th>
+                <th colspan="6" data-dt-order="disable">Evaluador</th>
+                <th rowspan="2" data-dt-order="disable">Acciones</th>
+            </tr>
+            <tr>
+                <th>Unidad</th>
+                <th>Nombre</th>
+                <th><span title="Grupo y nivel">Gr./Niv.</span></th>
+                <th><span title="Antigüedad total">Antig.</span></th>
+                <th>Vigente</th>
+                <th>Avisos</th>
+                <th>Unidad</th>
+                <th>Nombre</th>
+                <th><span title="Grupo y nivel">Gr./Niv.</span></th>
+                <th><span title="Antigüedad total">Antig.</span></th>
+                <th>Vigente</th>
+                <th>Avisos</th>
+            </tr>
+            </thead>
+            <tbody>
+            {%- for evaluacion in evaluaciones|filter(e => e.empleado != e.evaluador and e.evaluador != null) %}
+                {%- set plazaEmpleado = evaluacion.empleado.plazaOcupada ?: evaluacion.empleado.plazaTitular %}
+                {%- set plazaEvaluador = evaluacion.evaluador.plazaOcupada ?: evaluacion.evaluador.plazaTitular %}
+                <tr {% if plazaEmpleado.unidad|default != plazaEvaluador.unidad|default %}class="table-info" {% endif %}>
+                    <td>
+                        <span title="{{ plazaEmpleado.unidad.nombre|default }}">{{ plazaEmpleado.subunidad.codigo|default }}</span>
+                    </td>
+                    <td>{{ evaluacion.empleado.persona }}</td>
+                    <td>{{ evaluacion.empleado.grupo.nombre ~ (evaluacion.empleado.nivel > 0 ? '/' ~ evaluacion.empleado.nivel) }}</td>
+                    <td>
+                        {{- plazaEmpleado.ocupantes[0].antiguedad|default -}}
+                    </td>
+                    <td>
+                        {{- plazaEmpleado.ocupantes[0].enOcupada|default ?: evaluacion.empleado.vigente|date('Y-m-d') -}}
+                    </td>
+                    <td>
+                        {%- if evaluacion.empleado.ausencia -%}
+                            <sup class="badge bg-warning mx-1" title="{{ avisos[1] }}">1</sup>
+                        {%- endif %}
+                        {%- if date(evaluacion.empleado.vigente) > date() -%}
+                            <sup class="badge bg-warning mx-1" title="{{ avisos[2] }}">2</sup>
+                        {%- endif -%}
+                    </td>
+                    <td><span title="{{ plazaEvaluador.unidad.nombre|default }}">{{ plazaEvaluador.subunidad.codigo|default }}</span></td>
+                    <td>{{ evaluacion.evaluador.persona }}</td>
+                    <td>{{ evaluacion.evaluador.grupo.nombre ~ (evaluacion.evaluador.nivel > 0 ? '/' ~ evaluacion.evaluador.nivel) }}</td>
+                    <td>
+                        {{- plazaEvaluador.ocupantes[0].antiguedad|default -}}
+                    </td>
+                    <td>
+                        {{- plazaEvaluador.ocupantes[0].enTitular|default -}}
+                    </td>
+                    <td>
+                        {%- if evaluacion.evaluador.ausencia -%}
+                            <sup class="badge bg-warning mx-1" title="{{ avisos[1] }}">1</sup>
+                        {%- endif %}
+                        {%- if date(evaluacion.evaluador.vigente) > date() -%}
+                            <sup class="badge bg-warning mx-1" title="{{ avisos[2] }}">2</sup>
+                        {%- endif -%}
+                    </td>
+                    <td>
+                        <form method="post"
+                              action="{{ path(aplicacion.ruta ~ '_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion.id}) }}"
+                              onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluacion.evaluador.persona }} sobre {{ evaluacion.empleado.persona }}?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cuestionario.id ~ '-' ~ evaluacion.id) }}">
+                            <button class="border-0 text-primary">
+                                <span class="mx-1 fas fa-trash" title="Desasignar"></span>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {%- endfor %}
+            </tbody>
+            <caption>
+                <span class="me-4">Avisos:</span>
+                {%- for indice, aviso in avisos -%}
+                    <span class="me-4"><sup class="badge-warning">{{ indice }}</sup> {{ aviso }}</span>
+                {%- endfor -%}
+            </caption>
+        </table>
+    {%- elseif tipo == constant('App\\Repository\\Desempenyo\\EvaluaRepository::NO_EVALUACION') %}
+        {# Empleados que rechazan la evaluación #}
+        <table class="tabla-condensada" id="datosRechazan">
+            <caption class="caption-top">Solicitudes de no evaluación</caption>
+            <thead class="cabecera-condensada">
+            <tr>
+                <th>Unidad</th>
+                <th>Doc. empleado</th>
+                <th>Nombre empleado</th>
+                <th>Fecha solicitud</th>
+                <th data-dt-order="disable">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            {%- for evaluacion in evaluaciones|filter(e => e.evaluador == null) %}
+                <tr>
+                    <td>
+                        {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
+                        : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
+                    </td>
+                    <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
+                    <td>{{ evaluacion.empleado.persona }}</td>
+                    <td>{{ evaluacion.fechaRechazo|date('Y-m-d') }}</td>
+                    <td>
+                        <a class="recuperar" href="" data-persona="{{ evaluacion.empleado.persona }}"
+                           data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_recupera', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
+                            <span class="mx-1 fas fa-check" title="Recuperar evaluación"></span>
+                        </a>
+                    </td>
+                </tr>
+            {%- endfor %}
+            </tbody>
+        </table>
+        {#- Falta lista de empleados sin evaluador #}
+    {%- endif  %}
 {% endblock %}
 
 {% block botones %}
-    <li class="nav-item me-2">
-        <button class="btn btn-primary cargar" id="cargarEmpleados"
-           data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_auto', {id: cuestionario.id}) }}">
-            <span class="fas fa-person-arrow-down-to-line"></span> Cargar empleados
-        </button>
-    </li>
-    <li class="nav-item me-2">
-        <a class="btn btn-primary"
-           href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id}) }}">
-            <span class="fas fa-file-download"></span> Cargar evaluadores
-        </a>
-    </li>
+    {%- if tipo != constant('App\\Repository\\Desempenyo\\EvaluaRepository::AUTOEVALUACION') %}
+        <li class="nav-item me-2">
+            <a class="btn btn-primary"
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: 'auto'}) }}">
+                <span class="fas fa-users"></span> Ver empleados
+            </a>
+        </li>
+    {%- endif %}
+    {%- if tipo != constant('App\\Repository\\Desempenyo\\EvaluaRepository::EVALUACION') %}
+        <li class="nav-item me-2">
+            <a class="btn btn-primary"
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: 'evalua'}) }}">
+                <span class="fas fa-user-check"></span> Ver evaluadores
+            </a>
+        </li>
+    {%- endif %}
+    {%- if tipo != constant('App\\Repository\\Desempenyo\\EvaluaRepository::NO_EVALUACION') %}
+        <li class="nav-item me-2">
+            <a class="btn btn-primary"
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: 'noevalua'}) }}">
+                <span class="fas fa-user-times"></span> Ver no evaluados
+            </a>
+        </li>
+    {%- endif %}
+    {%- if tipo == constant('App\\Repository\\Desempenyo\\EvaluaRepository::AUTOEVALUACION') %}
+        <li class="nav-item me-2">
+            <button class="btn btn-primary cargar" id="cargarEmpleados"
+               data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_auto', {id: cuestionario.id}) }}">
+                <span class="fas fa-person-arrow-down-to-line"></span> Cargar empleados
+            </button>
+        </li>
+    {%- elseif tipo == constant('App\\Repository\\Desempenyo\\EvaluaRepository::EVALUACION') %}
+        <li class="nav-item me-2">
+            <a class="btn btn-primary"
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id}) }}">
+                <span class="fas fa-file-upload"></span> Cargar desde CSV
+            </a>
+        </li>
+        <li class="nav-item me-2">
+{#            <a class="btn btn-primary"#}
+{#               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id}) }}">#}
+                <span class="fas fa-cloud-upload"></span> Cargar desde Temponet
+{#            </a>#}
+        </li>
+    {%- endif %}
 {% endblock %}
 
 {% block migas %}

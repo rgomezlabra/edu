@@ -20,14 +20,14 @@
             <div class="alert alert-warning">En este momento, no hay cuestionarios activos.</div>
         {%- else %}
             {#- Autoevaluación #}
-            <div class="pagina-seccion">Fase para la autoevaluación del desempeño</div>
+            <div class="pagina-seccion">Fase 1: Autoevaluación del desempeño</div>
             <div class="container-fluid my-2">
                 <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
                 Dirigida a todas las personas empleadas del PTGAS: la autoevaluación de las competencias se
                 realiza mediante la cumplimentación del cuestionario de competencias. Cada conducta incluida en el
-                cuestionario deberá ser valorada por la propia persona empleada pública, aplicando una escala Likert de 1 a
-                10, y podrá señalar una o varias conductas específicas que sirvan como justificación y
-                evidencia del valor dado en cada una de las conductas del cuestionario.
+                cuestionario deberá ser valorada por la propia persona empleada pública, aplicando una escala Likert de
+                1 a 10, y podrá señalar una o varias conductas específicas que sirvan como justificación y evidencia
+                del valor dado en cada una de las conductas del cuestionario.
             </div>
             <div class="container-fluid my-2">
                 La autoevaluación por parte de la persona empleada pública tendrá un valor ponderado
@@ -36,8 +36,8 @@
             <div class="container-fluid my-2">
                 La escala Likert queda definida en <a href="#documenots">documentos de interés</a>.
                 A fin de homogeneizar los criterios de calificación, cada persona empleada pública debe consultar este
-                documento <strong>antes de comenzar su autoevaluación</strong> y aplicar la escala Lickert conforme a sus
-                indicaciones.
+                documento <strong>antes de comenzar su autoevaluación</strong> y aplicar la escala Lickert conforme a
+                sus indicaciones.
             </div>
             <ul class="lead my-3">
                 {%- if activos[0].fechaAlta > date() %}
@@ -65,13 +65,13 @@
                 {%- else %}
                     <li><a href="{{ activos[0].url }}">Cuestionario para autoevaluación de competencias</a></li>
                 {%- endif %}
-                <li><a href="{{ activos[0].url ~ '/evaluador' }}">Comprobar sus evaluadores</a></li>
+                <li><a href="{{ activos[0].url ~ '/evaluador' }}">Comprobar evaluadores</a></li>
                 <li>Comunicar incidencias del proceso de autoevaluación</li>
                 {%- if activos[0].fechaBaja >= date() %}
                     {%- if evaluados|filter(e => e.evaluador == null)|length == 0 %}
                         <li class="alert alert-primary">
                             <a id="rechaza" href="" data-url="{{ activos[0].url ~ '/rechaza' }}">
-                                Solicito no participar en el proceso de autoevaluación del desempeño
+                                Solicitar no participar en el proceso de autoevaluación del desempeño
                             </a>
                         </li>
                     {%- else %}
@@ -85,14 +85,19 @@
                 {%- endif %}
             </ul>
             {%- if activos|length > 0 and evaluaciones|filter(e => e.empleado != e.evaluador)|length > 0 %}
-                <div class="pagina-seccion">Fase para la evaluación por parte de los responsables</div>
+                <div class="pagina-seccion">Fase 2: Evaluación por parte de los responsables y otros agentes evaluadores (validadores 1 y 2)</div>
                 <div class="container-fluid my-2">
                     <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
-                    Esta fase va dirigida al responsable superior jerárquico, que deberá responder el cuestionario evaluando a
-                    cada persona a su cargo. Deberá señalar una o varias conductas específicas que sirvan como justificación y
-                    evidencia del valor dado en cada una de las conductas del cuestionario. La evaluación de la Universidad
-                    tiene un valor ponderado del 66% del valor total, con respecto al máximo de 60 puntos con los que se puntúan
-                    las competencias profesionales.
+                    En esta fase participan los siguientes agentes: los validadores 1 realizan la evaluación de las
+                    personas que se han autoevaluado; los validadores 2 realizan la evaluación de las personas
+                    evaluadoras 1 que se han autoevaluado; los validadores 2 que no tienen superior jerárquico en la
+                    estructura de puestos son evaluados por todos sus validadores 1.
+                </div>
+                <div class="container-fluid my-2">
+                    Deberá señalar una o varias conductas específicas que sirvan como justificación y evidencia del
+                    valor dado en cada una de las conductas del cuestionario. La evaluación de la Universidad tiene
+                    un valor ponderado del 66% del valor total, con respecto al máximo de 60 puntos con los que se
+                    puntúan las competencias profesionales.
                 </div>
                 <ul class="lead my-3">
                     {%- if activos[0].fechaAlta > date() %}
@@ -112,25 +117,31 @@
                     {%- endif %}
                     <li>Comunicar incidencias de evaluación por parte del responsable</li>
                 </ul>
-                <div class="pagina-seccion">Fase para la evaluación por parte de otras personas evaluadoras</div>
+                <div class="pagina-seccion">Fase 3 (pendiente 10% o eliminar): Evaluación por parte de otras personas evaluadoras</div>
                 <div class="container-fluid my-2">
                     <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
                     Esta fase va dirigida a otras personas evaluadoras que intervienen en el proceso de evaluación.
                 </div>
                 <div class="pagina-seccion">Resultados del proceso de evaluación activo</div>
                 <ul class="lead my-3">
-                    <li>Resultado parcial de la autoevaluación</li>
-                    <li>Resultado parcial de la evaluación del responsable</li>
-                    <li>Resultado parcial de la evaluación con la participación de otras personas evaluadoras</li>
+                    <li>Resultado parcial fase 1 (autoevaluación)</li>
+                    <li>Resultado parcial fase 2 (agentes evaluadores)</li>
                     <li>Resultado provisional del proceso de evaluación del desempeño</li>
                     <li>Resultado final del proceso de evaluación del desempeño</li>
                 </ul>
             {%- endif %}
-            <div class="pagina-seccion" id="documentos">Documentos de interés del procedimiento activo</div>
+            <div class="pagina-seccion" id="documentos">Área de desarrollo profesional</div>
+            <div class="container-fluid my-2">
+                ...
+            </div>
+            <div class="pagina-seccion" id="documentos">Documentos y enlaces interés del procedimiento activo</div>
             <ul class="lead my-3">
                 <li>Texto del acuerdo</li>
-                <li>Escala Lickert</li>
-                <li>Cuestionario 2024</li>
+                <li>Escalas Lickert</li>
+                <li>Cuestionario (PDF y Word)</li>
+                <li>Enlaces de interés a procedimientos electrónicos
+                    (presentación de instancias, interposición de recursos administrativos, ...)
+                </li>
             </ul>
         {%- endif %}
         {%- if cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Sistema\\Estado::ARCHIVADO'))|length > 0 %}

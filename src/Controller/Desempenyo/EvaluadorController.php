@@ -50,7 +50,17 @@ class EvaluadorController extends AbstractController
     public function index(Request $request, Cuestionario $cuestionario): Response
     {
         $this->denyAccessUnlessGranted('admin');
-        $evaluaciones = $this->evaluaRepository->findAll();
+        /** @var int $tipo */
+        $tipo = match ($request->query->getString('tipo')) {
+            'auto', '' => $this->evaluaRepository::AUTOEVALUACION,
+            'valida' => $this->evaluaRepository::EVALUACION,
+            'noevalua' => $this->evaluaRepository::NO_EVALUACION,
+            default => 0,
+        };
+        $evaluaciones = $this->evaluaRepository->findByEvaluacion([
+            'cuestionario' => $cuestionario,
+            'tipo' => $tipo,
+        ]);
         $this->redis = RedisAdapter::createConnection($request->server->getString('REDIS_URL'));
         $ultimo = null;
 
@@ -69,6 +79,7 @@ class EvaluadorController extends AbstractController
         return $this->render('intranet/desempenyo/admin/evaluador/index.html.twig', [
             'cuestionario' => $cuestionario,
             'evaluaciones' => $evaluaciones,
+            'tipo' => $tipo,
             'volcado_empleados' => $ultimo,
         ]);
     }
