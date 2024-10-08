@@ -124,6 +124,7 @@
                 {%- for indice, aviso in avisos -%}
                     <span class="me-4"><sup class="badge-warning">{{ indice }}</sup> {{ aviso }}</span>
                 {%- endfor -%}
+                <span class="me-4 px-2 bg-info rounded">Distinta unidad</span>
             </caption>
         </table>
     {%- elseif tipo == constant('App\\Repository\\Desempenyo\\EvaluaRepository::NO_EVALUACION') %}
@@ -203,10 +204,10 @@
             </a>
         </li>
         <li class="nav-item me-2">
-{#            <a class="btn btn-primary"#}
-{#               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id}) }}">#}
+            <button class="btn btn-primary cargar" id="cargarValida"
+                    data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_volcado', {id: cuestionario.id}) }}">
                 <span class="fas fa-cloud-upload"></span> Cargar desde Temponet
-{#            </a>#}
+            </button>
         </li>
     {%- endif %}
 {% endblock %}
@@ -221,8 +222,17 @@
 
 {%  block modal %}
     {{- include('layout/_dialogo_confirmar.html.twig') }}
-    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoEmpleados', pregunta: '¿Cargar datos de empleados para su autoevaluación?'}) }}
+    {{- include('layout/_dialogo_confirmar.html.twig', {
+        id: 'dialogoEmpleados',
+        pregunta: '¿Cargar datos de empleados para su autoevaluación?'
+    }) }}
     {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoEmpleados', mensaje: 'Cargando empleados', progreso: false}) }}
+    {{- include('layout/_dialogo_confirmar.html.twig', {
+        id: 'dialogoValida',
+        texto: 'La carga online de validaciones desde Temponet puede tardar bastante tiempo.',
+        pregunta: '¿Continuar con la carga de validaciones?'
+    }) }}
+    {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoValida', mensaje: 'Cargando validaciones', progreso: false}) }}
 {% endblock %}
 
 {% block js %}
@@ -326,8 +336,23 @@
             $('#cargandoEmpleados').fadeIn('fast');
             window.location.href = $('#cargarEmpleados').data('url');
         });
+        // Volcado de validaciones
+        const dialogoValida = $('#dialogoValida');
+        $('#cargarValida').on('click', function (e) {
+            e.preventDefault();
+            dialogoValida.fadeIn('fast');
+        });
+        $('#dialogoValidaCancelar').on('click', function () {
+            dialogoValida.fadeOut('fast');
+        });
+        $('#dialogoValidaAceptar').on('click', function () {
+            dialogoValida.fadeOut('fast');
+            $('#cargandoValida').fadeIn('fast');
+            window.location.href = $('#cargarValida').data('url');
+        });
         $(window).on('unload', function () {
             $('#cargandoEmpleados').hide();
+            $('#cargandoValida').hide();
         });
     </script>
 {% endblock %}

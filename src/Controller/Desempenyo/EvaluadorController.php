@@ -20,11 +20,15 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
 use RedisException;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use function Symfony\Component\String\u;
 
@@ -53,7 +57,7 @@ class EvaluadorController extends AbstractController
         /** @var int $tipo */
         $tipo = match ($request->query->getString('tipo')) {
             'auto', '' => $this->evaluaRepository::AUTOEVALUACION,
-            'valida' => $this->evaluaRepository::EVALUACION,
+            'evalua' => $this->evaluaRepository::EVALUACION,
             'noevalua' => $this->evaluaRepository::NO_EVALUACION,
             default => 0,
         };
@@ -302,6 +306,52 @@ class EvaluadorController extends AbstractController
             'cuestionario' => $cuestionario,
             'campos' => $campos,
         ]);
+    }
+
+    /** Volcar datos que relacionan empleado con su evaluador desde la API REST del servidor Temponet mediante comando. */
+    #[Route(
+        path: '/admin/cuestionario/{id}/evaluador/volcado',
+        name: 'admin_evaluador_volcado',
+        defaults: ['titulo' => 'Volcado de Validaciones desde Temponet'],
+        methods: ['GET', 'POST']
+    )]
+    public function volcadoEvaluacion(
+        KernelInterface $kernel,
+        Cuestionario    $cuestionario,
+    ): Response {
+        $this->denyAccessUnlessGranted('admin');
+        if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
+            $this->addFlash('warning', 'Sin acceso al cuestionario.');
+
+            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
+        }
+
+        $app = new Application($kernel);
+        $app->setAutoExit(false);
+        $input = new ArrayInput([
+            'command' => 'sirhus:rest:validaciones',
+            'cuestionario' => $cuestionario->getCodigo(),
+        ]);
+        $output = new BufferedOutput();
+        try {
+            if (0 !== $app->run($input, $output)) {
+                throw new Exception();
+            }
+        } catch (Exception) {
+            $this->addFlash('warning', 'Error al volcar datos desde Temponet.');
+
+            return $this->redirectToRoute('intranet_desempenyo');
+        }
+
+        $this->generator->logAndFlash('info', 'Volcado de validaciones desde Temponet', [
+            'cuestionario' => $cuestionario->getCodigo(),
+            'salida' => $output->fetch(),
+        ]);
+
+        return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', [
+            'id' => $cuestionario->getId(),
+            'tipo' => 'evalua',
+        ], Response::HTTP_SEE_OTHER);
     }
 
     /** Rechazar la evaluación de un empleado. */
