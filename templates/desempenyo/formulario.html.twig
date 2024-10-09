@@ -47,6 +47,11 @@
                     {#- Página de bienvenida #}
                     <div class="tab-pane fade text-left show active" id="vert-tabs-bienvenida"
                          role="tabpanel" aria-labelledby="vert-tabs-bienvenida-tab" tabindex="0">
+                        {%- if sesion > 0 %}
+                            <div class="badge-info">
+                                Dispone de {{ sesion }} segundos para rellenar el formulario.
+                            </div>
+                        {%- endif %}
                         <div>{{ formulario.formulario.cuestionario.bienvenida|raw }}</div>
                     </div>
                     {#- Páginas de grupos de preguntas #}

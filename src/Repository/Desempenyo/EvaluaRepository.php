@@ -85,7 +85,7 @@ class EvaluaRepository extends ServiceEntityRepository
                     ;
                     break;
                 case 'tipo':
-                    $qb->andWhere('evalua.tipo_evaluador = :tipo')->setParameter('tipo', $valor);
+                    $qb->andWhere('evalua.tipo_evaluador IN (:tipo)')->setParameter('tipo', $valor);
             }
         }
 

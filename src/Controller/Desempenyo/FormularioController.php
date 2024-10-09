@@ -19,6 +19,7 @@ use App\Repository\Desempenyo\FormularioRepository;
 use App\Repository\Plantilla\EmpleadoRepository;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
+use App\Service\SirhusLock;
 use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,9 +33,13 @@ use function Symfony\Component\String\u;
  */
 class FormularioController extends AbstractController
 {
+    // Periodo de validez (en segundos)
+    public const int TTL = 300;
+
     public function __construct(
         private readonly MessageGenerator     $generator,
         private readonly RutaActual           $actual,
+        private readonly SirhusLock           $lock,
         private readonly EvaluaRepository     $evaluaRepository,
         private readonly FormularioRepository $formularioRepository,
     ) {
@@ -110,7 +115,7 @@ class FormularioController extends AbstractController
             'evaluaciones' => $this->evaluaRepository->findByEvaluacion([
                 'cuestionario' => $cuestionario,
                 'empleado' => $empleado,
-                'tipo' => EvaluaRepository::EVALUACION,
+                'tipo' => [Evalua::EVALUA_RESPONSABLE, Evalua::EVALUA_OTRO],
             ]),
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
@@ -148,10 +153,9 @@ class FormularioController extends AbstractController
         $evaluaciones = $this->evaluaRepository->findByEvaluacion([
             'cuestionario' => $cuestionario,
             'evaluador' => $evaluador,
-            'tipo' => EvaluaRepository::EVALUACION,
         ]);
         if ([] === $evaluaciones) {
-            $this->addFlash('warning', 'El usuario es un evaluador.');
+            $this->addFlash('warning', 'El usuario no es un evaluador.');
 
             return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'inicio');
         }
@@ -183,7 +187,7 @@ class FormularioController extends AbstractController
         if (null === $evalua) {
             $cuestionario = $cuestionarioRepository->findOneBy(['url' => $request->getRequestUri()]);
             $empleado = $empleadoRepository->findOneByUsuario($usuario);
-            $evaluador = $empleado;
+            $evaluador = null;
         } else {
             $cuestionario = $cuestionarioRepository->findOneBy([
                 'url' => u($request->getRequestUri())->before('/' . $evalua)->toString(),
@@ -196,7 +200,7 @@ class FormularioController extends AbstractController
             $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
 
             return $this->redirectToRoute('intranet_desempenyo');
-        } elseif (!$empleado instanceof Empleado || !$evaluador instanceof Empleado) {
+        } elseif (!$empleado instanceof Empleado || (null !== $evalua && !$evaluador instanceof Empleado)) {
             $this->addFlash('warning', 'No se encuentran datos de empleado.');
 
             return $this->redirectToRoute('intranet_desempenyo');
@@ -220,6 +224,10 @@ class FormularioController extends AbstractController
                     'codigo' => $codigo,
                 ]);
             }
+        } elseif (null === $this->lock->acquire(self::TTL)) {
+            $this->addFlash('warning', 'Esta evaluación ya está abierta.');
+
+            return $this->redirectToRoute('intranet_desempenyo');
         } else {
             $cuestionaFormulario = new CuestionaFormulario();
             $cuestionaFormulario
@@ -238,6 +246,7 @@ class FormularioController extends AbstractController
             'formulario' => $formulario,
             'respuestas' => $respuestas,
             'codigo' => $codigo,
+            'sesion' => $this->lock->getRemainingLifetime(),
         ]);
     }
 
@@ -272,6 +281,10 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute('intranet_desempenyo');
         } elseif (!$this->isCsrfTokenValid($token, $request->request->getString('_token'))) {
             $this->generator->logAndFlash('error', 'Token de validación incorrecto');
+
+            return $this->redirectToRoute('intranet_desempenyo');
+        } elseif ($this->lock->isExpired()) {
+            $this->generator->logAndFlash('error', 'El tiempo de validez del cuestionario ha caducado.');
 
             return $this->redirectToRoute('intranet_desempenyo');
         } elseif (!$empleado instanceof Empleado || !$evaluador instanceof Empleado) {
@@ -342,6 +355,7 @@ class FormularioController extends AbstractController
         $cuestionaFormularioRepository->save($cuestionaFormulario);
         $this->formularioRepository->save($formulario, true);
         if ($enviado) {
+            $this->lock->release();
             $this->generator->logAndFlash('info', 'Formulario enviado correctamente.', [
                 'codigo' => $codigo,
                 'empleado' => $empleado,
@@ -360,22 +374,24 @@ class FormularioController extends AbstractController
     }
 
     /** Comprobar si el empleado puede ser evaluado por el evaluador. */
-    private function isEvaluable(Cuestionario $cuestionario, Empleado $empleado, Empleado $evaluador): bool
-    {
-        if (!$this->evaluaRepository->findOneBy([
-                'cuestionario' => $cuestionario,
-                'empleado' => $empleado,
-                'evaluador' => $evaluador,
-            ]) instanceof Evalua) {
-            $this->addFlash('warning', 'El empleado no es evaluable.');
+    private function isEvaluable(
+        Cuestionario $cuestionario,
+        Empleado     $empleado,
+        ?Empleado    $evaluador = null,
+    ): bool {
+        $criterios = [
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+        ];
+        if ($this->evaluaRepository->findOneBy($criterios + ['tipo_evaluador' => Evalua::NO_EVALUACION]) instanceof Evalua) {
+            $this->addFlash('warning', 'El empleado ha solicitado no ser evaluado.');
 
             return false;
-        } elseif ($this->evaluaRepository->findOneBy([
-                'cuestionario' => $cuestionario,
-                'empleado' => $empleado,
-                'evaluador' => null,
-            ]) instanceof Evalua) {
-            $this->addFlash('warning', 'El empleado ha solicitado no ser evaluado.');
+        }
+
+        $criterios += null === $evaluador ? ['tipo_evaluador' => Evalua::AUTOEVALUACION] : ['evaluador' => $evaluador];
+        if (!$this->evaluaRepository->findOneBy($criterios) instanceof Evalua) {
+            $this->addFlash('warning', 'El empleado no es evaluable.');
 
             return false;
         }

@@ -14,7 +14,7 @@
     <p class="">{{ aplicacion.descripcion }}</p>
 
     {%- set activos = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO')) %}
-    {#- Acciones comunes. #}
+    {#- Acciones comunes #}
     <div class="my-4">
         {%- if activos|length == 0 %}
             <div class="alert alert-warning">En este momento, no hay cuestionarios activos.</div>
@@ -34,7 +34,7 @@
                 del 34%, con respecto al máximo de los 60 puntos con los que se puntúan las competencias profesionales.
             </div>
             <div class="container-fluid my-2">
-                La escala Likert queda definida en <a href="#documenots">documentos de interés</a>.
+                La escala Likert queda definida en <a href="#documentos">documentos de interés</a>.
                 A fin de homogeneizar los criterios de calificación, cada persona empleada pública debe consultar este
                 documento <strong>antes de comenzar su autoevaluación</strong> y aplicar la escala Lickert conforme a
                 sus indicaciones.
@@ -58,7 +58,7 @@
                         Si existe de una incidencia, puede comunicarla en el apartado
                         <a href="#incidencias">Comunicar incidencias del proceso de autoevaluación</a>.
                     </div>
-                {%- elseif evaluados|filter(e => e.evaluador == null)|length > 0 %}
+                {%- elseif evaluados|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION'))|length > 0 %}
                     <div class="alert alert-warning">
                         El empleado ha solicitado no ser evaluado.
                     </div>
@@ -68,7 +68,7 @@
                 <li><a href="{{ activos[0].url ~ '/evaluador' }}">Comprobar evaluadores</a></li>
                 <li>Comunicar incidencias del proceso de autoevaluación</li>
                 {%- if activos[0].fechaBaja >= date() %}
-                    {%- if evaluados|filter(e => e.evaluador == null)|length == 0 %}
+                    {%- if evaluados|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION'))|length == 0 %}
                         <li class="alert alert-primary">
                             <a id="rechaza" href="" data-url="{{ activos[0].url ~ '/rechaza' }}">
                                 Solicitar no participar en el proceso de autoevaluación del desempeño
@@ -84,7 +84,9 @@
                     {%- endif %}
                 {%- endif %}
             </ul>
-            {%- if activos|length > 0 and evaluaciones|filter(e => e.empleado != e.evaluador)|length > 0 %}
+
+            {# Evaluación por parte del responsable #}
+            {%- if activos|length > 0 and evaluaciones|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'))|length > 0 %}
                 <div class="pagina-seccion">Fase 2: Evaluación por parte de los responsables y otros agentes evaluadores (validadores 1 y 2)</div>
                 <div class="container-fluid my-2">
                     <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
@@ -117,19 +119,28 @@
                     {%- endif %}
                     <li>Comunicar incidencias de evaluación por parte del responsable</li>
                 </ul>
+            {%- endif %}
+
+            {# Evaluación por parte de terceros agentes #}
+            {%- if activos|length > 0 and evaluaciones|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'))|length > 0 %}
                 <div class="pagina-seccion">Fase 3 (pendiente 10% o eliminar): Evaluación por parte de otras personas evaluadoras</div>
                 <div class="container-fluid my-2">
                     <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
                     Esta fase va dirigida a otras personas evaluadoras que intervienen en el proceso de evaluación.
                 </div>
-                <div class="pagina-seccion">Resultados del proceso de evaluación activo</div>
-                <ul class="lead my-3">
-                    <li>Resultado parcial fase 1 (autoevaluación)</li>
-                    <li>Resultado parcial fase 2 (agentes evaluadores)</li>
-                    <li>Resultado provisional del proceso de evaluación del desempeño</li>
-                    <li>Resultado final del proceso de evaluación del desempeño</li>
-                </ul>
+                {%- if activos[0].fechaAlta <= date() and date() <= activos[0].fechaBaja %}
+                    <li><a href="{{ activos[0].url ~ '/empleado' }}">Comprobar relación de personas a evaluar</a></li>
+                {%- endif %}
             {%- endif %}
+
+            {# Otros #}
+            <div class="pagina-seccion">Resultados del proceso de evaluación activo</div>
+            <ul class="lead my-3">
+                <li>Resultado parcial fase 1 (autoevaluación)</li>
+                <li>Resultado parcial fase 2 (agentes evaluadores)</li>
+                <li>Resultado provisional del proceso de evaluación del desempeño</li>
+                <li>Resultado final del proceso de evaluación del desempeño</li>
+            </ul>
             <div class="pagina-seccion" id="documentos">Área de desarrollo profesional</div>
             <div class="container-fluid my-2">
                 ...
