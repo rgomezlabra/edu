@@ -4,6 +4,7 @@ namespace App\Entity\Desempenyo;
 
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Plantilla\Empleado;
+use App\Entity\Sistema\Origen;
 use App\Repository\Desempenyo\EvaluaRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
@@ -21,6 +22,15 @@ use Doctrine\ORM\Mapping as ORM;
 )]
 class Evalua
 {
+    // Tipos de evaluaciones
+    public const int NO_EVALUACION = 0; // Solicitud de no evaluación
+
+    public const int AUTOEVALUACION = 1;    // Autoevaluación
+
+    public const int EVALUA_RESPONSABLE = 2;    // Evaluación por el responsable
+
+    public const int EVALUA_OTRO = 3;   // Evaluación por otro agente
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -33,12 +43,18 @@ class Evalua
     #[ORM\ManyToOne(targetEntity: Empleado::class)]
     private ?Empleado $evaluador = null;
 
+    #[ORM\Column(type: 'smallint', nullable: false, options: ['default' => 1])]
+    private int $tipo_evaluador = self::AUTOEVALUACION;
+
     #[ORM\ManyToOne(targetEntity: Cuestionario::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?Cuestionario $cuestionario = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $fecha_rechazo = null;
+
+    #[ORM\ManyToOne(targetEntity: Origen::class)]
+    private ?Origen $origen = null;
 
     public function getId(): ?int
     {
@@ -69,6 +85,18 @@ class Evalua
         return $this;
     }
 
+    public function getTipoEvaluador(): int
+    {
+        return $this->tipo_evaluador;
+    }
+
+    public function setTipoEvaluador(int $tipo = self::AUTOEVALUACION): static
+    {
+        $this->tipo_evaluador = $tipo;
+
+        return $this;
+    }
+
     public function getCuestionario(): ?Cuestionario
     {
         return $this->cuestionario;
@@ -86,8 +114,23 @@ class Evalua
         return $this->fecha_rechazo;
     }
 
-    public function setFechaRechazo(?DateTimeImmutable $fecha_rechazo): void
+    public function setFechaRechazo(?DateTimeImmutable $fecha_rechazo): static
     {
         $this->fecha_rechazo = $fecha_rechazo;
+
+        return $this;
     }
+
+    public function getOrigen(): ?Origen
+    {
+        return $this->origen;
+    }
+
+    public function setOrigen(?Origen $origen): static
+    {
+        $this->origen = $origen;
+
+        return $this;
+    }
+
 }

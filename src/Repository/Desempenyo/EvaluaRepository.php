@@ -14,13 +14,6 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class EvaluaRepository extends ServiceEntityRepository
 {
-    // Tipos de evaluaciones
-    public const int AUTOEVALUACION = 1;    // Autoevaluación (empleado = evaluador)
-
-    public const int EVALUACION = 2;    // Evaluación de otro empleado
-
-    public const int NO_EVALUACION = 3; // Solicitud de no evaluación (evaluador nulo)
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Evalua::class);
@@ -92,14 +85,12 @@ class EvaluaRepository extends ServiceEntityRepository
                     ;
                     break;
                 case 'tipo':
-                    $condicion = match ($valor) {
-                        self::AUTOEVALUACION => 'evalua.empleado = evalua.evaluador',
-                        self::EVALUACION => 'evalua.empleado != evalua.evaluador AND evalua.evaluador IS NOT NULL',
-                        self::NO_EVALUACION => 'evalua.evaluador IS NULL',
-                        default => 'evalua.empleado IS NULL'
-                    };
-                    $qb->andWhere($condicion);
+                    $qb->andWhere('evalua.tipo_evaluador = :tipo')->setParameter('tipo', $valor);
             }
+        }
+
+        if (!isset($criterios['tipo'])) {
+            $qb->andWhere('evalua.tipo_evaluador = :tipo')->setParameter('tipo', Evalua::AUTOEVALUACION);
         }
 
         return $qb->getQuery()->getResult();

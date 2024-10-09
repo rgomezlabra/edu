@@ -7,11 +7,13 @@ namespace App\Controller\Desempenyo;
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Desempenyo\Evalua;
 use App\Entity\Plantilla\Empleado;
+use App\Entity\Sistema\Origen;
 use App\Entity\Sistema\Usuario;
 use App\Form\Util\VolcadoType;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
 use App\Repository\Plantilla\EmpleadoRepository;
+use App\Repository\Sistema\OrigenRepository;
 use App\Service\Csv;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
@@ -54,30 +56,27 @@ class EvaluadorController extends AbstractController
     public function index(Request $request, Cuestionario $cuestionario): Response
     {
         $this->denyAccessUnlessGranted('admin');
-        /** @var int $tipo */
-        $tipo = match ($request->query->getString('tipo')) {
-            'auto', '' => $this->evaluaRepository::AUTOEVALUACION,
-            'evalua' => $this->evaluaRepository::EVALUACION,
-            'noevalua' => $this->evaluaRepository::NO_EVALUACION,
-            default => 0,
-        };
+        $tipo = $request->query->getInt('tipo', Evalua::AUTOEVALUACION);
         $evaluaciones = $this->evaluaRepository->findByEvaluacion([
             'cuestionario' => $cuestionario,
             'tipo' => $tipo,
         ]);
+
         $this->redis = RedisAdapter::createConnection($request->server->getString('REDIS_URL'));
         $ultimo = null;
 
-        try {
-            /** @var array<array-key, mixed> $datos */
-            $datos = json_decode((string) $this->redis->get('autoevaluacion'), true);
-            if (true === $datos['finalizado']) {
-                $ultimo = new DateTimeImmutable(
-                    (string) $datos['inicio']['date'],
-                    new DateTimeZone($datos['inicio']['timezone'] ?? 'UTC')
-                );
+        if ($tipo === Evalua::AUTOEVALUACION) {
+            try {
+                /** @var array<array-key, mixed> $datos */
+                $datos = json_decode((string) $this->redis->get('autoevaluacion'), true);
+                if (true === $datos['finalizado']) {
+                    $ultimo = new DateTimeImmutable(
+                        (string) $datos['inicio']['date'],
+                        new DateTimeZone($datos['inicio']['timezone'] ?? 'UTC')
+                    );
+                }
+            } catch (Exception) {
             }
-        } catch (Exception) {
         }
 
         return $this->render('intranet/desempenyo/admin/evaluador/index.html.twig', [
@@ -111,6 +110,7 @@ class EvaluadorController extends AbstractController
                 'codigo' => $cuestionario->getCodigo(),
                 'empleado' => $evalua->getEmpleado()?->getPersona(),
                 'evaluador' => $evalua->getEvaluador()?->getPersona(),
+                'tipo_evaluador' => $evalua->getTipoEvaluador(),
             ]);
         }
 
@@ -129,6 +129,7 @@ class EvaluadorController extends AbstractController
     public function cargarAutoevaluacion(
         Request            $request,
         EmpleadoRepository $empleadoRepository,
+        OrigenRepository   $origenRepository,
         Cuestionario       $cuestionario,
     ): Response {
         $this->denyAccessUnlessGranted('admin');
@@ -145,6 +146,7 @@ class EvaluadorController extends AbstractController
 
         $inicio = microtime(true);
         $this->redis = RedisAdapter::createConnection($request->server->getString('REDIS_URL'));
+        $externo = $origenRepository->findOneBy(['nombre' => Origen::EXTERNO]);
         $empleados = $empleadoRepository->findCesados(false);
         $datos = [
             'inicio' => new DateTimeImmutable(),
@@ -159,14 +161,16 @@ class EvaluadorController extends AbstractController
             ++$datos['actual'];
             if (!$this->evaluaRepository->findOneBy([
                 'empleado' => $empleado,
-                'evaluador' => $empleado,
+                'tipo_evaluador' => Evalua::AUTOEVALUACION,
                 'cuestionario' => $cuestionario,
+                'origen' => $externo,
                 ]) instanceof Evalua) {
                 $evalua = new Evalua();
                 $evalua
                     ->setEmpleado($empleado)
-                    ->setEvaluador($empleado)
+                    ->setTipoEvaluador(Evalua::AUTOEVALUACION)
                     ->setCuestionario($cuestionario)
+                    ->setOrigen($externo)
                 ;
                 $this->evaluaRepository->save($evalua);
                 ++$datos['nuevos'];
@@ -205,7 +209,10 @@ class EvaluadorController extends AbstractController
                 $this->actual->getAplicacion()?->getRuta() ?? '',
                 $this->actual->getRol()?->getRuta() ?? ''
             ),
-            ['id' => $cuestionario->getId()]
+            [
+                'id' => $cuestionario->getId(),
+                'tipo' => Evalua::AUTOEVALUACION,
+            ]
         );
     }
 
@@ -298,6 +305,7 @@ class EvaluadorController extends AbstractController
 
             return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', [
                 'id' => $cuestionario->getId(),
+                'tipo' => Evalua::EVALUA_RESPONSABLE,
             ], Response::HTTP_SEE_OTHER);
         }
 
@@ -350,7 +358,7 @@ class EvaluadorController extends AbstractController
 
         return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', [
             'id' => $cuestionario->getId(),
-            'tipo' => 'evalua',
+            'tipo' => Evalua::EVALUA_RESPONSABLE,
         ], Response::HTTP_SEE_OTHER);
     }
 
@@ -370,19 +378,19 @@ class EvaluadorController extends AbstractController
         $evalua = $evaluaRepository->findOneBy([
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
-            'evaluador' => $empleado,
+            'tipo_evaluador' => Evalua::AUTOEVALUACION,
         ]);
         if (!$evalua instanceof Evalua) {
             $this->generator->logAndFlash('warning', 'El empleado no existe o no es evaluable', [
                 'cuestionario' => $cuestionario->getCodigo(),
-                'usuario' => $empleado->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
+                'usuario' => $empleado->getPersona()?->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
             ]);
 
             return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]);
         }
 
         $evalua
-            ->setEvaluador(null)
+            ->setTipoEvaluador(Evalua::NO_EVALUACION)
             ->setFechaRechazo(new DateTimeImmutable())
         ;
         $evaluaRepository->save($evalua, true);
@@ -417,11 +425,11 @@ class EvaluadorController extends AbstractController
         $evalua = $evaluaRepository->findOneBy([
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
-            'evaluador' => $empleado,
+            'tipo_evaluador' => Evalua::AUTOEVALUACION,
         ]);
         if (!$evalua instanceof Evalua) {
             $this->generator->logAndFlash('warning', 'El empleado no existe o no es evaluable', [
-                'cuestionario' => $cuestionario->getCodigo(),
+                'cuestionario' => $cuestionario?->getCodigo(),
                 'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
             ]);
 
@@ -429,7 +437,7 @@ class EvaluadorController extends AbstractController
         }
 
         $evalua
-            ->setEvaluador(null)
+            ->setTipoEvaluador(Evalua::NO_EVALUACION)
             ->setFechaRechazo(new DateTimeImmutable())
         ;
         $evaluaRepository->save($evalua, true);
@@ -457,7 +465,7 @@ class EvaluadorController extends AbstractController
         $evalua = $evaluaRepository->findOneBy([
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
-            'evaluador' => null,
+            'tipo_evaluador' => Evalua::NO_EVALUACION,
         ]);
         if (!$evalua instanceof Evalua) {
             $this->generator->logAndFlash('warning', 'El empleado no existe o no había solicitado rechazar evaluación', [
@@ -469,7 +477,7 @@ class EvaluadorController extends AbstractController
         }
 
         $evalua
-            ->setEvaluador($empleado)
+            ->setTipoEvaluador()
             ->setFechaRechazo(null)
         ;
         $evaluaRepository->save($evalua, true);
@@ -504,7 +512,7 @@ class EvaluadorController extends AbstractController
         $evalua = $evaluaRepository->findOneBy([
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
-            'evaluador' => null,
+            'tipo_evaluador' => Evalua::NO_EVALUACION,
         ]);
         if (!$evalua instanceof Evalua) {
             $this->generator->logAndFlash('warning', 'El empleado no existe o no había solicitado rechazar evaluación', [
@@ -516,7 +524,7 @@ class EvaluadorController extends AbstractController
         }
 
         $evalua
-            ->setEvaluador($empleado)
+            ->setTipoEvaluador()
             ->setFechaRechazo(null)
         ;
         $evaluaRepository->save($evalua, true);

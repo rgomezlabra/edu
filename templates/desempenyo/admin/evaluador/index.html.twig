@@ -5,7 +5,7 @@
     <div class="pagina-titulo">{{ titulo }}</div>
 
     <div class="pagina-seccion">Cuestionario {{ cuestionario.codigo }}</div>
-    {%- if tipo == constant('App\\Repository\\Desempenyo\\EvaluaRepository::AUTOEVALUACION') %}
+    {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
         {#- Empleados para autoevaluación #}
         {%- if evaluaciones|length > 0 %}
             <div class="badge-info">
@@ -23,7 +23,7 @@
                 </tr>
             </thead>
             <tbody>
-            {%- for evaluacion in evaluaciones|filter(e => e.empleado == e.evaluador) %}
+            {%- for evaluacion in evaluaciones %}
                 <tr>
                     <td>
                         {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
@@ -41,13 +41,20 @@
             {%- endfor %}
             </tbody>
         </table>
-    {%- elseif tipo == constant('App\\Repository\\Desempenyo\\EvaluaRepository::EVALUACION') %}
-        {#- Relación de valuadores y empleados #}
+    {%- elseif tipo in [constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'), constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')] %}
+        {#- Relación de evaluadores y empleados #}
         <table class="tabla-condensada" id="datosEvaluadores">
             <thead class="cabecera-condensada">
             <tr>
                 <th colspan="6" data-dt-order="disable">Empleado</th>
-                <th colspan="6" data-dt-order="disable">Evaluador</th>
+                <th colspan="6" data-dt-order="disable">
+                    {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') -%}
+                        Evaluador responsable
+                    {%- else -%}
+                        Otro evaluador
+                    {%- endif -%}
+                </th>
+                <th rowspan="2">Origen</th>
                 <th rowspan="2" data-dt-order="disable">Acciones</th>
             </tr>
             <tr>
@@ -66,7 +73,7 @@
             </tr>
             </thead>
             <tbody>
-            {%- for evaluacion in evaluaciones|filter(e => e.empleado != e.evaluador and e.evaluador != null) %}
+            {%- for evaluacion in evaluaciones %}
                 {%- set plazaEmpleado = evaluacion.empleado.plazaOcupada ?: evaluacion.empleado.plazaTitular %}
                 {%- set plazaEvaluador = evaluacion.evaluador.plazaOcupada ?: evaluacion.evaluador.plazaTitular %}
                 <tr {% if plazaEmpleado.unidad|default != plazaEvaluador.unidad|default %}class="table-info" {% endif %}>
@@ -96,7 +103,7 @@
                         {{- plazaEvaluador.ocupantes[0].antiguedad|default -}}
                     </td>
                     <td>
-                        {{- plazaEvaluador.ocupantes[0].enTitular|default -}}
+                        {{- plazaEvaluador.ocupantes[0].enOcupada|default ?: evaluacion.evaluador.vigente|date('Y-m-d') -}}
                     </td>
                     <td>
                         {%- if evaluacion.evaluador.ausencia -%}
@@ -106,8 +113,10 @@
                             <sup class="badge bg-warning mx-1" title="{{ avisos[2] }}">2</sup>
                         {%- endif -%}
                     </td>
+                    <td>{{ evaluacion.origen.nombre|default|capitalize }}</td>
                     <td>
-                        <form method="post"
+                        <span class="mx-1 fas fa-people-arrows" title="Reasignar"></span>
+                        <form method="post" class="d-inline"
                               action="{{ path(aplicacion.ruta ~ '_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion.id}) }}"
                               onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluacion.evaluador.persona }} sobre {{ evaluacion.empleado.persona }}?');">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cuestionario.id ~ '-' ~ evaluacion.id) }}">
@@ -127,7 +136,7 @@
                 <span class="me-4 px-2 bg-info rounded">Distinta unidad</span>
             </caption>
         </table>
-    {%- elseif tipo == constant('App\\Repository\\Desempenyo\\EvaluaRepository::NO_EVALUACION') %}
+    {%- elseif tipo == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION') %}
         {# Empleados que rechazan la evaluación #}
         <table class="tabla-condensada" id="datosRechazan">
             <caption class="caption-top">Solicitudes de no evaluación</caption>
@@ -141,7 +150,7 @@
             </tr>
             </thead>
             <tbody>
-            {%- for evaluacion in evaluaciones|filter(e => e.evaluador == null) %}
+            {%- for evaluacion in evaluaciones %}
                 <tr>
                     <td>
                         {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
@@ -165,38 +174,46 @@
 {% endblock %}
 
 {% block botones %}
-    {%- if tipo != constant('App\\Repository\\Desempenyo\\EvaluaRepository::AUTOEVALUACION') %}
+    {%- if tipo != constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: 'auto'}) }}">
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')}) }}">
                 <span class="fas fa-users"></span> Ver empleados
             </a>
         </li>
     {%- endif %}
-    {%- if tipo != constant('App\\Repository\\Desempenyo\\EvaluaRepository::EVALUACION') %}
+    {%- if tipo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: 'evalua'}) }}">
-                <span class="fas fa-user-check"></span> Ver evaluadores
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')}) }}">
+                <span class="fas fa-user-check"></span> Ver responsables
             </a>
         </li>
     {%- endif %}
-    {%- if tipo != constant('App\\Repository\\Desempenyo\\EvaluaRepository::NO_EVALUACION') %}
+    {%- if tipo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: 'noevalua'}) }}">
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')}) }}">
+                <span class="fas fa-user-pen"></span> Ver otros
+            </a>
+        </li>
+    {%- endif %}
+    {%- if tipo != constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION') %}
+        <li class="nav-item me-2">
+            <a class="btn btn-primary"
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION')}) }}">
                 <span class="fas fa-user-times"></span> Ver no evaluados
             </a>
         </li>
     {%- endif %}
-    {%- if tipo == constant('App\\Repository\\Desempenyo\\EvaluaRepository::AUTOEVALUACION') %}
+    {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
         <li class="nav-item me-2">
             <button class="btn btn-primary cargar" id="cargarEmpleados"
                data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_auto', {id: cuestionario.id}) }}">
                 <span class="fas fa-person-arrow-down-to-line"></span> Cargar empleados
             </button>
         </li>
-    {%- elseif tipo == constant('App\\Repository\\Desempenyo\\EvaluaRepository::EVALUACION') %}
+    {%- elseif tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id}) }}">
