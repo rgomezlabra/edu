@@ -145,7 +145,7 @@
             <div class="container-fluid my-2">
                 ...
             </div>
-            <div class="pagina-seccion" id="documentos">Documentos y enlaces interés del procedimiento activo</div>
+            <div class="pagina-seccion" id="documentos">Documentos y enlaces de interés del procedimiento activo</div>
             <ul class="lead my-3">
                 <li>Texto del acuerdo</li>
                 <li>Escalas Lickert</li>
@@ -162,11 +162,13 @@
             </ul>
         {%- endif %}
     </div>
+    <div class="linea-botones"></div>
 
     {#- Mostrar roles de la aplicación con permiso para el usuario. #}
     {%- set admin = false -%}
     {%- for rol in aplicacion.roles|default -%}
         {%- for p in aplicacion.permisos|filter(p => p.usuario == app.user)|filter(r => r.rol == rol) -%}
+            {%- if loop.first %}<div class="pagina-seccion">Roles</div>{% endif %}
             {%- if p.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO') %}
                 {%- if p.rol.ruta == 'admin' %}
                     {%- set admin = true -%}

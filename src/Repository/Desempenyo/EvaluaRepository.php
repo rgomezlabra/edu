@@ -89,10 +89,6 @@ class EvaluaRepository extends ServiceEntityRepository
             }
         }
 
-        if (!isset($criterios['tipo'])) {
-            $qb->andWhere('evalua.tipo_evaluador = :tipo')->setParameter('tipo', Evalua::AUTOEVALUACION);
-        }
-
         return $qb->getQuery()->getResult();
     }
 }

@@ -23,9 +23,13 @@
                 <tbody>
                 {%- for evaluacion in evaluaciones %}
                     <tr>
-                        <td></td>
+                        <td>
+                            {{- evaluacion.evaluador.plazaOcupada ? evaluacion.evaluador.plazaOcupada.unidad.nombre
+                            : (evaluacion.evaluador.plazaTitular ? evaluacion.evaluador.plazaTitular.unidad.nombre) -}}
+                        </td>
                         <td>{{ evaluacion.evaluador.persona }}</td>
                         <td>
+                            incidencia
                         </td>
                     </tr>
                 {%- endfor %}

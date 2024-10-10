@@ -17,16 +17,16 @@
             <tbody>
             {%- for evaluacion in evaluaciones %}
                 <tr>
-                    <td></td>
+                    <td>
+                        {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
+                        : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
+                    </td>
                     <td>{{ evaluacion.empleado.persona }}</td>
                     <td>
-{#                        <a href="{{ path(aplicacion.ruta ~ '_formulario_rellenar', {codigo: cuestionario.codigo, evalua: evaluacion.empleado.id}) }}">#}
                         <a href="{{ cuestionario.url ~ '/' ~ evaluacion.empleado.id }}">
                             <span class="mx-1 fas fa-user-pen" title="Evaluar"></span>
                         </a>
-{#                        <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {'id': cuestionario.id}) }}">#}
-{#                            <span class="mx-1 fas fa-object-group" title="Grupos de preguntas"></span>#}
-{#                        </a>#}
+                        incidencia
                     </td>
                 </tr>
             {%- endfor %}
