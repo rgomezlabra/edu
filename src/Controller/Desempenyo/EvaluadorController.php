@@ -226,6 +226,7 @@ class EvaluadorController extends AbstractController
     public function cargarEvaluacion(
         Request            $request,
         EmpleadoRepository $empleadoRepository,
+        OrigenRepository   $origenRepository,
         Cuestionario       $cuestionario,
     ): Response {
         $this->denyAccessUnlessGranted('admin');
@@ -268,6 +269,7 @@ class EvaluadorController extends AbstractController
             $csv->cerrar();
 
             // Grabar datos
+            $fichero = $origenRepository->findOneBy(['nombre' => Origen::FICHERO]);
             /** @var string[] $linea */
             foreach ($lineas as $linea) {
                 $empleado = $empleadoRepository->findOneByDocumento($linea['DNI USUARIO']);
@@ -279,6 +281,8 @@ class EvaluadorController extends AbstractController
                             ->setCuestionario($cuestionario)
                             ->setEmpleado($empleado)
                             ->setEvaluador($evaluador)
+                            ->setTipoEvaluador(Evalua::EVALUA_RESPONSABLE)
+                            ->setOrigen($fichero)
                         ;
                         $this->evaluaRepository->save($evaluacion, true);
                         ++$nuevos;
