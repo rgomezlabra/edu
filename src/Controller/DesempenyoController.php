@@ -7,6 +7,7 @@ use App\Entity\Sistema\Usuario;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
 use App\Repository\Desempenyo\FormularioRepository;
+use App\Repository\Desempenyo\TipoIncidenciaRepository;
 use App\Repository\Plantilla\EmpleadoRepository;
 use App\Repository\Sistema\EstadoRepository;
 use App\Service\RutaActual;
@@ -52,11 +53,14 @@ class DesempenyoController extends AbstractController
         methods: ['GET']
     )]
     public function admin(
-        CuestionarioRepository $cuestionarioRepository,
-        EstadoRepository       $estadoRepository,
+        CuestionarioRepository   $cuestionarioRepository,
+        EstadoRepository         $estadoRepository,
+        TipoIncidenciaRepository $tipoIncidenciaRepository
     ): Response {
         $this->denyAccessUnlessGranted('admin');
-        if (0 === $cuestionarioRepository->count([
+        if (0 === $tipoIncidenciaRepository->count([])) {
+            $this->addFlash('warning', 'No hay definido ningún tipo de incidencias.');
+        } elseif (0 === $cuestionarioRepository->count([
                 'aplicacion' => $this->actual->getAplicacion(),
                 'estado' => $estadoRepository->findOneBy(['nombre' => Estado::PUBLICADO]),
             ])) {

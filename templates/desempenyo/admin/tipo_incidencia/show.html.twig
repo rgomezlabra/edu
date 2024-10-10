@@ -1,0 +1,40 @@
+{% extends path(aplicacion.ruta) ~ '/admin/tipo_incidencia/index.html.twig' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <div class="table">
+        <div class="row py-2">
+            <div class="fila-campo">Id</div>
+            <div class="fila-valor">{{ tipo.id }}</div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Nombre</div>
+            <div class="fila-valor">{{ tipo.nombre }}</div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Descripción</div>
+            <div class="fila-valor">{{ tipo.descripcion }}</div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block botones %}
+    <li class="nav-item me-2">
+        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_edit', {'id': tipo.id}) }}">
+            <span class="fas fa-edit"></span> Editar
+        </a>
+    </li>
+{#    {% if num_incidencias == 0 %}#}
+        <li class="nav-item ms-5 me-2">
+            {{ include(path(aplicacion.ruta) ~ '/admin/tipo_incidencia/_delete_form.html.twig', {'id': tipo.id}) }}
+        </li>
+{#    {% endif %}#}
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_index') }}">Tipos de incidencias</a></li>
+{% endblock %}

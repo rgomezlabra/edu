@@ -1,0 +1,61 @@
+{% extends path(aplicacion.ruta) ~ '/admin/index.html.twig' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <table class="tabla-condensada" id="datosTipos">
+        <thead class="cabecera-condensada">
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Nº incidencias</th>
+                <th data-dt-order="disable">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {%- for tipo in tipos %}
+            <tr>
+                <td>{{ tipo.id }}</td>
+                <td>{{ tipo.nombre }}</td>
+                <td>{{ tipo.descripcion }}</td>
+                <td></td>
+                <td>
+                    <a href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_show', {'id': tipo.id}) }}">
+                        <span class="mx-1 fas fa-eye" title="Ver"></span>
+                    </a>
+                    <a href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_edit', {'id': tipo.id}) }}">
+                        <span class="mx-1 fas fa-edit" title="Editar"></span>
+                    </a>
+                </td>
+            </tr>
+        {%- endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block botones %}
+    <li class="nav-item me-2">
+        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_new') }}">
+            <span class="fas fa-plus"></span> Crear tipo
+        </a>
+    </li>
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin') }}">Administrador</a></li>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+        $('#datosTipos').dataTable({
+            language: {
+                url: '{{ asset("includes/datatable.es.json") }}',
+            },
+        });
+    </script>
+{% endblock %}

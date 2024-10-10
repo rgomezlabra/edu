@@ -1,0 +1,16 @@
+{% extends path(aplicacion.ruta) ~ '/admin/tipo_incidencia/index.html.twig' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    {{ include(path(aplicacion.ruta) ~ '/admin/tipo_incidencia/_form.html.twig') }}
+{% endblock %}
+
+{% block botones %}{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_index') }}">Tipos de incidencias</a></li>
+{% endblock %}

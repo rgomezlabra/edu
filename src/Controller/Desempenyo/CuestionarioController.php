@@ -18,15 +18,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * Controlador para gestionar cuestionarios para evaluación de competencias.
+ * Controlador para gestionar cuestionarios para evaluación de desempeño.
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
 #[Route(path: '/intranet/desempenyo/admin/cuestionario', name: 'intranet_desempenyo_admin_cuestionario_')]
 class CuestionarioController extends AbstractController
 {
     public function __construct(
-        private readonly MessageGenerator $generator,
-        private readonly RutaActual $actual,
+        private readonly MessageGenerator       $generator,
+        private readonly RutaActual             $actual,
         private readonly CuestionarioRepository $cuestionarioRepository,
     ) {
     }
@@ -34,7 +34,7 @@ class CuestionarioController extends AbstractController
     #[Route(
         path: '/',
         name: 'index',
-        defaults: ['titulo' => 'Cuestionarios de Evaluación de Competencias'],
+        defaults: ['titulo' => 'Cuestionarios de Evaluación de Desempeño'],
         methods: ['GET']
     )]
     public function index(): Response
@@ -49,7 +49,7 @@ class CuestionarioController extends AbstractController
     #[Route(
         path: '/new',
         name: 'new',
-        defaults: ['titulo' => 'Nuevo Cuestionario de Evaluación de Competencias'],
+        defaults: ['titulo' => 'Nuevo Cuestionario de Evaluación de Desempeño'],
         methods: ['GET', 'POST']
     )]
     public function new(Request $request, EstadoRepository $estadoRepository): Response
@@ -88,7 +88,7 @@ class CuestionarioController extends AbstractController
     #[Route(
         path: '/{id}',
         name: 'show',
-        defaults: ['titulo' => 'Cuestionario de Evaluación de Competencias'],
+        defaults: ['titulo' => 'Cuestionario de Evaluación de Desempeño'],
         methods: ['GET']
     )]
     public function show(Cuestionario $cuestionario): Response
@@ -108,7 +108,7 @@ class CuestionarioController extends AbstractController
     #[Route(
         path: '/{id}/edit',
         name: 'edit',
-        defaults: ['titulo' => 'Editar Cuestionario de Evaluación de Competencias'],
+        defaults: ['titulo' => 'Editar Cuestionario de Evaluación de Desempeño'],
         methods: ['GET', 'POST']
     )]
     public function edit(Request $request, Cuestionario $cuestionario): Response
