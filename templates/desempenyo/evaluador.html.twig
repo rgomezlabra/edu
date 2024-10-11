@@ -17,7 +17,7 @@
                     <tr>
                         <th>Unidad</th>
                         <th>Evaluador</th>
-                        <th>Acciones</th>
+                        <th data-dt-order="disable">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -29,7 +29,7 @@
                         </td>
                         <td>{{ evaluacion.evaluador.persona }}</td>
                         <td>
-                            incidencia
+                            <em class="mx-1 fas fa-ear-listen" title="incidencia"></em>
                         </td>
                     </tr>
                 {%- endfor %}
@@ -90,13 +90,6 @@
                     },
                     text: '<i class="fas fa-file-excel"></i>',
                     titleAttr: 'Generar fichero Excel',
-                },
-            ],
-            columnDefs: [
-                {
-                    targets: [2],
-                    orderable: false,
-                    searchable: false,
                 },
             ],
             dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +
