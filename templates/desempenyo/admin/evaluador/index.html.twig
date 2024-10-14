@@ -78,7 +78,7 @@
                 {%- set plazaEvaluador = evaluacion.evaluador.plazaOcupada ?: evaluacion.evaluador.plazaTitular %}
                 <tr {% if plazaEmpleado.unidad|default != plazaEvaluador.unidad|default %}class="table-info" {% endif %}>
                     <td>
-                        <span title="{{ plazaEmpleado.unidad.nombre|default }}">{{ plazaEmpleado.subunidad.codigo|default }}</span>
+                        <span title="{{ plazaEmpleado.unidad.nombre|default }}">{{ plazaEmpleado.unidad.codigo|default }}</span>
                     </td>
                     <td>{{ evaluacion.empleado.persona }}</td>
                     <td>{{ evaluacion.empleado.grupo.nombre ~ (evaluacion.empleado.nivel > 0 ? '/' ~ evaluacion.empleado.nivel) }}</td>
@@ -96,7 +96,7 @@
                             <sup class="badge bg-warning mx-1" title="{{ avisos[2] }}">2</sup>
                         {%- endif -%}
                     </td>
-                    <td><span title="{{ plazaEvaluador.unidad.nombre|default }}">{{ plazaEvaluador.subunidad.codigo|default }}</span></td>
+                    <td><span title="{{ plazaEvaluador.unidad.nombre|default }}">{{ plazaEvaluador.unidad.codigo|default }}</span></td>
                     <td>{{ evaluacion.evaluador.persona }}</td>
                     <td>{{ evaluacion.evaluador.grupo.nombre ~ (evaluacion.evaluador.nivel > 0 ? '/' ~ evaluacion.evaluador.nivel) }}</td>
                     <td>
