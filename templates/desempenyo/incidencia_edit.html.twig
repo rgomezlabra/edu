@@ -1,0 +1,22 @@
+{% extends path(aplicacion.ruta) ~ '/admin/tipo_incidencia/index.html.twig' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    {{ form_start(form) }}
+    {{ form_row(form.cuestionario) }}
+    {{ form_row(form.tipo) }}
+    {{ form_row(form.incidencia.descripcion) }}
+    <div class="linea-botones">
+        <button class="btn btn-primary"><span class="fas fa-save"></span> {{ button_label|default('Guardar') }}</button>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block botones %}{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+{% endblock %}

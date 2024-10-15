@@ -3,6 +3,7 @@
 namespace App\Entity\Desempenyo;
 
 use App\Entity\Cirhus\Incidencia as IncidenciaCirhus;
+use App\Entity\Cuestiona\Cuestionario;
 use App\Repository\Desempenyo\IncidenciaRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -25,6 +26,9 @@ class Incidencia
 
     #[ORM\ManyToOne(targetEntity: TipoIncidencia::class)]
     private ?TipoIncidencia $tipo = null;
+
+    #[ORM\ManyToOne(targetEntity: Cuestionario::class)]
+    private ?Cuestionario $cuestionario = null;
 
     public function getId(): ?int
     {
@@ -51,6 +55,18 @@ class Incidencia
     public function setTipo(?TipoIncidencia $tipo): static
     {
         $this->tipo = $tipo;
+
+        return $this;
+    }
+
+    public function getCuestionario(): ?Cuestionario
+    {
+        return $this->cuestionario;
+    }
+
+    public function setCuestionario(?Cuestionario $cuestionario): static
+    {
+        $this->cuestionario = $cuestionario;
 
         return $this;
     }
