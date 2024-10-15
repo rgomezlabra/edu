@@ -15,6 +15,7 @@ use App\Repository\Desempenyo\IncidenciaRepository;
 use App\Repository\Sistema\EstadoRepository;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
+use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -94,7 +95,7 @@ class IncidenciaController extends AbstractController
                 ->setIncidencia($cirhus)
                 ->setAutor($usuario)
                 ->setEstado($iniciado)
-                ->setFechaInicio(new \DateTimeImmutable('now'))
+                ->setFechaInicio(new DateTimeImmutable('now'))
             ;
             $cirhus->addApunte($apunte);
             $cirhusRepository->save($cirhus);

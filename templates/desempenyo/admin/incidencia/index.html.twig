@@ -1,0 +1,129 @@
+{% extends path(aplicacion.ruta) ~ '/admin/index.html.twig' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <table class="tabla-condensada" id="datosTipos">
+        <thead class="cabecera-condensada">
+            <tr>
+                <th>Id</th>
+                <th>Estado</th>
+                <th class="text-center">Estado</th>
+                <th>Cuestionario</th>
+                <th>Tipo de incidencia</th>
+                <th>Solicitante</th>
+                <th>Solicitud</th>
+                <th>Resolución</th>
+                <th data-dt-order="disable">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {%- for incidencia in incidencias %}
+            <tr>
+                <td>{{ incidencia.id }}</td>
+                <td>{{ incidencia.incidencia.apuntes.last.estado.nombre|default }}</td>
+                <td class="text-center">
+                    {%- if incidencia.incidencia.apuntes.last.estado -%}
+                        <em class="fas {{ incidencia.incidencia.apuntes.last.estado.icono }} text-{{ incidencia.incidencia.apuntes.last.estado.color }}"
+                            title="{{ incidencia.incidencia.apuntes.last.estado.nombre }}"></em>
+                    {%- endif -%}
+                <td>{{ incidencia.cuestionario }}</td>
+                <td>{{ incidencia.tipo.nombre }}</td>
+                <td>{{ incidencia.incidencia.solicitante.persona }}</td>
+                <td>{{ incidencia.incidencia.apuntes.first.fechaInicio ? incidencia.incidencia.apuntes.first.fechaInicio|date('Y-m-d, H:i') }}</td>
+                <td>
+                    {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Sistema\\Estado::FINALIZADO') -%}
+                        {{- incidencia.incidencia.apuntes.first.fechaFin ? incidencia.incidencia.apuntes.first.fechaFin|date('Y-m-d, H:i') -}}
+                    {%- endif -%}
+                </td>
+                <td>
+                </td>
+            </tr>
+        {%- endfor %}
+        </tbody>
+        <caption class="mt-4">
+            <span class="me-4">Estados</span>
+            {%- for estado in aplicacion.estados|filter(e => e.tipo == constant('App\\Entity\\Sistema\\EstadoTipo::INCIDENCIA') and e.icono is not null) -%}
+                <span class="me-4 badge {% if estado.color %}text-{{ estado.color }}{% else %}text-black{% endif %}">
+                    <em class="fas {{ estado.icono }}"></em> {{ estado.nombre }}</span>
+            {%- endfor -%}
+        </caption>
+    </table>
+{% endblock %}
+
+{% block botones %}
+    <li class="nav-item me-2">
+        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_new') }}">
+            <span class="fas fa-plus"></span> Crear tipo
+        </a>
+    </li>
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin') }}">Administrador</a></li>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+        $('#datosTipos').dataTable({
+            buttons: [
+                {
+                    extend: 'copy',
+                    exportOptions: {
+                        columns: [0, 1, 3, 4, 5, 6, 7],
+                    },
+                    text: '<i class="fas fa-copy"></i>',
+                    titleAttr: 'Copiar',
+                },
+                {
+                    extend: 'print',
+                    exportOptions: {
+                        columns: [0, 1, 3, 4, 5, 6, 7],
+                        stripHtml: false,
+                    },
+                    text: '<i class="fas fa-print"></i>',
+                    titleAttr: 'Imprimir',
+                },
+                {
+                    extend: 'csv',
+                    exportOptions: {
+                        columns: [0, 1, 3, 4, 5, 6, 7],
+                    },
+                    text: '<i class="fas fa-file-csv"></i>',
+                    titleAttr: 'Generar fichero CSV',
+                },
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: [0, 1, 3, 4, 5, 6, 7],
+                    },
+                    text: '<i class="fas fa-file-excel"></i>',
+                    titleAttr: 'Generar fichero Excel',
+                },
+            ],
+            columnDefs: [
+                {
+                    targets: [0],
+                        type: 'num',
+                },
+                {
+                    targets: [1],
+                        visible: false,
+                },
+            ],
+            dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +
+                '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            language: {
+                url: '{{ asset("includes/datatable.es.json") }}',
+            },
+            order: [
+                [5, 'desc'],
+            ],
+        });
+    </script>
+{% endblock %}
