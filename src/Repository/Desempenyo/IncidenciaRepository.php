@@ -2,9 +2,11 @@
 
 namespace App\Repository\Desempenyo;
 
+use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Desempenyo\Incidencia;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * @author Ramón M. Gómez <ramongomez@us.es>
@@ -12,7 +14,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class IncidenciaRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private readonly Security $security)
     {
         parent::__construct($registry, Incidencia::class);
     }
@@ -33,5 +35,21 @@ class IncidenciaRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * @return Incidencia[]
+     */
+    public function findByConectado(Cuestionario $cuestionario): array
+    {
+        return $this->createQueryBuilder('incidencia')
+            ->join('incidencia.incidencia', 'cirhus')
+            ->andWhere('cirhus.solicitante = :solicitante')
+            ->andWhere('incidencia.cuestionario = :cuestionario')
+            ->setParameter('solicitante', $this->security->getUser())
+            ->setParameter('cuestionario', $cuestionario)
+            ->getQuery()
+            ->getResult()
+        ;
     }
 }

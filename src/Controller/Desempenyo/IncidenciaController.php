@@ -29,10 +29,14 @@ use function Symfony\Component\String\u;
 #[Route(path: '/intranet/desempenyo', name: 'intranet_desempenyo_')]
 class IncidenciaController extends AbstractController
 {
+    private string $rutaBase;
+
     public function __construct(
         private readonly MessageGenerator     $generator,
         private readonly IncidenciaRepository $incidenciaRepository,
+        private readonly RutaActual           $actual,
     ) {
+        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet';
     }
 
     #[Route(
@@ -47,6 +51,32 @@ class IncidenciaController extends AbstractController
 
         return $this->render('intranet/desempenyo/admin/incidencia/index.html.twig', [
             'incidencias' => $this->incidenciaRepository->findAll(),
+        ]);
+    }
+
+    #[Route(
+        path: '/formulario/{codigo}/incidencia',
+        name: 'formulario_incidencia_index',
+        requirements: ['codigo' => '[a-z0-9-]+'],
+        defaults: ['titulo' => 'Mis Incidencias de Evaluación de Desempeño'],
+        methods: ['GET', 'POST']
+    )]
+    public function indexUsuario(CuestionarioRepository $cuestionarioRepository, ?string $codigo): Response
+    {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
+        $cuestionario = $cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
+        if (!$cuestionario instanceof Cuestionario) {
+            $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+
+        return $this->render('intranet/desempenyo/incidencia_index.html.twig', [
+            'codigo' => $codigo,
+            'incidencias' => $this->incidenciaRepository->findByConectado($cuestionario),
         ]);
     }
 
@@ -70,7 +100,7 @@ class IncidenciaController extends AbstractController
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
 
-            return $this->redirectToRoute('intranet_desempenyo');
+            return $this->redirectToRoute($this->rutaBase);
         }
 
         /** @var Usuario $usuario */
@@ -93,8 +123,9 @@ class IncidenciaController extends AbstractController
             $apunte = new IncidenciaApunte();
             $apunte
                 ->setIncidencia($cirhus)
-                ->setAutor($usuario)
                 ->setEstado($iniciado)
+                ->setComentario('Solicitud')
+                ->setAutor($usuario)
                 ->setFechaInicio(new DateTimeImmutable('now'))
             ;
             $cirhus->addApunte($apunte);
@@ -105,11 +136,7 @@ class IncidenciaController extends AbstractController
                 'cuestionario' => $codigo,
             ]);
 
-            return $this->redirectToRoute(
-                'intranet_desempenyo_admin_tipo_incidencia_index',
-                [],
-                Response::HTTP_SEE_OTHER
-            );
+            return $this->redirectToRoute($this->rutaBase.'_admin_tipo_incidencia_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('intranet/desempenyo/incidencia_edit.html.twig', [
@@ -119,8 +146,8 @@ class IncidenciaController extends AbstractController
     }
 
     #[Route(
-        path: '/formulario/{codigo}/incidencia/{id}',
-        name: 'intranet_desempenyo_formulario_incidencia_edit',
+        path: '/formulario/{codigo}/incidencia/{id}/edit',
+        name: 'formulario_incidencia_edit',
         requirements: ['codigo' => '[a-z0-9-]+'],
         defaults: ['titulo' => 'Editar Incidencia de Evaluación de Desempeño'],
         methods: ['GET', 'POST']
@@ -135,18 +162,19 @@ class IncidenciaController extends AbstractController
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         $cuestionario = $cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
         $iniciado = $estadoRepository->findOneBy(['nombre' => Estado::INICIADO]);
+        $ultimo = $incidencia->getIncidencia()?->getApuntes()->last();
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
 
-            return $this->redirectToRoute('intranet_desempenyo');
+            return $this->redirectToRoute($this->rutaBase);
         } elseif ($incidencia->getCuestionario() !== $cuestionario) {
             $this->addFlash('warning', 'La incidencia no corresponde al cuestionario.');
 
-            return $this->redirectToRoute('intranet_desempenyo');
-        } elseif ($incidencia->getIncidencia()?->getApuntes()->last()->getEstado() !== $iniciado) {
+            return $this->redirectToRoute($this->rutaBase);
+        } elseif (!$ultimo instanceof IncidenciaApunte || $ultimo->getEstado() !== $iniciado) {
             $this->addFlash('warning', 'La incidencia está siendo tratada y no puede ser editada.');
 
-            return $this->redirectToRoute('intranet_desempenyo');
+            return $this->redirectToRoute($this->rutaBase);
         }
 
         $form = $this->createForm(IncidenciaType::class, $incidencia);
@@ -159,17 +187,61 @@ class IncidenciaController extends AbstractController
                 'cuestionario' => $codigo,
             ]);
 
-            return $this->redirectToRoute(
-                'intranet_desempenyo_admin_tipo_incidencia_index',
-                [],
-                Response::HTTP_SEE_OTHER
-            );
+            return $this->redirectToRoute($this->rutaBase.'_admin_tipo_incidencia_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('intranet/desempenyo/incidencia_edit.html.twig', [
             'incidencia' => $incidencia,
             'button_label' => 'Actualizar',
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route(
+        path: '/admin/incidencia/{id}',
+        name: 'admin_incidencia_show',
+        defaults: ['titulo' => 'Incidencia para Evaluación de Desempeño'],
+        methods: ['GET']
+    )]
+    public function show(
+        CuestionarioRepository $cuestionarioRepository,
+        Incidencia             $incidencia,
+        ?string                $codigo = null,
+    ): Response {
+        $this->denyAccessUnlessGranted('admin');
+
+        return $this->render('intranet/desempenyo/admin/incidencia/show.html.twig', [
+            'incidencia' => $incidencia,
+        ]);
+    }
+
+    #[Route(
+        path: '/formulario/{codigo}/incidencia/{id}',
+        name: 'formulario_incidencia_show',
+        requirements: ['codigo' => '[a-z0-9-]+'],
+        defaults: ['titulo' => 'Incidencia de Evaluación de Desempeño'],
+        methods: ['GET', 'POST']
+    )]
+    public function showUsuario(
+        CuestionarioRepository $cuestionarioRepository,
+        EstadoRepository       $estadoRepository,
+        string                 $codigo,
+        Incidencia             $incidencia,
+    ): Response {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
+        $cuestionario = $cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
+        if ($incidencia->getCuestionario() !== $cuestionario) {
+            $this->addFlash('warning', 'La incidencia no corresponde al cuestionario.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        } elseif ($incidencia->getIncidencia()?->getSolicitante() !== $this->getUser()) {
+            $this->addFlash('warning', 'La incidencia no ha sido solicitada por el usuario.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        return $this->render('intranet/desempenyo/incidencia_show.html.twig', [
+            'incidencia' => $incidencia,
         ]);
     }
 }

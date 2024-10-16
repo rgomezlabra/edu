@@ -8,12 +8,10 @@
     <table class="tabla-condensada" id="datosTipos">
         <thead class="cabecera-condensada">
             <tr>
-                <th>Id</th>
                 <th>Estado</th>
                 <th class="text-center">Estado</th>
                 <th>Cuestionario</th>
                 <th>Tipo de incidencia</th>
-                <th>Solicitante</th>
                 <th>Solicitud</th>
                 <th>Resolución</th>
                 <th data-dt-order="disable">Acciones</th>
@@ -22,16 +20,15 @@
         <tbody>
         {%- for incidencia in incidencias %}
             <tr>
-                <td>{{ incidencia.id }}</td>
                 <td>{{ incidencia.incidencia.apuntes.last.estado.nombre|default }}</td>
                 <td class="text-center">
                     {%- if incidencia.incidencia.apuntes.last.estado -%}
                         <em class="fas {{ incidencia.incidencia.apuntes.last.estado.icono }} text-{{ incidencia.incidencia.apuntes.last.estado.color }}"
                             title="{{ incidencia.incidencia.apuntes.last.estado.nombre }}"></em>
                     {%- endif -%}
-                <td>{{ incidencia.cuestionario }}</td>
+                </td>
+                <td>{{ incidencia.cuestionario.titulo }}</td>
                 <td>{{ incidencia.tipo.nombre }}</td>
-                <td>{{ incidencia.incidencia.solicitante.persona }}</td>
                 <td>{{ incidencia.incidencia.apuntes.first.fechaInicio ? incidencia.incidencia.apuntes.first.fechaInicio|date('Y-m-d, H:i') }}</td>
                 <td>
                     {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Sistema\\Estado::FINALIZADO') -%}
@@ -39,7 +36,7 @@
                     {%- endif -%}
                 </td>
                 <td>
-                    <a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_show', {id: incidencia.id}) }}">
+                    <a href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_show', {codigo: codigo, id: incidencia.id}) }}">
                         <span class="mx-1 fas fa-eye" title="Ver apuntes"></span>
                     </a>
                 </td>
@@ -58,15 +55,14 @@
 
 {% block botones %}
     <li class="nav-item me-2">
-        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_new') }}">
-            <span class="fas fa-plus"></span> Crear tipo
+        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_new', {codigo: codigo}) }}">
+            <span class="fas fa-plus"></span> Crear incidencia
         </a>
     </li>
 {% endblock %}
 
 {% block migas %}
     {{ parent() }}
-    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin') }}">Administrador</a></li>
 {% endblock %}
 
 {% block js %}
@@ -77,7 +73,7 @@
                 {
                     extend: 'copy',
                     exportOptions: {
-                        columns: [0, 1, 3, 4, 5, 6, 7],
+                        columns: [0, 2, 3, 4, 5],
                     },
                     text: '<i class="fas fa-copy"></i>',
                     titleAttr: 'Copiar',
@@ -85,7 +81,7 @@
                 {
                     extend: 'print',
                     exportOptions: {
-                        columns: [0, 1, 3, 4, 5, 6, 7],
+                        columns: [0, 2, 3, 4, 5],
                         stripHtml: false,
                     },
                     text: '<i class="fas fa-print"></i>',
@@ -94,7 +90,7 @@
                 {
                     extend: 'csv',
                     exportOptions: {
-                        columns: [0, 1, 3, 4, 5, 6, 7],
+                        columns: [0, 2, 3, 4, 5],
                     },
                     text: '<i class="fas fa-file-csv"></i>',
                     titleAttr: 'Generar fichero CSV',
@@ -102,7 +98,7 @@
                 {
                     extend: 'excelHtml5',
                     exportOptions: {
-                        columns: [0, 1, 3, 4, 5, 6, 7],
+                        columns: [0, 2, 3, 4, 5],
                     },
                     text: '<i class="fas fa-file-excel"></i>',
                     titleAttr: 'Generar fichero Excel',
@@ -111,11 +107,7 @@
             columnDefs: [
                 {
                     targets: [0],
-                        type: 'num',
-                },
-                {
-                    targets: [1],
-                        visible: false,
+                    visible: false,
                 },
             ],
             dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +
@@ -125,7 +117,7 @@
                 url: '{{ asset("includes/datatable.es.json") }}',
             },
             order: [
-                [5, 'desc'],
+                [3, 'desc'],
             ],
         });
     </script>
