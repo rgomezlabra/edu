@@ -1,8 +1,7 @@
-{% extends path(aplicacion.ruta) ~ '/admin/index.html.twig' %}
-
-{% block title %}{{ titulo }}{% endblock %}
+{% extends path(aplicacion.ruta) ~ '/index.html.twig' %}
 
 {% block content %}
+    <div class="badge-primary rounded-pill float-end">{{ app.user.persona }}</div>
     <div class="pagina-titulo">{{ titulo }}</div>
 
     <table class="tabla-condensada" id="datosTipos">
@@ -63,6 +62,11 @@
 
 {% block migas %}
     {{ parent() }}
+    <li class="breadcrumb-item">
+        <a href="{{ path(aplicacion.ruta) }}">
+            <em class="me-1 fas {{ aplicacion.icono }}"></em>{{ aplicacion.nombreCorto }}
+        </a>
+    </li>
 {% endblock %}
 
 {% block js %}

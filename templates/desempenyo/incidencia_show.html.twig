@@ -1,6 +1,7 @@
-{% extends path(aplicacion.ruta) ~ '/admin/index.html.twig' %}
+{% extends path(aplicacion.ruta) ~ '/incidencia_index.html.twig' %}
 
 {% block content %}
+    <div class="badge-primary rounded-pill float-end">{{ app.user.persona }}</div>
     <div class="pagina-titulo">{{ titulo }}</div>
 
     <div class="row py-2">
@@ -11,6 +12,10 @@
             </span>
             {{- incidencia.incidencia.apuntes.last.estado.nombre|default -}}
         </div>
+    </div>
+    <div class="row py-2">
+        <div class="fila-campo">Tipo de incidencia</div>
+        <div class="fila-valor">{{ incidencia.tipo.descripcion }}</div>
     </div>
     <div class="row py-2">
         <div class="fila-campo">Descripción</div>
@@ -32,7 +37,6 @@
                     <th>Fecha final</th>
                     <th>Comentario</th>
                     <th>Autor</th>
-                    <th data-dt-order="disable">Acciones</th>
                 </tr>
                 </thead>
                 {%- set inicio = 0 -%}
@@ -49,13 +53,6 @@
                         <td>{{ apunte.fechaFin ? apunte.fechaFin | date('d/m/Y, H:i') }}</td>
                         <td>{{ apunte.comentario }}</td>
                         <td>{{ apunte.autor.persona }}</td>
-                        <td>
-                            {%- if incidencia.incidencia.apuntes.last.estado.nombre|default != constant('App\\Entity\\Sistema\\Estado::FINALIZADO')  and loop.last %}
-{#                                <a href="{{ path('intranet_cirhus_admin_incidencia_apunte_edit',{'incidencia': incidencia.id, 'apunte': apunte.id}) }}">#}
-                                    <span class="mx-1 fas fa-edit" title="Editar"></span>
-{#                                </a>#}
-                            {% endif %}
-                        </td>
                     </tr>
                     {% if loop.first %}{% set inicio = apunte.fechaInicio | date('U') %}{% endif -%}
                     {% if loop.last %}{% set fin = apunte.fechaFin ? apunte.fechaFin|date('U') : 0 %}{% endif -%}
@@ -79,23 +76,21 @@
 {% endblock %}
 
 {% block botones %}
-    {%- if incidencia.incidencia.apuntes.last.estado.nombre != constant('App\\Entity\\Sistema\\Estado::FINALIZADO') %}
+    {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Sistema\\Estado::INICIADO') %}
         <li class="boton-inferior nav-item me-2">
-{#            <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_incidencia_edit', {'incidencia': incidencia.id}) }}">#}
+            <a class="btn btn-primary"
+               href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_edit', {codigo: incidencia.cuestionario.url|u.afterLast('/'), id: incidencia.id}) }}">
                 <span class="fas fa-edit"></span> Editar
-{#            </a>#}
+            </a>
         </li>
-        <li class="nav-item me-2">
-{#            <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_incidencia_apunte', {'incidencia': incidencia.id}) }}">#}
-                <span class="mx-1 fas fa-project-diagram"></span> Cambiar estado
-{#            </a>#}
-        </li>
-        {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Sistema\\Estado::INICIADO') %}
             <li class="nav-item ms-5 me-2">
-                borrar apunte
-{#                {{ include(path(aplicacion.ruta) ~ '/admin/incidencia/_delete_form.html.twig') }}#}
+                <form method="post"
+                      action="{{ path(aplicacion.ruta ~ '_formulario_incidencia_delete', {codigo: incidencia.cuestionario.url|u.afterLast('/'), id: incidencia.id}) }}"
+                      onsubmit="return confirm('¿Eliminar la incidencia actual?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ incidencia.id) }}">
+                    <button class="btn btn-primary"><span class="fas fa-trash"></span> Eliminar</button>
+                </form>
             </li>
-        {%- endif %}
     {%- endif %}
 {% endblock %}
 
@@ -103,7 +98,11 @@
 
 {% block migas %}
     {{ parent() }}
-{#    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_index') }}">Incidencias</a></li>#}
+    <li class="breadcrumb-item">
+        <a href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_index', {codigo: incidencia.cuestionario.url|u.afterLast('/')}) }}">
+            Incidencias
+        </a>
+    </li>
 {% endblock %}
 
 {% block js %}

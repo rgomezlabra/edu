@@ -1,7 +1,7 @@
 {% extends path(aplicacion.ruta) ~ '/index.html.twig' %}
 
 {% block content %}
-    <div class="badge-primary rounded-pill float-end">{{ evaluador.persona }}</div>
+    <div class="badge-primary rounded-pill float-end">{{ app.user.persona }}</div>
     <div class="pagina-titulo">{{ titulo }}</div>
 
     <div class="pagina-seccion">Cuestionario {{ cuestionario.titulo }}</div>

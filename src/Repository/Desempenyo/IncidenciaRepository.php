@@ -38,18 +38,22 @@ class IncidenciaRepository extends ServiceEntityRepository
     }
 
     /**
+     * Devuelve todas las incidencias del usuario conectado o solo las que haya solicitado en un cuestionario dado.
      * @return Incidencia[]
      */
-    public function findByConectado(Cuestionario $cuestionario): array
+    public function findByConectado(?Cuestionario $cuestionario = null): array
     {
-        return $this->createQueryBuilder('incidencia')
+        $qb = $this->createQueryBuilder('incidencia')
             ->join('incidencia.incidencia', 'cirhus')
             ->andWhere('cirhus.solicitante = :solicitante')
-            ->andWhere('incidencia.cuestionario = :cuestionario')
             ->setParameter('solicitante', $this->security->getUser())
-            ->setParameter('cuestionario', $cuestionario)
-            ->getQuery()
-            ->getResult()
         ;
+        if ($cuestionario instanceof Cuestionario) {
+            $qb->andWhere('incidencia.cuestionario = :cuestionario')
+                ->setParameter('cuestionario', $cuestionario)
+            ;
+        }
+
+        return $qb->getQuery()->getResult();
     }
 }

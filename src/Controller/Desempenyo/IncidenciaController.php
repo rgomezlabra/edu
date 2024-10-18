@@ -9,6 +9,7 @@ use App\Entity\Desempenyo\Incidencia;
 use App\Entity\Sistema\Estado;
 use App\Entity\Sistema\Usuario;
 use App\Form\Desempenyo\IncidenciaType;
+use App\Repository\Cirhus\IncidenciaApunteRepository;
 use App\Repository\Cirhus\IncidenciaRepository as CirhusIncidenciaRepository;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\IncidenciaRepository;
@@ -32,9 +33,10 @@ class IncidenciaController extends AbstractController
     private string $rutaBase;
 
     public function __construct(
-        private readonly MessageGenerator     $generator,
-        private readonly IncidenciaRepository $incidenciaRepository,
-        private readonly RutaActual           $actual,
+        private readonly MessageGenerator       $generator,
+        private readonly CuestionarioRepository $cuestionarioRepository,
+        private readonly IncidenciaRepository   $incidenciaRepository,
+        private readonly RutaActual             $actual,
     ) {
         $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet';
     }
@@ -61,18 +63,15 @@ class IncidenciaController extends AbstractController
         defaults: ['titulo' => 'Mis Incidencias de Evaluación de Desempeño'],
         methods: ['GET', 'POST']
     )]
-    public function indexUsuario(CuestionarioRepository $cuestionarioRepository, ?string $codigo): Response
+    public function indexUsuario(?string $codigo): Response
     {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
-        $cuestionario = $cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
+        $cuestionario = $this->cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
 
             return $this->redirectToRoute($this->rutaBase);
         }
-
-        /** @var Usuario $usuario */
-        $usuario = $this->getUser();
 
         return $this->render('intranet/desempenyo/incidencia_index.html.twig', [
             'codigo' => $codigo,
@@ -91,12 +90,11 @@ class IncidenciaController extends AbstractController
         Request                    $request,
         RutaActual                 $actual,
         CirhusIncidenciaRepository $cirhusRepository,
-        CuestionarioRepository     $cuestionarioRepository,
         EstadoRepository           $estadoRepository,
         string                     $codigo,
     ): Response {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
-        $cuestionario = $cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
+        $cuestionario = $this->cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
 
@@ -136,7 +134,7 @@ class IncidenciaController extends AbstractController
                 'cuestionario' => $codigo,
             ]);
 
-            return $this->redirectToRoute($this->rutaBase.'_admin_tipo_incidencia_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute($this->rutaBase . '_formulario_incidencia_index', ['codigo' => $codigo], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('intranet/desempenyo/incidencia_edit.html.twig', [
@@ -153,14 +151,13 @@ class IncidenciaController extends AbstractController
         methods: ['GET', 'POST']
     )]
     public function edit(
-        Request                $request,
-        CuestionarioRepository $cuestionarioRepository,
-        EstadoRepository       $estadoRepository,
-        string                 $codigo,
-        Incidencia             $incidencia
+        Request          $request,
+        EstadoRepository $estadoRepository,
+        string           $codigo,
+        Incidencia       $incidencia
     ): Response {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
-        $cuestionario = $cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
+        $cuestionario = $this->cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
         $iniciado = $estadoRepository->findOneBy(['nombre' => Estado::INICIADO]);
         $ultimo = $incidencia->getIncidencia()?->getApuntes()->last();
         if (!$cuestionario instanceof Cuestionario) {
@@ -187,7 +184,7 @@ class IncidenciaController extends AbstractController
                 'cuestionario' => $codigo,
             ]);
 
-            return $this->redirectToRoute($this->rutaBase.'_admin_tipo_incidencia_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute($this->rutaBase . '_formulario_incidencia_index', ['codigo' => $codigo], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('intranet/desempenyo/incidencia_edit.html.twig', [
@@ -203,11 +200,8 @@ class IncidenciaController extends AbstractController
         defaults: ['titulo' => 'Incidencia para Evaluación de Desempeño'],
         methods: ['GET']
     )]
-    public function show(
-        CuestionarioRepository $cuestionarioRepository,
-        Incidencia             $incidencia,
-        ?string                $codigo = null,
-    ): Response {
+    public function show(Incidencia $incidencia): Response
+    {
         $this->denyAccessUnlessGranted('admin');
 
         return $this->render('intranet/desempenyo/admin/incidencia/show.html.twig', [
@@ -222,14 +216,10 @@ class IncidenciaController extends AbstractController
         defaults: ['titulo' => 'Incidencia de Evaluación de Desempeño'],
         methods: ['GET', 'POST']
     )]
-    public function showUsuario(
-        CuestionarioRepository $cuestionarioRepository,
-        EstadoRepository       $estadoRepository,
-        string                 $codigo,
-        Incidencia             $incidencia,
-    ): Response {
+    public function showUsuario(string $codigo, Incidencia $incidencia): Response
+    {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
-        $cuestionario = $cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
+        $cuestionario = $this->cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
         if ($incidencia->getCuestionario() !== $cuestionario) {
             $this->addFlash('warning', 'La incidencia no corresponde al cuestionario.');
 
@@ -243,5 +233,58 @@ class IncidenciaController extends AbstractController
         return $this->render('intranet/desempenyo/incidencia_show.html.twig', [
             'incidencia' => $incidencia,
         ]);
+    }
+
+    #[Route(
+        path: '/formulario/{codigo}/incidencia/{id}/delete',
+        name: 'formulario_incidencia_delete',
+        defaults: ['titulo' => 'Eliminar Incidencia para Evaluación de Desempeño'],
+        methods: ['GET', 'POST']
+    )]
+    public function delete(
+        Request                    $request,
+        CirhusIncidenciaRepository $cirhusRepository,
+        IncidenciaApunteRepository $apunteRepository,
+        EstadoRepository           $estadoRepository,
+        string                     $codigo,
+        Incidencia                 $incidencia,
+    ): Response {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
+        $cuestionario = $this->cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
+        $iniciado = $estadoRepository->findOneBy(['nombre' => Estado::INICIADO]);
+        $cirhus = $incidencia->getIncidencia();
+        $ultimo = $cirhus?->getApuntes()->last();
+        if ($incidencia->getCuestionario() !== $cuestionario) {
+            $this->addFlash('warning', 'La incidencia no corresponde al cuestionario.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        } elseif ($incidencia->getIncidencia()?->getSolicitante() !== $this->getUser()) {
+            $this->addFlash('warning', 'La incidencia no ha sido solicitada por el usuario.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        } elseif (!$ultimo instanceof IncidenciaApunte || $ultimo->getEstado() !== $iniciado) {
+            $this->addFlash('warning', 'La incidencia está siendo tratada y no puede ser eliminada.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        $id = $incidencia->getId();
+        if ($this->isCsrfTokenValid('delete'. (int) $id, $request->request->getString('_token'))) {
+            if ($cirhus instanceof CirhusIncidencia) {
+                foreach ($apunteRepository->findBy(['incidencia' => $cirhus]) as $apunte) {
+                    $apunteRepository->remove($apunte);
+                }
+                $cirhusRepository->remove($cirhus);
+            }
+
+            $this->incidenciaRepository->remove($incidencia, true);
+            $this->generator->logAndFlash('info', 'Incidencia de desempeño eliminada', [
+                'id' => $id,
+                'cuestionario' => $codigo,
+                'solicitante' => $cirhus->getSolicitante()?->getUvus(),
+            ]);
+        }
+
+        return $this->redirectToRoute($this->rutaBase . '_formulario_incidencia_index', ['codigo' => $codigo], Response::HTTP_SEE_OTHER);
     }
 }

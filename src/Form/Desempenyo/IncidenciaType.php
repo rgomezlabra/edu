@@ -29,7 +29,7 @@ class IncidenciaType extends AbstractType
                 'attr' => [
                     'class' => 'w-25',
                 ],
-                'help' => 'Elegir de la lista un tipo de incidencia',
+                'help' => 'Elegir un tipo de incidencia de la lista desplegable.',
                 'label' => 'Tipo de incidencia',
                 'placeholder' => false,
             ])
