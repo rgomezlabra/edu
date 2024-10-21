@@ -5,9 +5,7 @@
     <div class="pagina-titulo">{{ titulo }}</div>
 
     {{ form_start(form) }}
-    {{ form_row(form.cuestionario) }}
-    {{ form_row(form.tipo) }}
-    {{ form_row(form.incidencia.descripcion) }}
+    {{ form_widget(form) }}
     <div class="linea-botones">
         <button class="btn btn-primary"><em class="fas fa-save"></em> {{ button_label|default('Guardar') }}</button>
     </div>
@@ -18,9 +16,13 @@
 
 {% block migas %}
     {{ parent() }}
-    <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_index', {codigo: incidencia.cuestionario.url|u.afterLast('/')}) }}">
-            Incidencias
-        </a>
-    </li>
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_index') }}">Incidencias</a></li>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+        import { Popover } from 'bootstrap';
+        const ayuda = new Popover('#ayudaEstados', {html: true,});
+    </script>
 {% endblock %}

@@ -55,10 +55,10 @@
                         <td>{{ apunte.autor.persona }}</td>
                         <td>
                             {%- if incidencia.incidencia.apuntes.last.estado.nombre|default != constant('App\\Entity\\Sistema\\Estado::FINALIZADO')  and loop.last %}
-{#                                <a href="{{ path('intranet_cirhus_admin_incidencia_apunte_edit',{'incidencia': incidencia.id, 'apunte': apunte.id}) }}">#}
-                                    <span class="mx-1 fas fa-edit" title="Editar"></span>
-{#                                </a>#}
-                            {% endif %}
+                                <a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_apunte',{'incidencia': incidencia.id, 'apunte': apunte.id}) }}">
+                                    <em class="mx-1 fas fa-edit" title="Editar"></em>
+                                </a>
+                            {%- endif %}
                         </td>
                     </tr>
                     {% if loop.first %}{% set inicio = apunte.fechaInicio | date('U') %}{% endif -%}
@@ -83,24 +83,12 @@
 {% endblock %}
 
 {% block botones %}
-    {%- if incidencia.incidencia.apuntes.last.estado.nombre != constant('App\\Entity\\Sistema\\Estado::FINALIZADO') %}
-        <li class="boton-inferior nav-item me-2">
-{#            <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_incidencia_edit', {'incidencia': incidencia.id}) }}">#}
-                <span class="fas fa-edit"></span> Editar
-{#            </a>#}
-        </li>
-        <li class="nav-item me-2">
-{#            <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_incidencia_apunte', {'incidencia': incidencia.id}) }}">#}
-                <span class="mx-1 fas fa-project-diagram"></span> Cambiar estado
-{#            </a>#}
-        </li>
-        {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Sistema\\Estado::INICIADO') %}
-            <li class="nav-item ms-5 me-2">
-                borrar apunte
-{#                {{ include(path(aplicacion.ruta) ~ '/admin/incidencia/_delete_form.html.twig') }}#}
-            </li>
-        {%- endif %}
-    {%- endif %}
+    <li class="nav-item me-2">
+        <a class="btn btn-primary"
+           href="{{ path(aplicacion.ruta ~ '_admin_incidencia_apunte',{'incidencia': incidencia.id}) }}">
+            <em class="fas fa-project-diagram"></em> Cambiar estado
+        </a>
+    </li>
 {% endblock %}
 
 {% block modal %}{% endblock %}

@@ -80,7 +80,7 @@
         <li class="boton-inferior nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_edit', {codigo: incidencia.cuestionario.url|u.afterLast('/'), id: incidencia.id}) }}">
-                <span class="fas fa-edit"></span> Editar
+                <em class="fas fa-edit"></em> Editar
             </a>
         </li>
             <li class="nav-item ms-5 me-2">
@@ -88,7 +88,7 @@
                       action="{{ path(aplicacion.ruta ~ '_formulario_incidencia_delete', {codigo: incidencia.cuestionario.url|u.afterLast('/'), id: incidencia.id}) }}"
                       onsubmit="return confirm('¿Eliminar la incidencia actual?');">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ incidencia.id) }}">
-                    <button class="btn btn-primary"><span class="fas fa-trash"></span> Eliminar</button>
+                    <button class="btn btn-primary"><em class="fas fa-trash"></em> Eliminar</button>
                 </form>
             </li>
     {%- endif %}

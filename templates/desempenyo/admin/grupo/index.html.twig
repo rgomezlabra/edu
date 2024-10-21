@@ -24,15 +24,15 @@
                     <td>{{ grupo.preguntas|length }}</td>
                     <td>
                         <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_show', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">
-                            <span class="mx-1 fas fa-eye" title="Ver"></span>
+                            <em class="mx-1 fas fa-eye" title="Ver"></em>
                         </a>
                         {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
                             <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_edit', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">
-                                <span class="mx-1 fas fa-edit" title="Editar"></span>
+                                <em class="mx-1 fas fa-edit" title="Editar"></em>
                             </a>
                         {%- endif %}
                         <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">
-                            <span class="mx-1 fas fa-question-circle" title="Preguntas"></span>
+                            <em class="mx-1 fas fa-question-circle" title="Preguntas"></em>
                         </a>
                     </td>
                 </tr>
@@ -53,12 +53,12 @@
     {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
         <li class="nav-item me-2">
             <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_grupo_new', {'id': cuestionario.id}) }}">
-                <span class="fas fa-plus"></span> Crear grupo
+                <em class="fas fa-plus"></em> Crear grupo
             </a>
         </li>
     {%- endif %}
     <li class="nav-item me-2">
-         <a id="ordenar" class="btn btn-primary disabled" href=""><span class="fas fa-save"></span> Grabar orden</a>
+         <a id="ordenar" class="btn btn-primary disabled" href=""><em class="fas fa-save"></em> Grabar orden</a>
     </li>
     <div id="aviso" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">

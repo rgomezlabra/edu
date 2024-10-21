@@ -1,5 +1,5 @@
 <form method="post" action="{{ path(aplicacion.ruta ~ '_admin_grupo_delete', {'cuestionario': grupo.cuestionario.id, 'grupo': grupo.id}) }}"
       onsubmit="return confirm('¿Eliminar el grupo {{ grupo.orden }} del cuestionario {{ grupo.cuestionario.codigo }}?');">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ grupo.id) }}">
-    <button class="btn btn-primary"><span class="fas fa-trash"></span> Eliminar</button>
+    <button class="btn btn-primary"><em class="fas fa-trash"></em> Eliminar</button>
 </form>

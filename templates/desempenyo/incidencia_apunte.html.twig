@@ -5,9 +5,7 @@
     <div class="pagina-titulo">{{ titulo }}</div>
 
     {{ form_start(form) }}
-    {{ form_row(form.cuestionario) }}
-    {{ form_row(form.tipo) }}
-    {{ form_row(form.incidencia.descripcion) }}
+    {{ form_widget(form) }}
     <div class="linea-botones">
         <button class="btn btn-primary"><em class="fas fa-save"></em> {{ button_label|default('Guardar') }}</button>
     </div>

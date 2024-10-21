@@ -46,11 +46,11 @@
                     <td class="text-start">{{ tipos[pregunta.tipo].leyenda|default(pregunta.tipo) }}</td>
                     <td>
                         <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_show', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'pregunta': pregunta.id}) }}">
-                            <span class="mx-1 fas fa-eye" title="Ver"></span>
+                            <em class="mx-1 fas fa-eye" title="Ver"></em>
                         </a>
                         {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
                             <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_edit', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'pregunta': pregunta.id}) }}">
-                                <span class="mx-1 fas fa-edit" title="Editar"></span>
+                                <em class="mx-1 fas fa-edit" title="Editar"></em>
                             </a>
                         {%- endif %}
                     </td>
@@ -72,11 +72,11 @@
     {%- if grupo != null %}
         {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
             <li class="nav-item me-2">
-                <button id="crear" class="btn btn-primary"><span class="fas fa-plus"></span> Crear pregunta</button>
+                <button id="crear" class="btn btn-primary"><em class="fas fa-plus"></em> Crear pregunta</button>
             </li>
         {%- elseif preguntas|length > 1 %}
             <li class="nav-item me-2">
-                <a id="ordenar" class="btn btn-primary disabled" href=""><span class="fas fa-save"></span> Grabar orden</a>
+                <a id="ordenar" class="btn btn-primary disabled" href=""><em class="fas fa-save"></em> Grabar orden</a>
             </li>
             <div id="aviso" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">

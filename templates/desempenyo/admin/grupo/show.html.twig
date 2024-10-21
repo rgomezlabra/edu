@@ -32,7 +32,7 @@
         <li class="boton-inferior nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_grupo_edit', {'cuestionario': grupo.cuestionario.id, 'grupo': grupo.id}) }}">
-                <span class="fas fa-edit"></span> Editar
+                <em class="fas fa-edit"></em> Editar
             </a>
         </li>
     {%- elseif grupo.preguntas|length == 0 %}
@@ -43,7 +43,7 @@
         <li class="boton-inferior nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {'cuestionario': grupo.cuestionario.id, 'grupo': grupo.id}) }}">
-                <span class="fas fa-question-circle"></span> Preguntas
+                <em class="fas fa-question-circle"></em> Preguntas
             </a>
         </li>
     {%- endif %}

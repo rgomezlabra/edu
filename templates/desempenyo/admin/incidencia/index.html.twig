@@ -40,7 +40,10 @@
                 </td>
                 <td>
                     <a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_show', {id: incidencia.id}) }}">
-                        <span class="mx-1 fas fa-eye" title="Ver apuntes"></span>
+                        <em class="mx-1 fas fa-eye" title="Ver apuntes"></em>
+                    </a>
+                    <a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_apunte',{'incidencia': incidencia.id}) }}">
+                        <em class="mx-1 fas fa-project-diagram" title="Cambiar estado"></em>
                     </a>
                 </td>
             </tr>
@@ -59,7 +62,7 @@
 {% block botones %}
     <li class="nav-item me-2">
         <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_new') }}">
-            <span class="fas fa-plus"></span> Crear tipo
+            <em class="fas fa-plus"></em> Crear tipo
         </a>
     </li>
 {% endblock %}

@@ -21,8 +21,8 @@
                 <tr>
                     <td class="text-center">
                         {%- if cuestionario.estado %}
-                            <span class="fas {{ cuestionario.estado.icono }} text-{{ cuestionario.estado.color }}"
-                                  title="{{ cuestionario.estado.nombre }}"></span>
+                            <em class="fas {{ cuestionario.estado.icono }} text-{{ cuestionario.estado.color }}"
+                                title="{{ cuestionario.estado.nombre }}"></em>
                         {%- endif %}
                     </td>
                     <td>{{ cuestionario.codigo }}</td>
@@ -32,22 +32,22 @@
                     <td>{{ cuestionario.autor.persona }}</td>
                     <td>
                         <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {'id': cuestionario.id}) }}">
-                            <span class="mx-1 fas fa-eye" title="Ver"></span>
+                            <em class="mx-1 fas fa-eye" title="Ver"></em>
                         </a>
                         <a href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {'id': cuestionario.id}) }}">
-                            <span class="mx-1 fas fa-user-check" title="Evaluadores"></span>
+                            <em class="mx-1 fas fa-user-check" title="Evaluadores"></em>
                         </a>
                         <a href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {'id': cuestionario.id}) }}">
-                            <span class="mx-1 fas fa-object-group" title="Grupos de preguntas"></span>
+                            <em class="mx-1 fas fa-object-group" title="Grupos de preguntas"></em>
                         </a>
                         {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO')
                             or cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::ARCHIVADO') %}
 {#                            <a href="{{ path(aplicacion.ruta ~ '_admin_formulario_index', {'cuestionario': cuestionario.id}) }}">#}
-                                <span class="mx-1 fas fa-list-check" title="Formularios entregados"></span>
+                                <em class="mx-1 fas fa-list-check" title="Formularios entregados"></em>
 {#                            </a>#}
                         {%- elseif cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
                             <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_edit', {'id': cuestionario.id}) }}">
-                                <span class="mx-1 fas fa-edit" title="Editar"></span>
+                                <em class="mx-1 fas fa-edit" title="Editar"></em>
                             </a>
                         {%- endif %}
                     </td>
@@ -72,7 +72,7 @@
 {% block botones %}
     <li class="nav-item me-2">
         <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_new') }}">
-            <span class="fas fa-plus"></span> Crear cuestionario
+            <em class="fas fa-plus"></em> Crear cuestionario
         </a>
     </li>
 {% endblock %}

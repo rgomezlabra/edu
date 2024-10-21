@@ -3,12 +3,14 @@
 
 {% block content %}
     <a class="float-end" href="{{ path('intranet_ayuda_show', {'aplic': aplicacion.ruta|regex_replace('/^intranet_/', '')}) }}">
-        <span class="fas fa-info-circle"></span> Ayuda
+        <em class="fas fa-info-circle"></em> Ayuda
     </a>
     <div class="pagina-titulo">
         {{- titulo }}
         {%- if aplicacion.estadoActual and aplicacion.estadoActual.color %}
-            <sup class="badge bg-{{ aplicacion.estadoActual.color }}"><span class="fas fa-sm {{ aplicacion.estadoActual.icono }}"></span> {{ aplicacion.estadoActual }}</sup>
+            <sup class="badge bg-{{ aplicacion.estadoActual.color }}">
+                <em class="fas fa-sm {{ aplicacion.estadoActual.icono }}"></em> {{ aplicacion.estadoActual }}
+            </sup>
         {%- endif %}
     </div>
     <p class="">{{ aplicacion.descripcion }}</p>
@@ -184,14 +186,14 @@
                 {%- endif %}
                 <div class="h5">
                     <a href="{{ path(aplicacion.ruta ~ '_' ~ rol.ruta) }}">
-                        <span class="fas {{ rol.icono }}"></span> {{ rol.nombre }}
+                        <em class="fas {{ rol.icono }}"></em> {{ rol.nombre }}
                     </a>
                     {% if p.unidad %} <span class="badge rounded-pill">({{ p.unidad.nombre }})</span>{% endif %}
                 </div>
                 <p>{{ rol.descripcion }}</p>
             {%- else %}
                 <div class="h5">
-                    <span class="fas {{ rol.icono }}"></span> {{ rol.nombre }}
+                    <em class="fas {{ rol.icono }}"></em> {{ rol.nombre }}
                     <sup class="bg-{{ p.estado.color|default }}">({{ p.estado.nombre }})</sup>
                 </div>
             {%- endif %}
@@ -210,7 +212,7 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path('intranet_usuario_aplicacion') }}"><span class="fas fa-tools"></span> Mis Aplicaciones</a>
+        <a href="{{ path('intranet_usuario_aplicacion') }}"><em class="fas fa-tools"></em> Mis Aplicaciones</a>
     </li>
 {% endblock %}
 

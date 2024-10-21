@@ -34,7 +34,7 @@
                     <td>
                         <a class="rechazar" href="" data-persona="{{ evaluacion.empleado.persona }}"
                            data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_rechaza', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
-                            <span class="mx-1 fas fa-remove" title="Rechazar evaluación"></span>
+                            <em class="mx-1 fas fa-remove" title="Rechazar evaluación"></em>
                         </a>
                     </td>
                 </tr>
@@ -115,13 +115,13 @@
                     </td>
                     <td>{{ evaluacion.origen.nombre|default|capitalize }}</td>
                     <td>
-                        <span class="mx-1 fas fa-people-arrows" title="Reasignar"></span>
+                        <em class="mx-1 fas fa-people-arrows" title="Reasignar"></em>
                         <form method="post" class="d-inline"
                               action="{{ path(aplicacion.ruta ~ '_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion.id}) }}"
                               onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluacion.evaluador.persona }} sobre {{ evaluacion.empleado.persona }}?');">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cuestionario.id ~ '-' ~ evaluacion.id) }}">
                             <button class="border-0 text-primary">
-                                <span class="mx-1 fas fa-trash" title="Desasignar"></span>
+                                <em class="mx-1 fas fa-trash" title="Desasignar"></em>
                             </button>
                         </form>
                     </td>
@@ -162,7 +162,7 @@
                     <td>
                         <a class="recuperar" href="" data-persona="{{ evaluacion.empleado.persona }}"
                            data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_recupera', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
-                            <span class="mx-1 fas fa-check" title="Recuperar evaluación"></span>
+                            <em class="mx-1 fas fa-check" title="Recuperar evaluación"></em>
                         </a>
                     </td>
                 </tr>
@@ -178,7 +178,7 @@
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')}) }}">
-                <span class="fas fa-users"></span> Ver empleados
+                <em class="fas fa-users"></em> Ver empleados
             </a>
         </li>
     {%- endif %}
@@ -186,7 +186,7 @@
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')}) }}">
-                <span class="fas fa-user-check"></span> Ver responsables
+                <em class="fas fa-user-check"></em> Ver responsables
             </a>
         </li>
     {%- endif %}
@@ -194,7 +194,7 @@
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')}) }}">
-                <span class="fas fa-user-pen"></span> Ver otros
+                <em class="fas fa-user-pen"></em> Ver otros
             </a>
         </li>
     {%- endif %}
@@ -202,7 +202,7 @@
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION')}) }}">
-                <span class="fas fa-user-times"></span> Ver no evaluados
+                <em class="fas fa-user-times"></em> Ver no evaluados
             </a>
         </li>
     {%- endif %}
@@ -210,20 +210,20 @@
         <li class="nav-item me-2">
             <button class="btn btn-primary cargar" id="cargarEmpleados"
                data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_auto', {id: cuestionario.id}) }}">
-                <span class="fas fa-person-arrow-down-to-line"></span> Cargar empleados
+                <em class="fas fa-person-arrow-down-to-line"></em> Cargar empleados
             </button>
         </li>
     {%- elseif tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id}) }}">
-                <span class="fas fa-file-upload"></span> Cargar desde CSV
+                <em class="fas fa-file-upload"></em> Cargar desde CSV
             </a>
         </li>
         <li class="nav-item me-2">
             <button class="btn btn-primary cargar" id="cargarValida"
                     data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_volcado', {id: cuestionario.id}) }}">
-                <span class="fas fa-cloud-upload"></span> Cargar desde Temponet
+                <em class="fas fa-cloud-upload"></em> Cargar desde Temponet
             </button>
         </li>
     {%- endif %}

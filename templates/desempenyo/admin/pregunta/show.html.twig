@@ -70,13 +70,13 @@
         <li class="boton-inferior nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_pregunta_edit', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'pregunta': pregunta.id}) }}">
-                <span class="fas fa-edit"></span> Editar
+                <em class="fas fa-edit"></em> Editar
             </a>
         </li>
     {%- endif %}
     <li class="nav-item me-2">
         <a id="simula" class="btn btn-primary" href="">
-            <span class="fas fa-video"></span> Simular
+            <em class="fas fa-video"></em> Simular
         </a>
     </li>
     {%- if pregunta.grupo.cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
