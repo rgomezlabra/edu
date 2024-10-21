@@ -350,10 +350,6 @@ class IncidenciaController extends AbstractController
                 $this->addFlash('warning', 'No se puede cambiar a estado iniciado.');
 
                 return $this->redirectToRoute($request->attributes->getString('_route'));
-            } elseif ($ultimo instanceof IncidenciaApunte && $apunte->getEstado() === $ultimo->getEstado()) {
-                $this->addFlash('warning', 'El estado no ha cambiado.');
-
-                return $this->redirectToRoute($request->attributes->getString('_route'), ['id' => $incidencia->getId()]);
             }
 
             $fecha = new DateTimeImmutable();
