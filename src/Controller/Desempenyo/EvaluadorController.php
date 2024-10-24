@@ -160,10 +160,10 @@ class EvaluadorController extends AbstractController
         foreach ($empleados as $empleado) {
             ++$datos['actual'];
             if (!$this->evaluaRepository->findOneBy([
-                'empleado' => $empleado,
-                'tipo_evaluador' => Evalua::AUTOEVALUACION,
-                'cuestionario' => $cuestionario,
-                'origen' => $externo,
+                    'empleado' => $empleado,
+                    'tipo_evaluador' => Evalua::AUTOEVALUACION,
+                    'cuestionario' => $cuestionario,
+                    'origen' => $externo,
                 ]) instanceof Evalua) {
                 $evalua = new Evalua();
                 $evalua
@@ -218,8 +218,9 @@ class EvaluadorController extends AbstractController
 
     /** Cargar datos que relacionan empleado con su evaluador para el cuestionario indicado. */
     #[Route(
-        path: '/admin/cuestionario/{id}/evaluador/carga',
+        path: '/admin/cuestionario/{id}/{tipo}/carga',
         name: 'admin_evaluador_carga',
+        requirements: ['tipo' => '(evaluador)|(otro)'],
         defaults: ['titulo' => 'Cargar Evaluadores de Empleados'],
         methods: ['GET', 'POST']
     )]
@@ -228,10 +229,20 @@ class EvaluadorController extends AbstractController
         EmpleadoRepository $empleadoRepository,
         OrigenRepository   $origenRepository,
         Cuestionario       $cuestionario,
+        string             $tipo,
     ): Response {
         $this->denyAccessUnlessGranted('admin');
+        $tipo = match ($tipo) {
+            'evaluador' => Evalua::EVALUA_RESPONSABLE,
+            'otro' => Evalua::EVALUA_OTRO,
+            default => null,
+        };
         if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
+
+            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
+        } elseif (null === $tipo) {
+            $this->addFlash('warning', 'Tipo de evaluador desconocido.');
 
             return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
         }
@@ -259,7 +270,10 @@ class EvaluadorController extends AbstractController
                     'fichero' => $fichero->getClientOriginalName(),
                 ]);
 
-                return $this->redirectToRoute($request->attributes->getString('_route'), ['id' => $cuestionario->getId()]);
+                return $this->redirectToRoute(
+                    $request->attributes->getString('_route'),
+                    ['id' => $cuestionario->getId()]
+                );
             }
 
             while (($datos = $csv->leer($campos)) !== null) {
@@ -275,13 +289,15 @@ class EvaluadorController extends AbstractController
                 $empleado = $empleadoRepository->findOneByDocumento($linea['DNI USUARIO']);
                 $evaluador = $empleadoRepository->findOneByDocumento($linea['DNI VALIDADOR']);
                 if ($empleado instanceof Empleado && $evaluador instanceof Empleado) {
-                    if (0 === $this->evaluaRepository->count(['empleado' => $empleado, 'evaluador' => $evaluador, 'cuestionario' => $cuestionario])) {
+                    if (0 === $this->evaluaRepository->count(
+                            ['empleado' => $empleado, 'evaluador' => $evaluador, 'cuestionario' => $cuestionario]
+                        )) {
                         $evaluacion = new Evalua();
                         $evaluacion
                             ->setCuestionario($cuestionario)
                             ->setEmpleado($empleado)
                             ->setEvaluador($evaluador)
-                            ->setTipoEvaluador(Evalua::EVALUA_RESPONSABLE)
+                            ->setTipoEvaluador($tipo)
                             ->setOrigen($fichero)
                         ;
                         $this->evaluaRepository->save($evaluacion, true);
@@ -309,13 +325,14 @@ class EvaluadorController extends AbstractController
 
             return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', [
                 'id' => $cuestionario->getId(),
-                'tipo' => Evalua::EVALUA_RESPONSABLE,
+                'tipo' => $tipo,
             ], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('intranet/desempenyo/admin/evaluador/volcado.html.twig', [
             'form' => $form->createView(),
             'cuestionario' => $cuestionario,
+            'tipo' => $tipo,
             'campos' => $campos,
         ]);
     }
@@ -387,10 +404,12 @@ class EvaluadorController extends AbstractController
         if (!$evalua instanceof Evalua) {
             $this->generator->logAndFlash('warning', 'El empleado no existe o no es evaluable', [
                 'cuestionario' => $cuestionario->getCodigo(),
-                'usuario' => $empleado->getPersona()?->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
+                'usuario' => $empleado->getPersona()?->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(
+                    ),
             ]);
 
-            return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]);
+            return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]
+            );
         }
 
         $evalua
@@ -434,7 +453,8 @@ class EvaluadorController extends AbstractController
         if (!$evalua instanceof Evalua) {
             $this->generator->logAndFlash('warning', 'El empleado no existe o no es evaluable', [
                 'cuestionario' => $cuestionario?->getCodigo(),
-                'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
+                'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(
+                    ),
             ]);
 
             return $this->redirectToRoute('intranet_desempenyo');
@@ -472,12 +492,18 @@ class EvaluadorController extends AbstractController
             'tipo_evaluador' => Evalua::NO_EVALUACION,
         ]);
         if (!$evalua instanceof Evalua) {
-            $this->generator->logAndFlash('warning', 'El empleado no existe o no había solicitado rechazar evaluación', [
-                'cuestionario' => $cuestionario->getCodigo(),
-                'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
-            ]);
+            $this->generator->logAndFlash(
+                'warning',
+                'El empleado no existe o no había solicitado rechazar evaluación',
+                [
+                    'cuestionario' => $cuestionario->getCodigo(),
+                    'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser(
+                        )?->getUserIdentifier(),
+                ]
+            );
 
-            return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]);
+            return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]
+            );
         }
 
         $evalua
@@ -519,10 +545,15 @@ class EvaluadorController extends AbstractController
             'tipo_evaluador' => Evalua::NO_EVALUACION,
         ]);
         if (!$evalua instanceof Evalua) {
-            $this->generator->logAndFlash('warning', 'El empleado no existe o no había solicitado rechazar evaluación', [
-                'cuestionario' => $cuestionario?->getCodigo(),
-                'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(),
-            ]);
+            $this->generator->logAndFlash(
+                'warning',
+                'El empleado no existe o no había solicitado rechazar evaluación',
+                [
+                    'cuestionario' => $cuestionario?->getCodigo(),
+                    'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser(
+                        )?->getUserIdentifier(),
+                ]
+            );
 
             return $this->redirectToRoute('intranet_desempenyo');
         }

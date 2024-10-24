@@ -2,7 +2,12 @@
 {% set avisos = {1: 'Ausente', 2: 'Vigencia futura'} %}
 
 {% block content %}
-    <div class="pagina-titulo">{{ titulo }}</div>
+    <div class="pagina-titulo">
+        {{ titulo }}
+        {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %} (responsables)
+        {%- elseif tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %} (terceros agentes)
+        {%- endif -%}
+    </div>
 
     <div class="pagina-seccion">Cuestionario {{ cuestionario.codigo }}</div>
     {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
@@ -17,7 +22,6 @@
             <thead class="cabecera-condensada">
                 <tr>
                     <th>Unidad</th>
-                    <th>Doc. empleado</th>
                     <th>Nombre empleado</th>
                     <th data-dt-order="disable">Acciones</th>
                 </tr>
@@ -29,7 +33,6 @@
                         {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
                             : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
                     </td>
-                    <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
                     <td>{{ evaluacion.empleado.persona }}</td>
                     <td>
                         <a class="rechazar" href="" data-persona="{{ evaluacion.empleado.persona }}"
@@ -216,7 +219,7 @@
     {%- elseif tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id}) }}">
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id, tipo: 'evaluador'}) }}">
                 <em class="fas fa-file-upload"></em> Cargar desde CSV
             </a>
         </li>
@@ -227,13 +230,21 @@
             </button>
         </li>
     {%- endif %}
+    {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
+        <li class="nav-item me-2">
+            <a class="btn btn-primary"
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id, tipo: 'otro'}) }}">
+                <em class="fas fa-file-upload"></em> Cargar desde CSV
+            </a>
+    </li>
+    {%- endif %}
 {% endblock %}
 
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">Cuestionarios</a></li>
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {'id': cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
+        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
     </li>
 {% endblock %}
 

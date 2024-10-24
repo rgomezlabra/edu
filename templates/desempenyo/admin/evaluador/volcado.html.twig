@@ -7,11 +7,14 @@
         Última carga de datos: {{ ultimo is defined ? ultimo|date('Y-m-d H:i:s') : 'sin fecha' }}
     </div>
 
-    <div class="pagina-seccion">Volcado de datos de evaluación</div>
+    <div class="pagina-seccion">
+        Volcado de datos de evaluación de
+        {{ tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') ? 'responsables' : 'otros agentes'}}
+    </div>
     <div class="alert alert-info">
         El volcado de datos actualizará todas las relaciones entre empleados y sus evaluadores de competencias,
-        teniendo en cuenta que odas las personas deben pertenecer activamente a la plantilla actual de la Universidad de
-        Sevilla.<br>
+        teniendo en cuenta que todas las personas deben pertenecer activamente a la plantilla actual de la Universidad
+        de Sevilla.<br>
         Los datos se cargarán usando un <strong>fichero CSV</strong> que contenga al menos los siguientes campos
         separados por comas:<br>
         {{ campos|join(', ') }}
@@ -29,7 +32,7 @@
     {{ parent() }}
     <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">Cuestionarios</a></li>
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {'id': cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
+        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
     </li>
 {% endblock %}
 
