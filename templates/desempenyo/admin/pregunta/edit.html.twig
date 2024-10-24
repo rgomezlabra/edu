@@ -7,13 +7,13 @@
         <em class="fas fa-info-circle"></em>
         Si se desea modificar el tipo de pregunta, ésta debe ser eliminada y creada de nuevo con el tipo adecuado.
     </div>
-    {{ include(path(aplicacion.ruta) ~ '/admin/pregunta/_form.html.twig', {'button_label': 'Actualizar'}) }}
+    {{ include(path(aplicacion.ruta) ~ '/admin/pregunta/_form.html.twig', {button_label: 'Actualizar'}) }}
 {% endblock %}
 
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">Preguntas</a>
+        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {cuestionario: cuestionario.id, grupo: grupo.id}) }}">Preguntas</a>
     </li>
 {% endblock %}
 

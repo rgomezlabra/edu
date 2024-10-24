@@ -18,6 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Controlador para gestionar preguntas para cuestionarios.
+ * @warning La función Ajax para cambiar el orden de las preguntas está en el controlador de Cuestiona.
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
 class PreguntaController extends AbstractController
@@ -48,7 +49,7 @@ class PreguntaController extends AbstractController
             '/{cuestionario}/pregunta',
         ],
         name: 'intranet_desempenyo_admin_pregunta_index',
-        defaults: ['titulo' => 'Preguntas'],
+        defaults: ['titulo' => 'Preguntas de Desempeño'],
         methods: ['GET']
     )]
     public function index(Cuestionario $cuestionario, ?Grupo $grupo): Response
@@ -63,7 +64,7 @@ class PreguntaController extends AbstractController
             $cuestionario
         );
 
-        return $this->render(sprintf('%s/admin/pregunta/index.html.twig', $this->aplic?->rutaToTemplateDir() ?? ''), [
+        return $this->render('intranet/desempenyo/admin/pregunta/index.html.twig', [
             'cuestionario' => $cuestionario,
             'grupo' => $grupo,
             'preguntas' => $preguntas,
@@ -119,6 +120,7 @@ class PreguntaController extends AbstractController
             $this->generator->logAndFlash('info', 'Nueva pregunta de desempeño', [
                 'id' => $cuestionario->getId(),
                 'cuestionario' => $cuestionario->getCodigo(),
+                'grupo' => $grupo->getCodigo(),
                 'pregunta' => $pregunta->getCodigo(),
             ]);
 
@@ -129,13 +131,35 @@ class PreguntaController extends AbstractController
             );
         }
 
-        return $this->render(sprintf('%s/admin/pregunta/new.html.twig', $this->aplic?->rutaToTemplateDir() ?? ''), [
+        return $this->render('intranet/desempenyo/admin/pregunta/new.html.twig', [
             'cuestionario' => $cuestionario,
             'grupo' => $grupo,
             'pregunta' => $pregunta,
             'tipos' => $tipos,
             'opciones' => $this->opciones,
             'form' => $form->createView(),
+        ]);
+    }
+
+     #[Route(
+        path: '/intranet/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta/{pregunta}/',
+        name: 'intranet_desempenyo_admin_pregunta_show',
+        defaults: ['titulo' => 'Pregunta de Desempeño'],
+        methods: ['GET']
+    )]
+   public function show(Cuestionario $cuestionario, Grupo $grupo, Pregunta $pregunta): Response
+    {
+        $this->denyAccessUnlessGranted('admin');
+        $tipos = $this->cargarTipos();
+        if (!$this->checkAcceso($cuestionario, $grupo, $pregunta)) {
+            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+        }
+
+        return $this->render('intranet/desempenyo/admin/pregunta/show.html.twig', [
+            'cuestionario' => $cuestionario,
+            'grupo' => $grupo,
+            'pregunta' => $pregunta,
+            'tipos' => $tipos,
         ]);
     }
 
@@ -179,6 +203,7 @@ class PreguntaController extends AbstractController
             $this->generator->logAndFlash('info', 'Pregunta de desempeño modificada', [
                 'id' => $cuestionario->getId(),
                 'cuestionario' => $cuestionario->getCodigo(),
+                'grupo' => $grupo->getCodigo(),
                 'pregunta' => $pregunta->getCodigo(),
             ]);
 
@@ -189,7 +214,7 @@ class PreguntaController extends AbstractController
             );
         }
 
-        return $this->render(sprintf('%s/admin/pregunta/edit.html.twig', $this->aplic?->rutaToTemplateDir() ?? ''), [
+        return $this->render('intranet/desempenyo/admin/pregunta/edit.html.twig', [
             'cuestionario' => $cuestionario,
             'grupo' => $grupo,
             'pregunta' => $pregunta,
@@ -197,6 +222,40 @@ class PreguntaController extends AbstractController
             'opciones' => $this->opciones,
             'form' => $form->createView(),
         ]);
+    }
+
+    #[Route(
+        path: '/intranet/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta/{pregunta}',
+        name: 'intranet_desempenyo_admin_pregunta_delete',
+        defaults: ['titulo' => 'Eliminar Pregunta de Desempeño'],
+        methods: ['POST']
+    )]
+    public function delete(Request $request, Cuestionario $cuestionario, Grupo $grupo, Pregunta $pregunta): Response
+    {
+        $this->denyAccessUnlessGranted('admin');
+        if (!$this->checkAcceso($cuestionario, $grupo, $pregunta)) {
+            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+        } elseif (Estado::BORRADOR !== $cuestionario->getEstado()?->getNombre()) {
+            $this->addFlash('warning', 'El cuestionario no puede ser modificado.');
+
+            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+        }
+
+        $id = $pregunta->getId();
+        if ($this->isCsrfTokenValid('delete' . (int) $id, $request->request->getString('_token'))) {
+            $this->preguntaRepository->remove($pregunta, true);
+            $this->generator->logAndFlash('info', 'Pregunta de desempeño eliminada', [
+                'id' => $id,
+                'cuestionario' => $cuestionario->getCodigo(),
+                'grupo' => $grupo->getCodigo(),
+                'pregunta' => $pregunta->getCodigo(),
+            ]);
+        }
+
+        return $this->redirectToRoute('intranet_desempenyo_admin_pregunta_index', [
+            'cuestionario' => $cuestionario->getId(),
+            'grupo' => $grupo->getId(),
+        ], Response::HTTP_SEE_OTHER);
     }
 
     /** Comprobar si los parámetros son correctos para acceder al controlador. */

@@ -65,7 +65,7 @@
     {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
         <li class="boton-inferior nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_pregunta_edit', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'pregunta': pregunta.id}) }}">
+               href="{{ path(aplicacion.ruta ~ '_admin_pregunta_edit', {cuestionario: cuestionario.id, grupo: grupo.id, pregunta: pregunta.id}) }}">
                 <em class="fas fa-edit"></em> Editar
             </a>
         </li>
@@ -77,7 +77,7 @@
     </li>
     {%- if pregunta.grupo.cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
         <li class="boton-inferior nav-item ms-5 me-2">
-            {{ include('intranet/cuestiona/admin/pregunta/_delete_form.html.twig') }}
+            {{ include(path(aplicacion.ruta) ~ '/admin/pregunta/_delete_form.html.twig') }}
         </li>
     {%- endif %}
 {% endblock %}
@@ -85,7 +85,7 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">Preguntas</a>
+        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {cuestionario: cuestionario.id, grupo: grupo.id}) }}">Preguntas</a>
     </li>
 {% endblock %}
 

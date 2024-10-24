@@ -9,7 +9,7 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}">Preguntas</a>
+        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {cuestionario: cuestionario.id, grupo: grupo.id}) }}">Preguntas</a>
     </li>
 {% endblock %}
 
