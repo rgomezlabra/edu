@@ -14,9 +14,11 @@
         <table class="tabla-condensada" id="datosPreguntas">
             <thead class="cabecera-condensada">
                 <tr>
-                    <th>{% if grupo == null %}Grupo{% endif %}</th>
                     <th>Orden</th>
-                    <th class="text-center">Activo</th>
+                    <th>Orden</th>
+                    <th class="text-center">Activa</th>
+                    <th>Cuestionario</th>
+                    <th>Código</th>
                     <th>Pregunta</th>
                     <th class="text-start">Tipo</th>
                     <th>Acciones</th>
@@ -25,15 +27,11 @@
             <tbody>
             {%- for pregunta in preguntas %}
                 <tr class="fila" data-id="{{ pregunta.id }}">
-                    {%- if grupo == null %}
-                        <td>{{ pregunta.grupo.orden }}</td>
-                    {%- else %}
-                        <td>
-                            {%- if preguntas|length > 1 %}
-                                <span class="badge-secondary" title="Reordenar preguntas"><em class="fas fa-sort"></em></span>
-                            {%- endif %}
-                        </td>
-                    {%- endif %}
+                    <td>
+                        {%- if preguntas|length > 1 %}
+                            <span class="badge-secondary" title="Reordenar preguntas"><em class="fas fa-sort"></em></span>
+                        {%- endif %}
+                    </td>
                     <td>{{ pregunta.orden }}</td>
                     <td class="text-center">
                         {%- if pregunta.activa -%}
@@ -42,7 +40,15 @@
                             No <sup><em class="fas fa-times text-danger }}"></em></sup>
                         {%- endif -%}
                     </td>
-                    <td>{{ pregunta }}</td>
+                    <td>
+                        {%- if pregunta.reducida -%}
+                            <span class="badge-warning }}">reducido</span>
+                        {%- else -%}
+                            <span class="badge-info }}">completo</span>
+                        {%- endif -%}
+                    </td>
+                    <td>{{ pregunta.codigo }}</td>
+                    <td>{{ pregunta.titulo }}</td>
                     <td class="text-start">{{ tipos[pregunta.tipo].leyenda|default(pregunta.tipo) }}</td>
                     <td>
                         <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_show', {'cuestionario': cuestionario.id, 'grupo': grupo.id, 'pregunta': pregunta.id}) }}">
@@ -175,16 +181,16 @@
             ],
             columnDefs: [
                 {
-                    targets: [1, 4],
-                    type: 'num',
+                    visible: false,
+                    targets: [1],
+                },
+                {
+                    searchable: false,
+                    targets: [0, 1, 7],
                 },
                 {
                     orderable: false,
                     targets: '_all'
-                },
-                {
-                    targets: [4],
-                    searchable: false,
                 },
             ],
             dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +

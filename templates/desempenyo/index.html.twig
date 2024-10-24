@@ -24,22 +24,29 @@
             {#- Autoevaluación #}
             <div class="pagina-seccion">Fase 1: Autoevaluación del desempeño</div>
             <div class="container-fluid my-2">
-                <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
-                Dirigida a todas las personas empleadas del PTGAS: la autoevaluación de las competencias se
-                realiza mediante la cumplimentación del cuestionario de competencias. Cada conducta incluida en el
-                cuestionario deberá ser valorada por la propia persona empleada pública, aplicando una escala Likert de
-                1 a 10, y podrá señalar una o varias conductas específicas que sirvan como justificación y evidencia
-                del valor dado en cada una de las conductas del cuestionario.
+                <a data-bs-toggle="collapse" href="#acordeonAuto" aria-expanded="false" aria-controls="acordeonAuto">
+                    Pulsar para obtener más detalle del procedimiento.
+                </a>
             </div>
-            <div class="container-fluid my-2">
-                La autoevaluación por parte de la persona empleada pública tendrá un valor ponderado
-                del 34%, con respecto al máximo de los 60 puntos con los que se puntúan las competencias profesionales.
-            </div>
-            <div class="container-fluid my-2">
-                La escala Likert queda definida en <a href="#documentos">documentos de interés</a>.
-                A fin de homogeneizar los criterios de calificación, cada persona empleada pública debe consultar este
-                documento <strong>antes de comenzar su autoevaluación</strong> y aplicar la escala Lickert conforme a
-                sus indicaciones.
+            <div class="collapse" id="acordeonAuto">
+                <div class="container-fluid my-2">
+                    <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
+                    Dirigida a todas las personas empleadas del PTGAS: la autoevaluación de las competencias se
+                    realiza mediante la cumplimentación del cuestionario de competencias. Cada conducta incluida en el
+                    cuestionario deberá ser valorada por la propia persona empleada pública, aplicando una escala Likert de
+                    1 a 10, y podrá señalar una o varias conductas específicas que sirvan como justificación y evidencia
+                    del valor dado en cada una de las conductas del cuestionario.
+                </div>
+                <div class="container-fluid my-2">
+                    La autoevaluación por parte de la persona empleada pública tendrá un valor ponderado
+                    del 34%, con respecto al máximo de los 60 puntos con los que se puntúan las competencias profesionales.
+                </div>
+                <div class="container-fluid my-2">
+                    La escala Likert queda definida en <a href="#documentos">documentos de interés</a>.
+                    A fin de homogeneizar los criterios de calificación, cada persona empleada pública debe consultar este
+                    documento <strong>antes de comenzar su autoevaluación</strong> y aplicar la escala Lickert conforme a
+                    sus indicaciones.
+                </div>
             </div>
             <ul class="lead my-3">
                 {%- if activos[0].fechaAlta > date() %}
@@ -95,17 +102,24 @@
             {%- if activos|length > 0 and evaluaciones|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'))|length > 0 %}
                 <div class="pagina-seccion">Fase 2: Evaluación por parte de los responsables y otros agentes evaluadores (validadores 1 y 2)</div>
                 <div class="container-fluid my-2">
-                    <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
-                    En esta fase participan los siguientes agentes: los validadores 1 realizan la evaluación de las
-                    personas que se han autoevaluado; los validadores 2 realizan la evaluación de las personas
-                    evaluadoras 1 que se han autoevaluado; los validadores 2 que no tienen superior jerárquico en la
-                    estructura de puestos son evaluados por todos sus validadores 1.
+                    <a data-bs-toggle="collapse" href="#acordeonEvalua" aria-expanded="false" aria-controls="acordeonAuto">
+                        Pulsar para obtener más detalle del procedimiento.
+                    </a>
                 </div>
-                <div class="container-fluid my-2">
-                    Deberá señalar una o varias conductas específicas que sirvan como justificación y evidencia del
-                    valor dado en cada una de las conductas del cuestionario. La evaluación de la Universidad tiene
-                    un valor ponderado del 66% del valor total, con respecto al máximo de 60 puntos con los que se
-                    puntúan las competencias profesionales.
+                <div class="collapse" id="acordeonEvalua">
+                    <div class="container-fluid my-2">
+                        <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
+                        En esta fase participan los siguientes agentes: los validadores 1 realizan la evaluación de las
+                        personas que se han autoevaluado; los validadores 2 realizan la evaluación de las personas
+                        evaluadoras 1 que se han autoevaluado; los validadores 2 que no tienen superior jerárquico en la
+                        estructura de puestos son evaluados por todos sus validadores 1.
+                    </div>
+                    <div class="container-fluid my-2">
+                        Deberá señalar una o varias conductas específicas que sirvan como justificación y evidencia del
+                        valor dado en cada una de las conductas del cuestionario. La evaluación de la Universidad tiene
+                        un valor ponderado del 66% del valor total, con respecto al máximo de 60 puntos con los que se
+                        puntúan las competencias profesionales.
+                    </div>
                 </div>
                 <ul class="lead my-3">
                     {%- if activos[0].fechaAlta > date() %}
