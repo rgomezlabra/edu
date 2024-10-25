@@ -21,12 +21,17 @@ use App\Service\SirhusLock;
 use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
+use Predis\ClientInterface;
+use Redis;
+use RedisArray;
+use RedisCluster;
 use RedisException;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,13 +43,22 @@ use function Symfony\Component\String\u;
 class EvaluadorController extends AbstractController
 {
     private object $redis;
+    private int $ttl;   // Tiempo de bloqueo
+    private string $rutaBase;   // Ruta base de la aplicación actual
 
     public function __construct(
         private readonly MessageGenerator $generator,
         private readonly SirhusLock       $lock,
         private readonly RutaActual       $actual,
         private readonly EvaluaRepository $evaluaRepository,
+        #[Autowire('%app.redis_url%')]
+        private readonly string           $redisUrl,
     ) {
+        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
+        /** @var ClientInterface|Redis|RedisArray|RedisCluster $redis */
+        $redis = RedisAdapter::createConnection($this->redisUrl);
+        $this->redis = $redis;
+        $this->ttl = 60;
     }
 
     #[Route(
@@ -61,22 +75,19 @@ class EvaluadorController extends AbstractController
             'cuestionario' => $cuestionario,
             'tipo' => $tipo,
         ]);
-
-        $this->redis = RedisAdapter::createConnection($request->server->getString('REDIS_URL'));
+        $claveRedis = sprintf('evaluacion-%d', $tipo);
         $ultimo = null;
 
-        if ($tipo === Evalua::AUTOEVALUACION) {
-            try {
-                /** @var array<array-key, mixed> $datos */
-                $datos = json_decode((string) $this->redis->get('autoevaluacion'), true);
-                if (true === $datos['finalizado']) {
-                    $ultimo = new DateTimeImmutable(
-                        (string) $datos['inicio']['date'],
-                        new DateTimeZone($datos['inicio']['timezone'] ?? 'UTC')
-                    );
-                }
-            } catch (Exception) {
+        try {
+            /** @var array<array-key, mixed> $datos */
+            $datos = json_decode((string) $this->redis->get($claveRedis), true);
+            if (true === $datos['finalizado']) {
+                $ultimo = new DateTimeImmutable(
+                    (string) $datos['inicio']['date'],
+                    new DateTimeZone($datos['inicio']['timezone'] ?? 'UTC')
+                );
             }
+        } catch (Exception) {
         }
 
         return $this->render('intranet/desempenyo/admin/evaluador/index.html.twig', [
@@ -133,19 +144,18 @@ class EvaluadorController extends AbstractController
         Cuestionario       $cuestionario,
     ): Response {
         $this->denyAccessUnlessGranted('admin');
-        $ttl = 300; // Periodo de validez de 300 s
+        $claveRedis = sprintf('evaluacion-%d', Evalua::AUTOEVALUACION);
         if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
-            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
-        } elseif (null === $this->lock->acquire($ttl)) {
+            return $this->redirectToRoute($this->rutaBase);
+        } elseif (null === $this->lock->acquire($this->ttl)) {
             $this->addFlash('warning', 'Recurso bloqueado por otra operación de carga.');
 
             return $this->redirectToRoute($request->attributes->getString('_route'));
         }
 
         $inicio = microtime(true);
-        $this->redis = RedisAdapter::createConnection($request->server->getString('REDIS_URL'));
         $externo = $origenRepository->findOneBy(['nombre' => Origen::EXTERNO]);
         $empleados = $empleadoRepository->findCesados(false);
         $datos = [
@@ -168,7 +178,7 @@ class EvaluadorController extends AbstractController
                 $evalua = new Evalua();
                 $evalua
                     ->setEmpleado($empleado)
-                    ->setTipoEvaluador(Evalua::AUTOEVALUACION)
+                    ->setTipoEvaluador()
                     ->setCuestionario($cuestionario)
                     ->setOrigen($externo)
                 ;
@@ -178,7 +188,7 @@ class EvaluadorController extends AbstractController
 
             $datos['duracion'] = microtime(true) - $inicio;
             try {
-                $this->redis->set('autoevaluacion', json_encode($datos));
+                $this->redis->set($claveRedis, json_encode($datos));
             } catch (RedisException) {
             }
         }
@@ -197,7 +207,7 @@ class EvaluadorController extends AbstractController
 
         $datos['finalizado'] = true;
         try {
-            $this->redis->set('autoevaluacion', json_encode($datos));
+            $this->redis->set($claveRedis, json_encode($datos));
         } catch (RedisException) {
         }
 
@@ -240,11 +250,15 @@ class EvaluadorController extends AbstractController
         if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
-            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         } elseif (null === $tipo) {
             $this->addFlash('warning', 'Tipo de evaluador desconocido.');
 
-            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
+        } elseif (null === $this->lock->acquire($this->ttl)) {
+            $this->addFlash('warning', 'Recurso bloqueado por otra operación de carga.');
+
+            return $this->redirectToRoute($request->attributes->getString('_route'));
         }
 
         $campos = [
@@ -254,12 +268,10 @@ class EvaluadorController extends AbstractController
         $form = $this->createForm(VolcadoType::class, ['maxSize' => '256k']);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            set_time_limit(60); // La carga completa puede tardar más de los 30 s. por defecto
+            set_time_limit($this->ttl); // La carga completa puede tardar más de los 30 s. por defecto
             $inicio = microtime(true);
-            $this->redis = RedisAdapter::createConnection($request->server->getString('REDIS_URL'));
+            $claveRedis = sprintf('evaluacion-%d', $tipo);
             $lineas = [];
-            $nuevos = 0;
-            $descartados = 0;
             // Cargar fichero CSV
             /** @var UploadedFile $fichero */
             $fichero = $form->get('fichero_csv')->getData();
@@ -281,45 +293,61 @@ class EvaluadorController extends AbstractController
             }
 
             $csv->cerrar();
+            $datos = [
+                'inicio' => new DateTimeImmutable(),
+                'total' => count($lineas),
+                'actual' => 0,
+                'nuevos' => 0,
+                'descartados' => 0,
+                'duracion' => 0,
+                'finalizado' => false,
+            ];
 
             // Grabar datos
             $fichero = $origenRepository->findOneBy(['nombre' => Origen::FICHERO]);
             /** @var string[] $linea */
             foreach ($lineas as $linea) {
+                ++$datos['actual'];
+                // Guardar solo asignaciones nuevas
                 $empleado = $empleadoRepository->findOneByDocumento($linea['DNI USUARIO']);
                 $evaluador = $empleadoRepository->findOneByDocumento($linea['DNI VALIDADOR']);
-                if ($empleado instanceof Empleado && $evaluador instanceof Empleado) {
-                    if (0 === $this->evaluaRepository->count(
-                            ['empleado' => $empleado, 'evaluador' => $evaluador, 'cuestionario' => $cuestionario]
-                        )) {
-                        $evaluacion = new Evalua();
-                        $evaluacion
-                            ->setCuestionario($cuestionario)
-                            ->setEmpleado($empleado)
-                            ->setEvaluador($evaluador)
-                            ->setTipoEvaluador($tipo)
-                            ->setOrigen($fichero)
-                        ;
-                        $this->evaluaRepository->save($evaluacion, true);
-                        ++$nuevos;
-                    } else {
-                        ++$descartados;
-                    }
+                if ($empleado instanceof Empleado && $evaluador instanceof Empleado &&
+                    0 === $this->evaluaRepository->count(
+                        ['empleado' => $empleado, 'evaluador' => $evaluador, 'cuestionario' => $cuestionario]
+                    )) {
+                    $evaluacion = new Evalua();
+                    $evaluacion
+                        ->setCuestionario($cuestionario)
+                        ->setEmpleado($empleado)
+                        ->setEvaluador($evaluador)
+                        ->setTipoEvaluador($tipo)
+                        ->setOrigen($fichero)
+                    ;
+                    $this->evaluaRepository->save($evaluacion, true);
+                    ++$datos['nuevos'];
                 } else {
-                    ++$descartados;
+                    ++$datos['descartados'];
+                }
+                $datos['duracion'] = microtime(true) - $inicio;
+                try {
+                    $this->redis->set($claveRedis, json_encode($datos));
+                } catch (RedisException) {
                 }
             }
 
-            if ($nuevos > 0) {
-                $this->generator->logAndFlash('info', 'Nuevos evaluadores cargados', [
-                    'nuevos' => $nuevos,
-                    'descartados' => $descartados,
-                    'duracion' => microtime(true) - $inicio,
-                ]);
+            $datos['finalizado'] = true;
+            try {
+                $this->redis->set($claveRedis, json_encode($datos));
+            } catch (RedisException) {
+            }
+
+            $this->lock->release();
+            if ($datos['nuevos'] > 0) {
+                $this->generator->logAndFlash('info', 'Nuevos evaluadores cargados', $datos);
             } else {
                 $this->generator->logAndFlash('warning', 'No se han cargado evaluadores nuevos', [
-                    'descartados' => $descartados,
-                    'duracion' => microtime(true) - $inicio,
+                    'descartados' => $datos['descartados'],
+                    'duracion' => $datos['duracion'],
                 ]);
             }
 
@@ -346,13 +374,18 @@ class EvaluadorController extends AbstractController
     )]
     public function volcadoEvaluacion(
         KernelInterface $kernel,
+        Request         $request,
         Cuestionario    $cuestionario,
     ): Response {
         $this->denyAccessUnlessGranted('admin');
         if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
-            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
+        } elseif (null === $this->lock->acquire($this->ttl)) {
+            $this->addFlash('warning', 'Recurso bloqueado por otra operación de carga.');
+
+            return $this->redirectToRoute($request->attributes->getString('_route'));
         }
 
         $app = new Application($kernel);
@@ -367,17 +400,19 @@ class EvaluadorController extends AbstractController
                 throw new Exception();
             }
         } catch (Exception) {
+            $this->lock->release();
             $this->addFlash('warning', 'Error al volcar datos desde Temponet.');
 
-            return $this->redirectToRoute('intranet_desempenyo');
+            return $this->redirectToRoute($this->rutaBase);
         }
 
+        $this->lock->release();
         $this->generator->logAndFlash('info', 'Volcado de validaciones desde Temponet', [
             'cuestionario' => $cuestionario->getCodigo(),
             'salida' => $output->fetch(),
         ]);
 
-        return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', [
+        return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', [
             'id' => $cuestionario->getId(),
             'tipo' => Evalua::EVALUA_RESPONSABLE,
         ], Response::HTTP_SEE_OTHER);
@@ -408,7 +443,7 @@ class EvaluadorController extends AbstractController
                     ),
             ]);
 
-            return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]
+            return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]
             );
         }
 
@@ -422,7 +457,7 @@ class EvaluadorController extends AbstractController
             'empleado' => $empleado->getPersona()?->getUsuario()->getUvus(),
         ]);
 
-        return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]);
+        return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
     }
 
     /** Empleado solicita no ser evaluado. */
@@ -457,7 +492,7 @@ class EvaluadorController extends AbstractController
                     ),
             ]);
 
-            return $this->redirectToRoute('intranet_desempenyo');
+            return $this->redirectToRoute($this->rutaBase);
         }
 
         $evalua
@@ -470,7 +505,7 @@ class EvaluadorController extends AbstractController
             'empleado' => $empleado?->getPersona()->getUsuario()->getUvus(),
         ]);
 
-        return $this->redirectToRoute('intranet_desempenyo');
+        return $this->redirectToRoute($this->rutaBase);
     }
 
     /** Recupera la evaluación de un empleado que la había rechazado previamente. */
@@ -502,7 +537,7 @@ class EvaluadorController extends AbstractController
                 ]
             );
 
-            return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]
+            return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]
             );
         }
 
@@ -516,7 +551,7 @@ class EvaluadorController extends AbstractController
             'empleado' => $empleado?->getPersona()->getUsuario()->getUvus(),
         ]);
 
-        return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', ['id' => $cuestionario->getId()]);
+        return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
     }
 
     /** Empleado solicita recuperar la posibilidad de ser evaluado. */
@@ -555,7 +590,7 @@ class EvaluadorController extends AbstractController
                 ]
             );
 
-            return $this->redirectToRoute('intranet_desempenyo');
+            return $this->redirectToRoute($this->rutaBase);
         }
 
         $evalua
@@ -568,6 +603,6 @@ class EvaluadorController extends AbstractController
             'empleado' => $empleado?->getPersona()->getUsuario()->getUvus(),
         ]);
 
-        return $this->redirectToRoute('intranet_desempenyo');
+        return $this->redirectToRoute($this->rutaBase);
     }
 }
