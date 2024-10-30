@@ -162,13 +162,25 @@
     {{ parent() }}
     <script type="module">
         import { Toast } from 'bootstrap';
-        // Pedir confirmación antes de enviar formulario
+        const aviso = new Toast('#aviso');
+        // Pedir confirmación antes de enviar formulario si las evidencias son adecuadas
         const enviar = $('#enviar');
         const enviado = $('#enviado');
         const modalEnviar = $('#dialogoEnviar');
         enviado.val(false);
         enviar.on('click', function (e) {
             e.preventDefault();
+            let seguir = true;
+            $('[class$=emphasis]').each(function () {
+                const observa = $('#' + $(this).prop('id').replace('salida_', 'observa_'));
+                if (observa.val().length < 10) {
+                    aviso.show();
+                    seguir = false;
+                }
+            });
+            if (!seguir) {
+                return false;
+            }
             modalEnviar.show();
         });
         $('#dialogoEnviarCancelar').on('click', function () {
@@ -205,11 +217,10 @@
                     }
                 });
             } else {
-                // Aviso en el panel de enviar el formulario
-                const aviso = new Toast('#aviso');
+                // Aviso en el panel de enviar el formulario con evidencias necesarias de menos de 10 caracteres
                 $('[class$=emphasis]').each(function () {
                     const observa = $('#' + $(this).prop('id').replace('salida_', 'observa_'));
-                    if (observa.val() === '') {
+                    if (observa.val().length < 10) {
                         aviso.show();
                     }
                 });
