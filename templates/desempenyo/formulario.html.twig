@@ -28,14 +28,23 @@
                             Comenzar la evaluación
                         </a>
                     {%- endif %}
-                    {#- Páginas de grupos de preguntas #}
-                    {%- for grupo in formulario.formulario.cuestionario.grupos|sort((a, b) => a.orden <=> b.orden) %}
-                        <a class="nav-link" id="vert-tabs-{{ grupo.orden }}-tab" role="tab"
-                           data-bs-toggle="pill" href="#vert-tabs-{{ grupo.orden }}" aria-controls="vert-tabs-{{ grupo.orden }}"
+                    {%- if evalua.tipoEvaluador != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
+                        {#- Grupos de preguntas de cuestionario completo #}
+                        {%- for grupo in formulario.formulario.cuestionario.grupos|sort((a, b) => a.orden <=> b.orden) %}
+                            <a class="nav-link" id="vert-tabs-{{ grupo.orden }}-tab" role="tab"
+                               data-bs-toggle="pill" href="#vert-tabs-{{ grupo.orden }}" aria-controls="vert-tabs-{{ grupo.orden }}"
+                               aria-selected="false">
+                                <span class="ms-3">{{ grupo.titulo }}</span>
+                            </a>
+                        {%- endfor %}
+                    {%- else %}
+                        {#- Cuestionario reducido #}
+                        <a class="nav-link" id="vert-tabs-reducido-tab" role="tab"
+                           data-bs-toggle="pill" href="#vert-tabs-reducido" aria-controls="vert-tabs-reducido"
                            aria-selected="false">
-                            <span class="ms-3">{{ grupo.titulo }}</span>
+                            <span class="ms-3">Cuestionario reducido</span>
                         </a>
-                    {%- endfor %}
+                    {%- endif %}
                     {%- if formulario.formulario.cuestionario.bienvenida %}
                         <a class="nav-link" id="vert-tabs-despedida-tab" role="tab"
                            data-bs-toggle="pill" href="#vert-tabs-despedida" aria-controls="vert-tabs-despedida"
@@ -57,7 +66,8 @@
                         {%- endif %}
                         <div>{{ formulario.formulario.cuestionario.bienvenida|raw }}</div>
                     </div>
-                    {#- Páginas de grupos de preguntas #}
+                    {%- if evalua.tipoEvaluador != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
+                        {#- Páginas de grupos de preguntas de cuestionario completo #}
                         {%- for grupo in formulario.formulario.cuestionario.grupos %}
                             <div class="tab-pane fade text-left" id="vert-tabs-{{ grupo.orden }}"
                                  role="tabpanel" aria-labelledby="vert-tabs-{{ grupo.orden }}-tab" tabindex="0">
@@ -71,7 +81,8 @@
                                         <div class="col-5">Evidencias</div>
                                     </div>
                                     {%- set puntos = 0 %}
-                                    {%- for pregunta in grupo.preguntas %}
+                                    {%- set preguntas = grupo.preguntas|filter(p => p.reducida == false) %}
+                                    {%- for pregunta in preguntas %}
                                         {%- set tipo = (tipos_preguntas|json_decode)[pregunta.tipo] %}
                                         <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
                                             <div class="col-5">
@@ -81,19 +92,18 @@
                                                 etiqueta: 'preg_' ~ pregunta.id, valor: respuestas[pregunta.id]|default(puntos_iniciales)}) }}
                                         </div>
                                         {%- set puntos = puntos + respuestas[pregunta.id].valor|default(puntos_iniciales) %}
-                                        {%- if loop.last %}
-                                            <div class="row fw-bold bg-tertiary">
-                                                <div class="col-5 text-end">Media</div>
-                                                <div id="media_{{ grupo.orden }}" class="col-2">{{ (puntos / loop.index)|number_format(2) }}</div>
-                                            </div>
-                                        {%- endif %}
                                     {%- endfor %}
+                                    {%- if preguntas is defined and preguntas|length > 0 %}
+                                        <div class="row fw-bold bg-tertiary">
+                                            <div class="col-5 text-end">Media</div>
+                                            <div id="media_{{ grupo.orden }}" class="col-2">{{ (puntos / preguntas|length)|number_format(2) }}</div>
+                                        </div>
+                                    {%- endif %}
                                 </div>
-                                <div class="linea-botones"></div>
                                 <div class="d-flex">
                                     <input type="hidden" name="_token"
                                            value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
-                                    <button class="btn btn-primary"><em class="mx-1 fas fa-save"></em>Grabar</button>
+                                    <button class="btn btn-primary m-2"><em class="mx-1 fas fa-save"></em>Grabar</button>
                                     <div id="aviso_{{ grupo.orden }}" class="toast text-bg-warning align-self-center mx-2" role="alert"
                                          aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
                                         <div class="toast-body">
@@ -107,15 +117,63 @@
                                 </div>
                             </div>
                         {%- endfor %}
+                    {%- else %}
+                        {#- Cuestionario reducido #}
+                        <div class="tab-pane fade text-left" id="vert-tabs-reducido" role="tabpanel"
+                             aria-labelledby="vert-tabs-reducido-tab" tabindex="0">
+                            <div class="d-grid">
+                                <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
+                                    <div class="col-5">Pregunta</div>
+                                    <div class="col-2">Valoración</div>
+                                    <div class="col-5">Evidencias</div>
+                                </div>
+                                {%- set puntos = 0 %}
+                                {%- for grupo in formulario.formulario.cuestionario.grupos %}
+                                    {%- set preguntas = grupo.preguntas|filter(p => p.reducida == false) %}
+                                    {%- for pregunta in preguntas %}
+                                        {%- set tipo = (tipos_preguntas|json_decode)[pregunta.tipo] %}
+                                        <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
+                                            <div class="col-5">
+                                                <div class="fw-bold" title="{{ pregunta.descripcion|raw }}">{{ pregunta }}</div>
+                                            </div>
+                                            {{- include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {
+                                                etiqueta: 'preg_' ~ pregunta.id, valor: respuestas[pregunta.id]|default(puntos_iniciales)}) }}
+                                        </div>
+                                        {%- set puntos = puntos + respuestas[pregunta.id].valor|default(puntos_iniciales) %}
+                                    {%- endfor %}
+                                {%- endfor %}
+                                {%- if preguntas is defined and preguntas|length > 0 %}
+                                    <div class="row fw-bold bg-tertiary">
+                                        <div class="col-5 text-end">Media</div>
+                                        <div id="media_reducido" class="col-2">{{ (puntos / preguntas|length)|number_format(2) }}</div>
+                                    </div>
+                                {%- endif %}
+                            </div>
+                            <div class="d-flex">
+                                <input type="hidden" name="_token"
+                                       value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
+                                <button class="btn btn-primary"><em class="m-2 fas fa-save"></em>Grabar</button>
+                                <div id="aviso_reducido" class="toast text-bg-warning align-self-center mx-2" role="alert"
+                                     aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
+                                    <div class="toast-body">
+                                        <div class="d-flex">
+                                            <div>Faltan evidencias.</div>
+                                            <button type="button" class="btn-close me-2 m-auto"
+                                                    data-bs-dismiss="toast" aria-label="Close"></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {%- endif %}
                     {#- Página de despedida #}
                     <div class="tab-pane fade text-left" id="vert-tabs-despedida" role="tabpanel"
                          aria-labelledby="vert-tabs-despedida-tab" tabindex="0">
                         <div>{{ formulario.formulario.cuestionario.despedida|default|raw }}</div>
-                        <div class="linea-botones"></div>
                         <input type="hidden" name="_token"
                                value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
                         <div class="d-flex">
-                            <button class="btn btn-primary align-self-center" id="enviar">
+                            <button class="btn btn-primary m-2 align-self-center" id="enviar">
                                 <em class="mx-1 fas fa-envelope"></em>Enviar
                             </button>
                             {#- Avisos #}
