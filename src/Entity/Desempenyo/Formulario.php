@@ -25,7 +25,6 @@ class Formulario
     private ?Empleado $empleado = null;
 
     #[ORM\ManyToOne(targetEntity: Empleado::class)]
-    #[ORM\JoinColumn(nullable: false)]
     private ?Empleado $evaluador = null;
 
     #[ORM\OneToOne(targetEntity: CuestionaFormulario::class)]

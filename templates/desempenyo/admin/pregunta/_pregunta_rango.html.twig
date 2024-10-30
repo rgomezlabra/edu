@@ -21,4 +21,9 @@
     {%- endif %}
 {% endif %}
 
-<script>document.getElementById('{{ salida|default }}').innerHTML = 'Puntuación: ' + {{ preg }}.value;</script>
+<script>
+    valor = {{ preg }}.value
+    puntua = document.getElementById('{{ salida|default }}');
+    puntua.innerHTML = 'Puntuación: ' + valor;
+    puntua.className = valor < 5 ? 'text-danger-emphasis' : (valor > 7 ? 'text-success-emphasis' : 'text-info');
+</script>

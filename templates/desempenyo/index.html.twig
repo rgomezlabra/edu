@@ -2,9 +2,6 @@
 {% set titulo = titulo|default(aplicacion.nombre) %}
 
 {% block content %}
-    <a class="float-end" href="{{ path('intranet_ayuda_show', {'aplic': aplicacion.ruta|regex_replace('/^intranet_/', '')}) }}">
-        <em class="fas fa-info-circle"></em> Ayuda
-    </a>
     <div class="pagina-titulo">
         {{- titulo }}
         {%- if aplicacion.estadoActual and aplicacion.estadoActual.color %}

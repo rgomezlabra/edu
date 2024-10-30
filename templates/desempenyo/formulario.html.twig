@@ -1,6 +1,7 @@
 {% extends path(aplicacion.ruta) ~ '/index.html.twig' %}
 
 {% block content %}
+    {%- set puntos_iniciales = 6 -%}
     {%- set tipos_preguntas -%}
         {{ render(controller('App\\Controller\\Cuestiona\\PreguntaController::getTipos')) }}
     {%- endset -%}
@@ -9,10 +10,12 @@
     <div class="pagina-titulo">{{ formulario.formulario.cuestionario.titulo }}</div>
     <div class="m-3">{{ formulario.formulario.cuestionario.descripcion|raw }}</div>
 
-    {%- if formulario.empleado == formulario.evaluador %}
+    {%- if evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
         <div class="pagina-seccion">Autoevaluación</div>
-    {%- else %}
-        <div class="pagina-seccion">Evaluación de {{ formulario.empleado.persona }}</div>
+    {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
+        <div class="pagina-seccion">Evaluación de {{ formulario.empleado.persona }} por parte del responsable</div>
+    {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
+        <div class="pagina-seccion">Evaluación de {{ formulario.empleado.persona }} por parte de tercer agente</div>
     {%- endif %}
     <form method="post" action="{{ path(aplicacion.ruta ~ '_formulario_guardar', {'codigo': codigo}) }}">
         <div class="d-flex align-items-start">
@@ -75,9 +78,9 @@
                                                 <div class="fw-bold" title="{{ pregunta.descripcion|raw }}">{{ pregunta }}</div>
                                             </div>
                                             {{- include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {
-                                                etiqueta: 'preg_' ~ pregunta.id, valor: respuestas[pregunta.id]|default}) }}
+                                                etiqueta: 'preg_' ~ pregunta.id, valor: respuestas[pregunta.id]|default(puntos_iniciales)}) }}
                                         </div>
-                                        {%- set puntos = puntos + respuestas[pregunta.id].valor|default(0) %}
+                                        {%- set puntos = puntos + respuestas[pregunta.id].valor|default(puntos_iniciales) %}
                                         {%- if loop.last %}
                                             <div class="row fw-bold bg-tertiary">
                                                 <div class="col-5 text-end">Media</div>
@@ -87,9 +90,21 @@
                                     {%- endfor %}
                                 </div>
                                 <div class="linea-botones"></div>
-                                <input type="hidden" name="_token"
-                                       value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
-                                <button class="btn btn-primary"><em class="mx-1 fas fa-save"></em>Grabar</button>
+                                <div class="d-flex">
+                                    <input type="hidden" name="_token"
+                                           value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
+                                    <button class="btn btn-primary"><em class="mx-1 fas fa-save"></em>Grabar</button>
+                                    <div id="aviso_{{ grupo.orden }}" class="toast text-bg-warning align-self-center mx-2" role="alert"
+                                         aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
+                                        <div class="toast-body">
+                                            <div class="d-flex">
+                                                <div>Faltan evidencias.</div>
+                                                <button type="button" class="btn-close me-2 m-auto"
+                                                        data-bs-dismiss="toast" aria-label="Close"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         {%- endfor %}
                     {#- Página de despedida #}
@@ -108,7 +123,7 @@
                                  aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
                                 <div class="toast-body">
                                     <div class="d-flex">
-                                        <div>No se han introducido evidencias en todas las preguntas.</div>
+                                        <div>No se han introducido evidencias en todas las preguntas necesarias.</div>
                                         <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
                                                 aria-label="Close"></button>
                                     </div>
@@ -120,7 +135,7 @@
             </div>
         </div>
         <input type="hidden" name="empleado" value="{{ formulario.empleado.id }}" />
-        <input type="hidden" name="evaluador" value="{{ formulario.evaluador.id }}" />
+        <input type="hidden" name="evaluador" value="{{ formulario.evaluador.id|default }}" />
         <input type="hidden" name="enviado" id="enviado" value="0" />
     </form>
 {% endblock %}
@@ -147,26 +162,13 @@
     {{ parent() }}
     <script type="module">
         import { Toast } from 'bootstrap';
+        // Pedir confirmación antes de enviar formulario
         const enviar = $('#enviar');
         const enviado = $('#enviado');
         const modalEnviar = $('#dialogoEnviar');
-        const aviso = new Toast('#aviso');
         enviado.val(false);
         enviar.on('click', function (e) {
             e.preventDefault();
-            {#- Avisar si el evaluador no ha rellenado todas las evidencias #}
-            {%- if formulario.empleado != formulario.evaluador %}
-                let seguir = true;
-                $('[id^="observa_"]').each(function () {
-                    if (!$(this).val()) {
-                        aviso.show();
-                        seguir = false;
-                    }
-                });
-                if (!seguir) {
-                    return false;
-                }
-            {%- endif %}
             modalEnviar.show();
         });
         $('#dialogoEnviarCancelar').on('click', function () {
@@ -176,8 +178,11 @@
             modalEnviar.hide();
             enviado.val(true).parent().submit();
         });
-        // Actualizar media de puntos
+        // Actualizar color y media de puntos
         $('[id^=preg_]').on('change', function () {
+            let valor = $(this).val();
+            const salida = $('#' + $(this).prop('id').replace('preg_', 'salida_'));
+            salida.prop('class', 'fw-bold ' + (valor < 5 ? 'text-danger-emphasis' : (valor > 7 ? 'text-success-emphasis' : 'text-info')));
             let total = 0;
             const grupo = $(this).closest('.d-grid');
             const preguntas = grupo.find('[id^=preg_]');
@@ -185,6 +190,30 @@
                 total += parseFloat($(this).val());
             })
             grupo.find('[id^=media_]').html((total / preguntas.length).toFixed(2));
+        });
+        // Mostrar aviso si faltan evidencias
+        $('a[role="tab"]').on('click', function () {
+            const tab = $('#' + this.getAttribute('aria-controls'));
+            let re = new RegExp(/\d$/);
+            if (re.test(tab.prop('id'))) {
+                // Aviso en grupo de preguntas (el id. del grupo termina en número)
+                const aviso = new Toast(tab.find('[id^=aviso_]'));
+                tab.find('[class$=emphasis]').each(function () {
+                    const observa = $('#' + $(this).prop('id').replace('salida_', 'observa_'));
+                    if (observa.val() === '') {
+                        aviso.show();
+                    }
+                });
+            } else {
+                // Aviso en el panel de enviar el formulario
+                const aviso = new Toast('#aviso');
+                $('[class$=emphasis]').each(function () {
+                    const observa = $('#' + $(this).prop('id').replace('salida_', 'observa_'));
+                    if (observa.val() === '') {
+                        aviso.show();
+                    }
+                });
+            }
         });
     </script>
 {% endblock %}
