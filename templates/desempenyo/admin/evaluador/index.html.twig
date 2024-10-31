@@ -210,14 +210,14 @@
         </li>
     {%- endif %}
     {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
-        <li class="nav-item me-2">
+        <li class="nav-item ms-5 me-2">
             <button class="btn btn-primary cargar" id="cargarEmpleados"
                data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_auto', {id: cuestionario.id}) }}">
                 <em class="fas fa-person-arrow-down-to-line"></em> Cargar empleados
             </button>
         </li>
     {%- elseif tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
-        <li class="nav-item me-2">
+        <li class="nav-item ms-5 me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id, tipo: 'evaluador'}) }}">
                 <em class="fas fa-file-upload"></em> Cargar desde CSV
@@ -231,7 +231,7 @@
         </li>
     {%- endif %}
     {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
-        <li class="nav-item me-2">
+        <li class="nav-item ms-5 me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id, tipo: 'otro'}) }}">
                 <em class="fas fa-file-upload"></em> Cargar desde CSV

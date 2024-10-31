@@ -39,9 +39,8 @@
                         {%- endfor %}
                     {%- else %}
                         {#- Cuestionario reducido #}
-                        <a class="nav-link" id="vert-tabs-reducido-tab" role="tab"
-                           data-bs-toggle="pill" href="#vert-tabs-reducido" aria-controls="vert-tabs-reducido"
-                           aria-selected="false">
+                        <a class="nav-link" id="vert-tabs-0-tab" role="tab" data-bs-toggle="pill" href="#vert-tabs-0"
+                           aria-controls="vert-tabs-0" aria-selected="false">
                             <span class="ms-3">Cuestionario reducido</span>
                         </a>
                     {%- endif %}
@@ -119,8 +118,8 @@
                         {%- endfor %}
                     {%- else %}
                         {#- Cuestionario reducido #}
-                        <div class="tab-pane fade text-left" id="vert-tabs-reducido" role="tabpanel"
-                             aria-labelledby="vert-tabs-reducido-tab" tabindex="0">
+                        <div class="tab-pane fade text-left" id="vert-tabs-0" role="tabpanel"
+                             aria-labelledby="vert-tabs-0-tab" tabindex="0">
                             <div class="d-grid">
                                 <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
                                     <div class="col-5">Pregunta</div>
@@ -129,7 +128,7 @@
                                 </div>
                                 {%- set puntos = 0 %}
                                 {%- for grupo in formulario.formulario.cuestionario.grupos %}
-                                    {%- set preguntas = grupo.preguntas|filter(p => p.reducida == false) %}
+                                    {%- set preguntas = grupo.preguntas|filter(p => p.reducida == true) %}
                                     {%- for pregunta in preguntas %}
                                         {%- set tipo = (tipos_preguntas|json_decode)[pregunta.tipo] %}
                                         <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
@@ -152,8 +151,8 @@
                             <div class="d-flex">
                                 <input type="hidden" name="_token"
                                        value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
-                                <button class="btn btn-primary"><em class="m-2 fas fa-save"></em>Grabar</button>
-                                <div id="aviso_reducido" class="toast text-bg-warning align-self-center mx-2" role="alert"
+                                <button class="btn btn-primary m-2"><em class="mx-1 fas fa-save"></em>Grabar</button>
+                                <div id="aviso_0" class="toast text-bg-warning align-self-center mx-2" role="alert"
                                      aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
                                     <div class="toast-body">
                                         <div class="d-flex">
@@ -266,11 +265,11 @@
             const tab = $('#' + this.getAttribute('aria-controls'));
             let re = new RegExp(/\d$/);
             if (re.test(tab.prop('id'))) {
-                // Aviso en grupo de preguntas (el id. del grupo termina en número)
+                // Aviso en grupo de preguntas (si identificador del grupo termina en número)
                 const aviso = new Toast(tab.find('[id^=aviso_]'));
                 tab.find('[class$=emphasis]').each(function () {
                     const observa = $('#' + $(this).prop('id').replace('salida_', 'observa_'));
-                    if (observa.val() === '') {
+                    if (observa.val().length < 10) {
                         aviso.show();
                     }
                 });

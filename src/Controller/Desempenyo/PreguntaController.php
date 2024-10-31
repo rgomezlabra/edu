@@ -23,6 +23,8 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 class PreguntaController extends AbstractController
 {
+    private string $rutaBase;   // Ruta base de la aplicación actual
+
     // Opciones por defecto para las preguntas soportadas por la aplicación
     /** @var array<array-key, int[]|bool[]> $opciones */
     private array $opciones = [
@@ -33,14 +35,12 @@ class PreguntaController extends AbstractController
         ],
     ];
 
-    private ?Aplicacion $aplic;
-
     public function __construct(
         private readonly MessageGenerator   $generator,
         private readonly RutaActual         $actual,
         private readonly PreguntaRepository $preguntaRepository,
     ) {
-        $this->aplic = $this->actual->getAplicacion();
+        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
     }
 
     #[Route(
@@ -56,7 +56,7 @@ class PreguntaController extends AbstractController
     {
         $this->denyAccessUnlessGranted('admin');
         if (!$this->checkAcceso($cuestionario, $grupo)) {
-            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         }
 
         // Preguntas de un grupo o de cuestionario completo
@@ -84,15 +84,15 @@ class PreguntaController extends AbstractController
         $tipos = $this->cargarTipos();
         $tipo = $request->query->getInt('tipo');
         if (!$this->checkAcceso($cuestionario, $grupo)) {
-            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         } elseif (Estado::BORRADOR !== $cuestionario->getEstado()?->getNombre()) {
             $this->addFlash('warning', 'El cuestionario no puede ser modificado.');
 
-            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         } elseif (!array_key_exists($tipo, $tipos)) {
             $this->addFlash('warning', 'El tipo de pregunta no existe.');
 
-            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         }
 
         $pregunta = new Pregunta();
@@ -118,17 +118,16 @@ class PreguntaController extends AbstractController
             $pregunta->setOrden(-1);
             $this->preguntaRepository->save($pregunta, true);
             $this->generator->logAndFlash('info', 'Nueva pregunta de desempeño', [
-                'id' => $cuestionario->getId(),
+                'id' => $pregunta->getId(),
                 'cuestionario' => $cuestionario->getCodigo(),
                 'grupo' => $grupo->getCodigo(),
                 'pregunta' => $pregunta->getCodigo(),
             ]);
 
-            return $this->redirectToRoute(
-                sprintf('%s_admin_pregunta_index', $this->aplic?->getRuta() ?? ''),
-                ['cuestionario' => $cuestionario->getId(), 'grupo' => $grupo->getId()],
-                Response::HTTP_SEE_OTHER
-            );
+            return $this->redirectToRoute($this->rutaBase . '_admin_pregunta_index', [
+                'cuestionario' => $cuestionario->getId(),
+                'grupo' => $grupo->getId(),
+            ], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('intranet/desempenyo/admin/pregunta/new.html.twig', [
@@ -152,7 +151,7 @@ class PreguntaController extends AbstractController
         $this->denyAccessUnlessGranted('admin');
         $tipos = $this->cargarTipos();
         if (!$this->checkAcceso($cuestionario, $grupo, $pregunta)) {
-            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         }
 
         return $this->render('intranet/desempenyo/admin/pregunta/show.html.twig', [
@@ -174,15 +173,15 @@ class PreguntaController extends AbstractController
         $this->denyAccessUnlessGranted('admin');
         $tipos = $this->cargarTipos();
         if (!$this->checkAcceso($cuestionario, $grupo, $pregunta)) {
-            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         } elseif (Estado::BORRADOR !== $cuestionario->getEstado()?->getNombre()) {
             $this->addFlash('warning', 'El cuestionario no puede ser modificado.');
 
-            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         } elseif (!array_key_exists($pregunta->getTipo(), $tipos)) {
             $this->addFlash('warning', 'El tipo de pregunta no es válido.');
 
-            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         }
 
         $form = $this->createForm(PreguntaType::class, $pregunta, [
@@ -201,14 +200,14 @@ class PreguntaController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->preguntaRepository->save($pregunta, true);
             $this->generator->logAndFlash('info', 'Pregunta de desempeño modificada', [
-                'id' => $cuestionario->getId(),
+                'id' => $pregunta->getId(),
                 'cuestionario' => $cuestionario->getCodigo(),
                 'grupo' => $grupo->getCodigo(),
                 'pregunta' => $pregunta->getCodigo(),
             ]);
 
             return $this->redirectToRoute(
-                sprintf('%s_admin_pregunta_index', $this->aplic?->getRuta() ?? ''),
+                $this->rutaBase . '_admin_pregunta_index',
                 ['cuestionario' => $cuestionario->getId(), 'grupo' => $grupo->getId()],
                 Response::HTTP_SEE_OTHER
             );
@@ -234,11 +233,11 @@ class PreguntaController extends AbstractController
     {
         $this->denyAccessUnlessGranted('admin');
         if (!$this->checkAcceso($cuestionario, $grupo, $pregunta)) {
-            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         } elseif (Estado::BORRADOR !== $cuestionario->getEstado()?->getNombre()) {
             $this->addFlash('warning', 'El cuestionario no puede ser modificado.');
 
-            return $this->redirectToRoute($this->aplic?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         }
 
         $id = $pregunta->getId();
@@ -261,7 +260,8 @@ class PreguntaController extends AbstractController
     /** Comprobar si los parámetros son correctos para acceder al controlador. */
     private function checkAcceso(Cuestionario $cuestionario, ?Grupo $grupo = null, ?Pregunta $pregunta = null): bool
     {
-        if (!$this->aplic instanceof Aplicacion && $cuestionario->getAplicacion() !== $this->aplic) {
+        $aplic = $this->actual->getAplicacion();
+        if (!$aplic instanceof Aplicacion && $cuestionario->getAplicacion() !== $aplic) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
             return false;
