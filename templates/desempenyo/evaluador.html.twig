@@ -17,7 +17,7 @@
                     <tr>
                         <th>Unidad</th>
                         <th>Evaluador</th>
-                        <th data-dt-order="disable">Acciones</th>
+                        <th>Tipo evaluador</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -29,7 +29,13 @@
                         </td>
                         <td>{{ evaluacion.evaluador.persona }}</td>
                         <td>
-                            <em class="mx-1 fas fa-ear-listen" title="incidencia"></em>
+                            {%- if evaluacion.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') -%}
+                                Responsable/Principal
+                            {%- elseif evaluacion.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') -%}
+                                Tercer agente
+                            {%- else -%}
+                                <span class="badge-warning">Desconocido</span>
+                            {%- endif -%}
                         </td>
                     </tr>
                 {%- endfor %}
@@ -42,7 +48,7 @@
 {% block botones %}
     <li class="nav-item me-2">
         <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_new', {codigo: cuestionario.url|u.afterLast('/')}) }}">
-            <em class="fas fa-ear-listen"></em> Incidencia
+            <em class="fas fa-ear-listen"></em> Nueva incidencia
         </a>
     </li>
 {% endblock %}

@@ -3,9 +3,11 @@
 namespace App\Controller\Desempenyo;
 
 use App\Entity\Cuestiona\Cuestionario;
+use App\Entity\Sistema\Estado;
 use App\Entity\Sistema\Usuario;
 use App\Form\Cuestiona\CuestionarioType;
 use App\Form\Cuestiona\PeriodoValidezType;
+use App\Form\Desempenyo\ConfiguraCuestionarioType;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Sistema\EstadoRepository;
 use App\Service\MessageGenerator;
@@ -24,11 +26,14 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(path: '/intranet/desempenyo/admin/cuestionario', name: 'intranet_desempenyo_admin_cuestionario_')]
 class CuestionarioController extends AbstractController
 {
+    private string $rutaBase;   // Ruta base de la aplicación actual
+
     public function __construct(
         private readonly MessageGenerator       $generator,
         private readonly RutaActual             $actual,
         private readonly CuestionarioRepository $cuestionarioRepository,
     ) {
+        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
     }
 
     #[Route(
@@ -66,6 +71,7 @@ class CuestionarioController extends AbstractController
         $form = $this->createForm(CuestionarioType::class, $cuestionario, [
             'de_aplicacion' => true,
             'con_fechas' => true,
+            'form_configuracion' => ConfiguraCuestionarioType::class,
         ]);
         $form->handleRequest($request);
 
@@ -76,7 +82,7 @@ class CuestionarioController extends AbstractController
                 'codigo' => $cuestionario->getCodigo(),
             ]);
 
-            return $this->redirectToRoute('intranet_desempenyo_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute($this->rutaBase . '_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('intranet/desempenyo/admin/cuestionario/new.html.twig', [
@@ -97,7 +103,7 @@ class CuestionarioController extends AbstractController
         if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
-            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         }
 
         return $this->render('intranet/desempenyo/admin/cuestionario/show.html.twig', [
@@ -117,12 +123,13 @@ class CuestionarioController extends AbstractController
         if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
-            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         }
 
         $form = $this->createForm(CuestionarioType::class, $cuestionario, [
             'de_aplicacion' => true,
             'con_fechas' => true,
+            'form_configuracion' => ConfiguraCuestionarioType::class,
         ]);
         $form->handleRequest($request);
 
@@ -137,7 +144,7 @@ class CuestionarioController extends AbstractController
                 'codigo' => $cuestionario->getCodigo(),
             ]);
 
-            return $this->redirectToRoute('intranet_desempenyo_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute($this->rutaBase . '_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('intranet/desempenyo/admin/cuestionario/edit.html.twig', [
@@ -159,15 +166,15 @@ class CuestionarioController extends AbstractController
         if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
-            return $this->redirectToRoute($this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio');
+            return $this->redirectToRoute($this->rutaBase);
         } elseif (0 === count($cuestionario->getGrupos())) {
             $this->addFlash('warning', 'El cuestionario no tiene preguntas definidas.');
 
-            return $this->redirectToRoute('intranet_desempenyo_admin_cuestionario_show', ['id' => $cuestionario->getId()]);
+            return $this->redirectToRoute($this->rutaBase . '_admin_cuestionario_show', ['id' => $cuestionario->getId()]);
         } elseif ($cuestionario->getGrupos()->filter(static fn ($grupo) => count($grupo->getPreguntas()) === 0)->count() > 0) {
             $this->addFlash('warning', 'El cuestionario tiene algún grupo de preguntas vacío.');
 
-            return $this->redirectToRoute('intranet_desempenyo_admin_cuestionario_show', ['id' => $cuestionario->getId()]);
+            return $this->redirectToRoute($this->rutaBase . '_admin_cuestionario_show', ['id' => $cuestionario->getId()]);
         }
 
         $form = $this->createForm(PeriodoValidezType::class, $cuestionario, [
@@ -190,7 +197,7 @@ class CuestionarioController extends AbstractController
                 ]);
             }
 
-            $publicado = $estadoRepository->findOneBy(['nombre' => 'Publicado']);
+            $publicado = $estadoRepository->findOneBy(['nombre' => Estado::PUBLICADO]);
             $cuestionario
                 ->setEstado($publicado)
                 ->setUrl(
@@ -216,6 +223,31 @@ class CuestionarioController extends AbstractController
         return $this->render('intranet/desempenyo/admin/cuestionario/edit.html.twig', [
             'cuestionario' => $cuestionario,
             'form' => $form->createView(),
+        ]);
+    }
+
+    /** Desactivar formulario (estado borrador). */
+    #[Route(
+        path: '/{id}/desactivar',
+        name: 'desactivar',
+        defaults: ['titulo' => 'Desactivar Cuestionario'],
+        methods: ['GET', 'POST']
+    )]
+    public function desactivar(EstadoRepository $estadoRepository, Cuestionario $cuestionario): Response
+    {
+        $this->denyAccessUnlessGranted('admin');
+        $borrador = $estadoRepository->findOneBy(['nombre' => Estado::BORRADOR]);
+        if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
+            $this->addFlash('warning', 'Sin acceso al cuestionario.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        $cuestionario->setEstado($borrador);
+        $this->cuestionarioRepository->save($cuestionario, true);
+
+        return $this->render('intranet/desempenyo/admin/cuestionario/show.html.twig', [
+            'cuestionario' => $cuestionario,
         ]);
     }
 }

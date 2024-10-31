@@ -47,16 +47,14 @@
                     : 'no establecido' -}}
             </div>
         </div>
-{#        <div class="row py-2">#}
-{#            <div class="fila-campo">Cuestionario de aplicación</div>#}
-{#            <div class="fila-valor">#}
-{#                {%- if cuestionario.aplicacion -%}#}
-{#                    <em class="fas {{ cuestionario.aplicacion.icono }}"></em> {{ cuestionario.aplicacion.nombre }}#}
-{#                {%- else -%}#}
-{#                    genérico#}
-{#                {%- endif -%}#}
-{#            </div>#}
-{#        </div>#}
+        <div class="row py-2">
+            <div class="fila-campo">Parámetros de configuración</div>
+            <div class="fila-valor">
+                {%- for opcion, valor in cuestionario.configuracion -%}
+                    <span class="me-4">{{ opcion|capitalize }}: {{ valor }}</span>
+                {%- endfor -%}
+            </div>
+        </div>
         <div class="row py-2">
             <div class="fila-campo">Autor</div>
             <div class="fila-valor">{{ cuestionario.autor.persona }}</div>

@@ -25,7 +25,7 @@
                     <td>{{ evaluacion.empleado.persona }}</td>
                     <td>
                         {%- if evaluacion.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') -%}
-                            Responsable
+                            Responsable/Principal
                         {%- elseif evaluacion.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') -%}
                             Tercer agente
                         {%- else -%}
@@ -47,7 +47,7 @@
 {% block botones %}
     <li class="nav-item me-2">
         <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_new', {codigo: cuestionario.url|u.afterLast('/')}) }}">
-            <em class="fas fa-plus"></em> Nueva Incidencia
+            <em class="fas fa-ear-listen"></em> Nueva Incidencia
         </a>
     </li>
 {% endblock %}

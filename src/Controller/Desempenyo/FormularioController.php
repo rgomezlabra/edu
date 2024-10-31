@@ -153,9 +153,14 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
+        $tipo = $request->query->getInt('tipo');
+        if (Evalua::EVALUA_OTRO !== $tipo) {
+            $tipo = Evalua::EVALUA_RESPONSABLE;
+        }
         $evaluaciones = $this->evaluaRepository->findByEvaluacion([
             'cuestionario' => $cuestionario,
             'evaluador' => $evaluador,
+            'tipo' => $tipo,
         ]);
         if ([] === $evaluaciones) {
             $this->addFlash('warning', 'El usuario no es un evaluador.');

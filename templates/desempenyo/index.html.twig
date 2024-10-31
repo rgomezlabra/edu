@@ -2,6 +2,8 @@
 {% set titulo = titulo|default(aplicacion.nombre) %}
 
 {% block content %}
+    {# Pesos establecidos por defecto #}
+    {% set pesos = [34, 56, 10] %}
     <div class="pagina-titulo">
         {{- titulo }}
         {%- if aplicacion.estadoActual and aplicacion.estadoActual.color %}
@@ -19,7 +21,9 @@
             <div class="alert alert-warning">En este momento, no hay cuestionarios activos.</div>
         {%- else %}
             {#- Autoevaluación #}
-            <div class="pagina-seccion">Fase 1: Autoevaluación del desempeño</div>
+            <div class="pagina-seccion">
+                Fase 1: Autoevaluación del desempeño ({{ activos[0].configuracion.peso1|default(pesos[0]) }}%)
+            </div>
             <div class="container-fluid my-2">
                 <a data-bs-toggle="collapse" href="#acordeonAuto" aria-expanded="false" aria-controls="acordeonAuto">
                     Pulsar para obtener más detalle del procedimiento.
@@ -97,7 +101,10 @@
 
             {# Evaluación por parte del responsable #}
             {%- if activos|length > 0 and evaluaciones|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'))|length > 0 %}
-                <div class="pagina-seccion">Fase 2: Evaluación por parte de los responsables y otros agentes evaluadores (validadores 1 y 2)</div>
+                <div class="pagina-seccion">
+                    Fase 2: Evaluación por parte del responsable o evaluador principal
+                    ({{ activos[0].configuracion.peso2|default(pesos[1]) }}%)
+                </div>
                 <div class="container-fluid my-2">
                     <a data-bs-toggle="collapse" href="#acordeonEvalua" aria-expanded="false" aria-controls="acordeonAuto">
                         Pulsar para obtener más detalle del procedimiento.
@@ -132,7 +139,11 @@
                             <a href="#incidencias2">Comunicar incidencias de evaluación por parte del responsable</a>.
                         </div>
                     {%- else %}
-                        <li><a href="{{ activos[0].url ~ '/empleado' }}">Comprobar relación de personas a evaluar</a></li>
+                        <li>
+                            <a href="{{ activos[0].url ~ '/empleado?tipo=' ~ constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') }}">
+                                Comprobar relación de personas a evaluar
+                            </a>
+                        </li>
                     {%- endif %}
 
                     <li>
@@ -145,14 +156,23 @@
 
             {# Evaluación por parte de terceros agentes #}
             {%- if activos|length > 0 and evaluaciones|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'))|length > 0 %}
-                <div class="pagina-seccion">Fase 3 (pendiente 10% o eliminar): Evaluación por parte de otras personas evaluadoras</div>
+                <div class="pagina-seccion">
+                    Fase 3: Evaluación por parte de otras personas evaluadoras colaboradoras
+                    ({{ activos[0].configuracion.peso3|default(pesos[2]) }}%)
+                </div>
                 <div class="container-fluid my-2">
                     <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
                     Esta fase va dirigida a otras personas evaluadoras que intervienen en el proceso de evaluación.
                 </div>
-                {%- if activos[0].fechaAlta <= date() and date() <= activos[0].fechaBaja %}
-                    <li><a href="{{ activos[0].url ~ '/empleado' }}">Comprobar relación de personas a evaluar</a></li>
-                {%- endif %}
+                <ul class="lead my-3">
+                    {%- if activos[0].fechaAlta <= date() and date() <= activos[0].fechaBaja %}
+                        <li>
+                            <a href="{{ activos[0].url ~ '/empleado?tipo=' ~ constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') }}">
+                                Comprobar relación de personas a evaluar
+                            </a>
+                        </li>
+                    {%- endif %}
+                </ul>
             {%- endif %}
 
             {# Otros #}
