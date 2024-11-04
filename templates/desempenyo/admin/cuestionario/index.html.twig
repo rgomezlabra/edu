@@ -42,9 +42,9 @@
                         </a>
                         {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO')
                             or cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::ARCHIVADO') %}
-{#                            <a href="{{ path(aplicacion.ruta ~ '_admin_formulario_index', {'cuestionario': cuestionario.id}) }}">#}
+                            <a href="{{ path(aplicacion.ruta ~ '_admin_formulario_index', {'cuestionario': cuestionario.id}) }}">
                                 <em class="mx-1 fas fa-list-check" title="Formularios entregados"></em>
-{#                            </a>#}
+                            </a>
                         {%- elseif cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
                             <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_edit', {'id': cuestionario.id}) }}">
                                 <em class="mx-1 fas fa-edit" title="Editar"></em>

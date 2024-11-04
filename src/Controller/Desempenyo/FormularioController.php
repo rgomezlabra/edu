@@ -54,8 +54,11 @@ class FormularioController extends AbstractController
         defaults: ['titulo' => 'Formularios Entregados'],
         methods: ['GET']
     )]
-    public function index(Request $request, CuestionarioRepository $cuestionarioRepository): Response
-    {
+    public function index(
+        Request                $request,
+        CuestionarioRepository $cuestionarioRepository,
+        EvaluaRepository       $evaluaRepository,
+    ): Response {
         $this->denyAccessUnlessGranted('admin');
         $cuestionario = $cuestionarioRepository->find($request->query->getString('cuestionario'));
         if (!$cuestionario instanceof Cuestionario || $cuestionario->getAutor() !== $this->getUser()) {
@@ -64,9 +67,26 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        return $this->render('intranet/cuestiona/admin/formulario/index.html.twig', [
+        $evaluaciones = $evaluaRepository->findBy(['cuestionario' => $cuestionario]);
+        $formularios = $this->formularioRepository->findByEntregados($cuestionario);
+        $puntos = [];
+        foreach ($formularios as $formulario) {
+            $total = 0;
+            foreach ($formulario->getFormulario()->getRespuestas() as $respuesta) {
+                $valor = $respuesta->getValor();
+                $total += (int) $valor['valor'];
+            }
+            $evalua = array_filter(
+                $evaluaciones,
+                static fn ($e) => $e->getEmpleado() === $formulario->getEmpleado() && $e->getEvaluador() === $formulario->getEvaluador()
+            );
+            $puntos[(int) $formulario->getEmpleado()?->getId()][reset($evalua)->getTipoEvaluador()] = $total;
+        }
+
+        return $this->render('intranet/desempenyo/admin/cuestionario/resultado.html.twig', [
             'cuestionario' => $cuestionario,
-            'formularios' => $this->formularioRepository->findByCuestionario($cuestionario),
+            'formularios' => $formularios,
+            'puntos' => $puntos,
         ]);
     }
 
@@ -114,15 +134,18 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        return $this->render(sprintf('%s/evaluador.html.twig', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? ''), [
-            'evaluaciones' => $this->evaluaRepository->findByEvaluacion([
+        return $this->render(
+            sprintf('%s/evaluador.html.twig', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? ''),
+            [
+                'evaluaciones' => $this->evaluaRepository->findByEvaluacion([
+                    'cuestionario' => $cuestionario,
+                    'empleado' => $empleado,
+                    'tipo' => [Evalua::EVALUA_RESPONSABLE, Evalua::EVALUA_OTRO],
+                ]),
                 'cuestionario' => $cuestionario,
                 'empleado' => $empleado,
-                'tipo' => [Evalua::EVALUA_RESPONSABLE, Evalua::EVALUA_OTRO],
-            ]),
-            'cuestionario' => $cuestionario,
-            'empleado' => $empleado,
-        ]);
+            ]
+        );
     }
 
     #[Route(
@@ -168,11 +191,14 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        return $this->render(sprintf('%s/empleado.html.twig', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? ''), [
-            'evaluaciones' => $evaluaciones,
-            'cuestionario' => $cuestionario,
-            'evaluador' => $evaluador,
-        ]);
+        return $this->render(
+            sprintf('%s/empleado.html.twig', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? ''),
+            [
+                'evaluaciones' => $evaluaciones,
+                'cuestionario' => $cuestionario,
+                'evaluador' => $evaluador,
+            ]
+        );
     }
 
     /** Rellenar formulario. */
@@ -346,7 +372,8 @@ class FormularioController extends AbstractController
             $pregunta = $preguntaRepository->find((int) u($clave)->after('_')->toString());
             if ($pregunta instanceof Pregunta) {
                 $respuesta = $cuestionaFormulario?->getRespuestas()->filter(
-                    static fn (Respuesta $respuesta) => $respuesta->getFormulario() === $formulario->getFormulario() && $respuesta->getPregunta() === $pregunta
+                    static fn(Respuesta $respuesta) => $respuesta->getFormulario() === $formulario->getFormulario(
+                        ) && $respuesta->getPregunta() === $pregunta
                 )->first();
                 if (!$respuesta instanceof Respuesta) {
                     $respuesta = new Respuesta();

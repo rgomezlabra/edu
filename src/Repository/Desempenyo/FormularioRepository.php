@@ -38,7 +38,24 @@ class FormularioRepository extends ServiceEntityRepository
     }
 
     /**
-     * Devuelve los formularios para un cuestionario dado.
+     * Devuelve los formularios entregados para cuestionario dado.
+     * @return Formulario[]
+     */
+    public function findByEntregados(Cuestionario $cuestionario): array
+    {
+        return $this->createQueryBuilder('formulario')
+            ->join('formulario.formulario', 'cues_formulario')
+            ->join('cues_formulario.cuestionario', 'cuestionario')
+            ->andWhere('cuestionario.id = :cuestionarioId')
+            ->andWhere('cues_formulario.fecha_envio IS NOT NULL')
+            ->setParameter('cuestionarioId', $cuestionario->getId())
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    /**
+     * Devuelve los formularios para un cuestionario, empleado y evaluador.
      * @return Formulario[]
      */
     public function findByCuestionario(Cuestionario $cuestionario, ?Empleado $empleado = null, ?Empleado $evaluador = null): array
@@ -46,28 +63,25 @@ class FormularioRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('formulario')
             ->join('formulario.formulario', 'cues_formulario')
             ->join('cues_formulario.cuestionario', 'cuestionario')
-            ->andWhere('cuestionario.id = :cuestionarioId')
-            ->setParameter('cuestionarioId', $cuestionario->getId())
+            ->andWhere('cuestionario.id = :cuestionario')
+            ->setParameter('cuestionario', $cuestionario->getId())
         ;
         if ($empleado instanceof Empleado) {
             $qb
                 ->join('formulario.empleado', 'empleado')
-                ->andWhere('empleado.id = :empleadoId')
-                ->setParameter('empleadoId', $empleado->getId())
+                ->andWhere('empleado.id = :empleado')
+                ->setParameter('empleado', $empleado->getId())
             ;
         }
 
         if ($evaluador instanceof Empleado) {
             $qb
                 ->join('formulario.evaluador', 'evaluador')
-                ->andWhere('evaluador.id = :evaluadorId')
-                ->setParameter('evaluadorId', $evaluador->getId())
+                ->andWhere('evaluador.id = :evaluador')
+                ->setParameter('evaluador', $evaluador->getId())
             ;
         }
 
-        return $qb
-            ->getQuery()
-            ->getResult()
-        ;
+        return $qb->getQuery()->getResult();
     }
 }
