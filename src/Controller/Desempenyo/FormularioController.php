@@ -19,6 +19,8 @@ use App\Service\MessageGenerator;
 use App\Service\RutaActual;
 use App\Service\SirhusLock;
 use DateTimeImmutable;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -202,6 +204,73 @@ class FormularioController extends AbstractController
                 'evaluador' => $evaluador,
             ]
         );
+    }
+
+    /** PDF del formulario. */
+    #[Route(
+        path: '/formulario/{codigo}/pdf',
+        name: 'formulario_pdf',
+        requirements: ['codigo' => '[a-z0-9-]+'],
+        methods: ['GET']
+    )]
+    public function pdf(
+        Request                $request,
+        CuestionarioRepository $cuestionarioRepository,
+        EmpleadoRepository     $empleadoRepository,
+        string                 $codigo,
+    ): Response {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        $empleado = $empleadoRepository->findOneByUsuario($usuario);
+        $cuestionario = $cuestionarioRepository->findOneBy([
+            'url' => sprintf('/%s/formulario/%s', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? '', $codigo),
+        ]);
+        if (!$cuestionario instanceof Cuestionario) {
+            $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        } elseif (!$empleado instanceof Empleado) {
+            $this->addFlash('warning', 'No se encuentran datos de empleado.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        $evalua = $this->evaluaRepository->findByEntregados([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+        ])[0] ?? null;
+        $formulario = $evalua?->getFormulario();
+        if (!$formulario instanceof Formulario) {
+            $this->addFlash('warning', 'El formulario solicitado no existe o no esta disponible.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+        $respuestas = [];
+        foreach ($formulario->getRespuestas() as $respuesta) {
+            $pregunta = $respuesta->getPregunta();
+            if ($pregunta instanceof Pregunta) {
+                $respuestas[(int) $pregunta->getId()] = $respuesta->getValor();
+            }
+        }
+
+        // Generar PDF
+        $html = $this->renderView('intranet/desempenyo/formulario_pdf.html.twig', [
+            'codigo' => $codigo,
+            'formulario' => $evalua,
+            'respuestas' => $respuestas,
+        ]);
+        $opciones = new Options();
+        $opciones
+            ->setDefaultFont('sans-serif')
+            ->setDefaultPaperSize('A4')
+        ;
+        $dompdf = new Dompdf($opciones);
+        $dompdf->loadHtml($html, 'UTF-8');
+        $dompdf->render();
+        $dompdf->stream(sprintf('autoevaluacion-%s.pdf', $cuestionario->getCodigo()));
+
+        return new Response();
     }
 
     /** Rellenar formulario. */

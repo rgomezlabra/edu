@@ -46,7 +46,7 @@ class EvaluaRepository extends ServiceEntityRepository
     /**
      * Buscar datos de evaluación para los criterios de búsqueda indicados (cuestionario, empleado, evaluador y tipo de
      * evaluación).
-     * @param  int[]|Cuestionario[]|Empleado[] $criterios
+     * @param  int[]|bool[]|Cuestionario[]|Empleado[] $criterios
      * @return Evalua[]
      */
     public function findByEvaluacion(array $criterios): array
@@ -97,6 +97,11 @@ class EvaluaRepository extends ServiceEntityRepository
                     }
 
                     $qb->andWhere('evalua.tipo_evaluador IN (:tipo)')->setParameter('tipo', $valor);
+                    break;
+                case 'entregados':
+                    $qb->join('evalua.formulario', 'formulario')
+                        ->andWhere('formulario.fecha_envio ' . ($valor ? 'IS NOT NULL' : 'IS NULL'))
+                    ;
             }
         }
 
@@ -154,6 +159,17 @@ class EvaluaRepository extends ServiceEntityRepository
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Devuelve las evaluaciones con formularios entregados según los criterios de búsqueda (cuestionario, empleado y
+     * evaluador).
+     * @param int[]|Cuestionario[]|Empleado[] $criterios
+     * @return Evalua[]
+     */
+    public function findByEntregados(array $criterios): array
+    {
+        return $this->findByEvaluacion([...$criterios, 'entregados' => true]);
     }
 
     /** Mejorar consulta para obtener datos de empleado evaluado. */

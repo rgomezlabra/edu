@@ -1,0 +1,51 @@
+{% extends '/layout/base_pdf.html.twig' %}
+
+{% block title %}Autoevaluación: {{ formulario.cuestionario.codigo }}{% endblock %}
+
+{% block content %}
+{% set tipos_preguntas -%}
+    {{ render(controller('App\\Controller\\Cuestiona\\PreguntaController::getTipos')) }}
+{%- endset -%}
+
+<div class="pagina">
+    <h2>{{ formulario.cuestionario.titulo }}</h2>
+    <div>{{ formulario.cuestionario.descripcion|raw }}</div>
+    <h3>Autoevaluación de {{ app.user.persona }}</h3>
+    <div>Fecha de entrega: {{ formulario.formulario.fechaEnvio|date('d/m/Y') }}</div>
+</div>
+<div class="salto-pagina"></div>
+
+{%- for grupo in formulario.cuestionario.grupos|sort((a, b) => a.orden <=> b.orden) %}
+    <div class="pagina">
+        <h5>{{ grupo }}</h5>
+        <div>{{ grupo.descripcion|raw }}</div>
+        <table>
+            <thead>
+            <tr>
+                <th>Pregunta</th>
+                <th class="col-2">Valoración</th>
+                <th class="col-5">Evidencias</th>
+            </tr>
+            </thead>
+            <tbody>
+            {%- set puntos = 0 %}
+            {%- for pregunta in grupo.preguntas|sort((a, b) => a.orden <=> b.orden) %}
+                <tr>
+                    <td>{{ pregunta }}</td>
+                    <td>{{ respuestas[pregunta.id].valor|default }}</td>
+                    <td>{{ respuestas[pregunta.id].observa|default }}</td>
+                </tr>
+                {%- set puntos = puntos + respuestas[pregunta.id].valor|default(0) %}
+                {%- if loop.last %}
+                    <tr>
+                        <td>Media</td>
+                        <td>{{ (puntos / loop.index)|round(2) }}</td>
+                        <td></td>
+                    </tr>
+                {%- endif %}
+            {%- endfor %}
+            </tbody>
+        </table>
+    </div>
+{%- endfor %}
+{% endblock %}

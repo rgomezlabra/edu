@@ -32,11 +32,21 @@
             {%- for formulario in formularios|filter(f => f.formulario.fechaEnvio) %}
             <tr>
                 <td>{{ formulario.empleado.persona }}</td>
-                {%- for tipo in [
-                    constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'),
-                    constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
-                    constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'),
-                ] %}
+                {%- if formulario.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION' )%}
+                    <td><span class="badge-warning">No evaluable</span></td>
+                    <td>{{ formulario.fechaRechazo|date('Y-m-d') }}</td>
+                    {%- set tipos = [
+                        constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
+                        constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'),
+                    ] %}
+                {%- else %}
+                    {%- set tipos = [
+                        constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'),
+                        constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
+                        constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'),
+                    ] %}
+                {%- endif %}
+                {%- for tipo in tipos %}
                     <td>{{ puntos[formulario.empleado.id][tipo]|default|round(2) }}</td>
                     <td>{{ puntos[formulario.empleado.id][tipo]|default ? formulario.formulario.fechaEnvio|date('Y-m-d') }}</td>
                 {%- endfor %}
@@ -45,7 +55,7 @@
                     + (puntos[formulario.empleado.id][constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')]|default(0) * config['peso2'] / 100)
                     + (puntos[formulario.empleado.id][constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')]|default(0) * config['peso3'] / 100)
                 -%}
-                <td>{{ (media * 6)|round(2) }}</td>
+                <td {% if (media * 6) < 20 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|round(2) }}</td>
                 <td>{{ (media * 10)|round(2) }}</td>
                 <td></td>
             </tr>
