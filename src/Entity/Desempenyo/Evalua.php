@@ -3,6 +3,7 @@
 namespace App\Entity\Desempenyo;
 
 use App\Entity\Cuestiona\Cuestionario;
+use App\Entity\Cuestiona\Formulario;
 use App\Entity\Plantilla\Empleado;
 use App\Entity\Sistema\Origen;
 use App\Repository\Desempenyo\EvaluaRepository;
@@ -49,6 +50,9 @@ class Evalua
     #[ORM\ManyToOne(targetEntity: Cuestionario::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?Cuestionario $cuestionario = null;
+
+    #[ORM\ManyToOne(targetEntity: Formulario::class)]
+    private ?Formulario $formulario = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $fecha_rechazo = null;
@@ -105,6 +109,18 @@ class Evalua
     public function setCuestionario(?Cuestionario $cuestionario): static
     {
         $this->cuestionario = $cuestionario;
+
+        return $this;
+    }
+
+    public function getFormulario(): ?Formulario
+    {
+        return $this->formulario;
+    }
+
+    public function setFormulario(?Formulario $formulario): static
+    {
+        $this->formulario = $formulario;
 
         return $this;
     }

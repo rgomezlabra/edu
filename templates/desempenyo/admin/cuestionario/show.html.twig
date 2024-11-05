@@ -91,6 +91,12 @@
                 <em class="fas fa-check"></em> Activar
             </a>
         </li>
+    {%- elseif cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO') %}
+        <li class="nav-item me-2">
+            <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_formulario_index', {'cuestionario': cuestionario.id}) }}">
+                <em class="fas fa-list-check"></em> Formularios
+            </a>
+        </li>
     {%- endif %}
     <li class="nav-item me-2">
         <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {'id': cuestionario.id}) }}">

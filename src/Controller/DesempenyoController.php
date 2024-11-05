@@ -6,7 +6,6 @@ use App\Entity\Sistema\Estado;
 use App\Entity\Sistema\Usuario;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
-use App\Repository\Desempenyo\FormularioRepository;
 use App\Repository\Desempenyo\TipoIncidenciaRepository;
 use App\Repository\Plantilla\EmpleadoRepository;
 use App\Repository\Sistema\EstadoRepository;
@@ -31,7 +30,6 @@ class DesempenyoController extends AbstractController
         CuestionarioRepository $cuestionarioRepository,
         EmpleadoRepository     $empleadoRepository,
         EvaluaRepository       $evaluaRepository,
-        FormularioRepository   $formularioRepository,
     ): Response {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
@@ -42,7 +40,6 @@ class DesempenyoController extends AbstractController
             'cuestionarios' => $cuestionarioRepository->findBy(['aplicacion' => $this->actual->getAplicacion()]),
             'evaluados' => $evaluaRepository->findBy(['empleado' => $empleado]),
             'evaluaciones' => $evaluaRepository->findBy(['evaluador' => $empleado]),
-            'formularios' => $formularioRepository->findBy(['empleado' => $empleado]),
         ]);
     }
 

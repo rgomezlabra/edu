@@ -4,7 +4,7 @@
     {%- set config = cuestionario.configuracion %}
     <div class="pagina-titulo">{{ titulo }}</div>
 
-    <div class="pagina-seccion">Cuestionario {{ cuestionario.codigo }}</div>
+    <div class="pagina-seccion">{{ cuestionario.titulo }}</div>
     <div class="my-4">
         <table class="tabla-condensada" id="datosResultados">
             <thead class="cabecera-condensada">
@@ -13,18 +13,19 @@
                 <th colspan="2" data-dt-order="disable">Autoevaluación ({{ config.peso1 }}%)</th>
                 <th colspan="2" data-dt-order="disable">Evaluación responsable ({{ config.peso2 }}%)</th>
                 <th colspan="2" data-dt-order="disable">Evaluación tercer agente ({{ config.peso3 }}%)</th>
-                <th data-dt-order="disable"></th>
+                <th colspan="2" data-dt-order="disable">Total ponderado</th>
                 <th rowspan="2" data-dt-order="disable">Acciones</th>
             </tr>
             <tr>
                 <th>Empleado</th>
-                <th>Puntos</th>
-                <th>Fecha</th>
-                <th>Puntos</th>
-                <th>Fecha</th>
-                <th>Puntos</th>
-                <th>Fecha</th>
-                <th>Total calculado</th>
+                <th class="text-start">Media</th>
+                <th class="text-start">Fecha</th>
+                <th class="text-start">Media</th>
+                <th class="text-start">Fecha</th>
+                <th class="text-start">Media</th>
+                <th class="text-start">Fecha</th>
+                <th class="text-start">60 puntos</th>
+                <th class="text-start">100 puntos</th>
             </tr>
             </thead>
             <tbody>
@@ -36,20 +37,25 @@
                     constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
                     constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'),
                 ] %}
-                    <td>{{ puntos[formulario.empleado.id][tipo]|default }}</td>
+                    <td>{{ puntos[formulario.empleado.id][tipo]|default|round(2) }}</td>
                     <td>{{ puntos[formulario.empleado.id][tipo]|default ? formulario.formulario.fechaEnvio|date('Y-m-d') }}</td>
                 {%- endfor %}
-                <td>
-                    {{- (puntos[formulario.empleado.id][constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')]|default(0) * config['peso1'] / 100)
-                        + (puntos[formulario.empleado.id][constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')]|default(0) * config['peso2'] / 100)
-                        + (puntos[formulario.empleado.id][constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')]|default(0) * config['peso3'] / 100) -}}
-                </td>
+                {%- set media =
+                    (puntos[formulario.empleado.id][constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')]|default(0) * config['peso1'] / 100)
+                    + (puntos[formulario.empleado.id][constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')]|default(0) * config['peso2'] / 100)
+                    + (puntos[formulario.empleado.id][constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')]|default(0) * config['peso3'] / 100)
+                -%}
+                <td>{{ (media * 6)|round(2) }}</td>
+                <td>{{ (media * 10)|round(2) }}</td>
                 <td></td>
             </tr>
             {%- endfor%}
             </tbody>
         </table>
     </div>
+{% endblock %}
+
+{% block botones %}
 {% endblock %}
 
 {% block migas %}

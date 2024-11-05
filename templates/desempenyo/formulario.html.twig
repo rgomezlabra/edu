@@ -5,24 +5,24 @@
     {%- set tipos_preguntas -%}
         {{ render(controller('App\\Controller\\Cuestiona\\PreguntaController::getTipos')) }}
     {%- endset -%}
-    {%- set grupos = formulario.formulario.cuestionario.grupos|filter(g => g.activa)|sort((a, b) => a.orden <=> b.orden) -%}
+    {%- set grupos = evalua.cuestionario.grupos|filter(g => g.activa)|sort((a, b) => a.orden <=> b.orden) -%}
 
     <div class="badge-primary rounded-pill float-end">{{ app.user.persona }}</div>
-    <div class="pagina-titulo">{{ formulario.formulario.cuestionario.titulo }}</div>
-    <div class="m-3">{{ formulario.formulario.cuestionario.descripcion|raw }}</div>
+    <div class="pagina-titulo">{{ evalua.cuestionario.titulo }}</div>
+    <div class="m-3">{{ evalua.cuestionario.descripcion|raw }}</div>
 
     {%- if evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
         <div class="pagina-seccion">Autoevaluación</div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
-        <div class="pagina-seccion">Evaluación de {{ formulario.empleado.persona }} por parte del responsable</div>
+        <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte del responsable</div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
-        <div class="pagina-seccion">Evaluación de {{ formulario.empleado.persona }} por parte de tercer agente</div>
+        <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte de tercer agente</div>
     {%- endif %}
     <form class="d-flex align-items-start my-2"
           method="post" action="{{ path(aplicacion.ruta ~ '_formulario_guardar', {'codigo': codigo}) }}">
         <div class="col-3 col-sm-2 me-3">
             <div class="nav flex-column nav-pills h-100" id="vert-tabs-tab" role="tablist" aria-orientation="vertical">
-                {%- if formulario.formulario.cuestionario.bienvenida %}
+                {%- if evalua.cuestionario.bienvenida %}
                     <a class="nav-link show active" id="vert-tabs-bienvenida-tab" role="tab"
                        data-bs-toggle="pill" href="#vert-tabs-bienvenida" aria-controls="vert-tabs-bienvenida"
                        aria-selected="true">
@@ -45,7 +45,7 @@
                         <span class="ms-3">Cuestionario reducido</span>
                     </a>
                 {%- endif %}
-                {%- if formulario.formulario.cuestionario.bienvenida %}
+                {%- if evalua.cuestionario.bienvenida %}
                     <a class="nav-link" id="vert-tabs-despedida-tab" role="tab"
                        data-bs-toggle="pill" href="#vert-tabs-despedida" aria-controls="vert-tabs-despedida"
                        aria-selected="false">
@@ -64,7 +64,7 @@
                             Dispone de {{ sesion }} segundos para rellenar el formulario.
                         </div>
                     {%- endif %}
-                    <div>{{ formulario.formulario.cuestionario.bienvenida|raw }}</div>
+                    <div>{{ evalua.cuestionario.bienvenida|raw }}</div>
                 </div>
                 {%- if evalua.tipoEvaluador != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
                     {#- Páginas de grupos de preguntas de cuestionario completo #}
@@ -102,7 +102,7 @@
                             </div>
                             <div class="d-flex">
                                 <input type="hidden" name="_token"
-                                       value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
+                                       value="{{ csrf_token(codigo ~ '.' ~ evalua.cuestionario.id) }}" />
                                 <button class="btn btn-primary m-2"><em class="mx-1 fas fa-save"></em>Grabar</button>
                                 <div id="aviso_{{ grupo.orden }}" class="toast text-bg-warning align-self-center mx-2" role="alert"
                                      aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
@@ -128,7 +128,7 @@
                                 <div class="col-5">Evidencias</div>
                             </div>
                             {%- set puntos = 0 %}
-                            {%- for grupo in formulario.formulario.cuestionario.grupos|sort((a, b) => a.orden <=> b.orden) %}
+                            {%- for grupo in evalua.cuestionario.grupos|sort((a, b) => a.orden <=> b.orden) %}
                                 {%- set preguntas = grupo.preguntas|filter(p => p.activa and p.reducida)|sort((a, b) => a.orden <=> b.orden)  %}
                                 {%- for pregunta in preguntas %}
                                     {%- set tipo = (tipos_preguntas|json_decode)[pregunta.tipo] %}
@@ -151,7 +151,7 @@
                         </div>
                         <div class="d-flex">
                             <input type="hidden" name="_token"
-                                   value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
+                                   value="{{ csrf_token(codigo ~ '.' ~ evalua.cuestionario.id) }}" />
                             <button class="btn btn-primary m-2"><em class="mx-1 fas fa-save"></em>Grabar</button>
                             <div id="aviso_0" class="toast text-bg-warning align-self-center mx-2" role="alert"
                                  aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
@@ -169,9 +169,9 @@
                 {#- Página de despedida #}
                 <div class="tab-pane fade text-left" id="vert-tabs-despedida" role="tabpanel"
                      aria-labelledby="vert-tabs-despedida-tab" tabindex="0">
-                    <div>{{ formulario.formulario.cuestionario.despedida|default|raw }}</div>
+                    <div>{{ evalua.cuestionario.despedida|default|raw }}</div>
                     <input type="hidden" name="_token"
-                           value="{{ csrf_token(codigo ~ '.' ~ formulario.formulario.cuestionario.id) }}" />
+                           value="{{ csrf_token(codigo ~ '.' ~ evalua.cuestionario.id) }}" />
                     <div class="d-flex">
                         <button class="btn btn-primary m-2 align-self-center" id="enviar">
                             <em class="mx-1 fas fa-envelope"></em>Enviar
@@ -191,8 +191,8 @@
                 </div>
             </div>
         </div>
-        <input type="hidden" name="empleado" value="{{ formulario.empleado.id }}" />
-        <input type="hidden" name="evaluador" value="{{ formulario.evaluador.id|default }}" />
+        <input type="hidden" name="empleado" value="{{ evalua.empleado.id }}" />
+        <input type="hidden" name="evaluador" value="{{ evalua.evaluador.id|default }}" />
         <input type="hidden" name="enviado" id="enviado" value="0" />
     </form>
 {% endblock %}

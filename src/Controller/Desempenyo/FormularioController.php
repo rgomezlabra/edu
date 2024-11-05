@@ -3,19 +3,17 @@
 namespace App\Controller\Desempenyo;
 
 use App\Entity\Cuestiona\Cuestionario;
-use App\Entity\Cuestiona\Formulario as CuestionaFormulario;
+use App\Entity\Cuestiona\Formulario;
 use App\Entity\Cuestiona\Pregunta;
 use App\Entity\Cuestiona\Respuesta;
 use App\Entity\Desempenyo\Evalua;
-use App\Entity\Desempenyo\Formulario;
 use App\Entity\Plantilla\Empleado;
 use App\Entity\Sistema\Usuario;
 use App\Repository\Cuestiona\CuestionarioRepository;
-use App\Repository\Cuestiona\FormularioRepository as CuestionaFormularioRepository;
+use App\Repository\Cuestiona\FormularioRepository;
 use App\Repository\Cuestiona\PreguntaRepository;
 use App\Repository\Cuestiona\RespuestaRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
-use App\Repository\Desempenyo\FormularioRepository;
 use App\Repository\Plantilla\EmpleadoRepository;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
@@ -38,11 +36,10 @@ class FormularioController extends AbstractController
     private string $rutaBase;   // Ruta base de la aplicación actual
 
     public function __construct(
-        private readonly MessageGenerator     $generator,
-        private readonly RutaActual           $actual,
-        private readonly SirhusLock           $lock,
-        private readonly EvaluaRepository     $evaluaRepository,
-        private readonly FormularioRepository $formularioRepository,
+        private readonly MessageGenerator $generator,
+        private readonly RutaActual       $actual,
+        private readonly SirhusLock       $lock,
+        private readonly EvaluaRepository $evaluaRepository,
     ) {
         $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
         $this->ttl = 300;
@@ -61,26 +58,26 @@ class FormularioController extends AbstractController
     ): Response {
         $this->denyAccessUnlessGranted('admin');
         $cuestionario = $cuestionarioRepository->find($request->query->getString('cuestionario'));
-        if (!$cuestionario instanceof Cuestionario || $cuestionario->getAutor() !== $this->getUser()) {
+        if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        $evaluaciones = $evaluaRepository->findBy(['cuestionario' => $cuestionario]);
-        $formularios = $this->formularioRepository->findByEntregados($cuestionario);
+        $formularios = $evaluaRepository->findByFormularios(['cuestionario' => $cuestionario, 'entregados' => true]);
         $puntos = [];
         foreach ($formularios as $formulario) {
             $total = 0;
-            foreach ($formulario->getFormulario()->getRespuestas() as $respuesta) {
+            /** @var Respuesta[] $respuestas */
+            $respuestas = $formulario->getFormulario()?->getRespuestas();
+            foreach ($respuestas as $respuesta) {
                 $valor = $respuesta->getValor();
                 $total += (int) $valor['valor'];
             }
-            $evalua = array_filter(
-                $evaluaciones,
-                static fn ($e) => $e->getEmpleado() === $formulario->getEmpleado() && $e->getEvaluador() === $formulario->getEvaluador()
-            );
-            $puntos[(int) $formulario->getEmpleado()?->getId()][reset($evalua)->getTipoEvaluador()] = $total;
+            if ($total > 0) {
+                $total /= count($respuestas);
+            }
+            $puntos[(int) $formulario->getEmpleado()?->getId()][$formulario->getTipoEvaluador()] = $total;
         }
 
         return $this->render('intranet/desempenyo/admin/cuestionario/resultado.html.twig', [
@@ -96,13 +93,19 @@ class FormularioController extends AbstractController
         defaults: ['titulo' => 'Formulario Enviado'],
         methods: ['GET']
     )]
-    public function show(Formulario $formulario): Response
+    public function show(Evalua $evalua): Response
     {
         $this->denyAccessUnlessGranted('admin');
+        $formulario = $evalua->getFormulario();
+        if (!$formulario instanceof Formulario) {
+            $this->addFlash('warning', 'Evaluación sin cuestionario asociado.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
 
         return $this->render('intranet/cuestiona/admin/formulario/show.html.twig', [
-            'cuestionario' => $formulario->getFormulario()?->getCuestionario(),
-            'formulario' => $formulario,
+            'cuestionario' => $formulario->getCuestionario(),
+            'evaluacion' => $evalua,
         ]);
     }
 
@@ -247,18 +250,18 @@ class FormularioController extends AbstractController
         }
 
         $respuestas = [];
-        $formulario = $this->formularioRepository->findByCuestionario($cuestionario, $empleado, $evaluador)[0] ?? null;
+        $formulario = $evalua->getFormulario();
         if ($formulario instanceof Formulario) {
-            foreach ($formulario->getFormulario()?->getRespuestas() ?? [] as $respuesta) {
+            foreach ($formulario->getRespuestas() as $respuesta) {
                 $pregunta = $respuesta->getPregunta();
                 if ($pregunta instanceof Pregunta) {
                     $respuestas[(int) $pregunta->getId()] = $respuesta->getValor();
                 }
             }
 
-            if ($formulario->getFormulario()?->getFechaEnvio() instanceof DateTimeImmutable) {
+            if ($formulario->getFechaEnvio() instanceof DateTimeImmutable) {
                 return $this->render('intranet/desempenyo/formulario_ver.html.twig', [
-                    'formulario' => $formulario,
+                    'formulario' => $evalua,
                     'respuestas' => $respuestas,
                     'codigo' => $codigo,
                 ]);
@@ -267,23 +270,10 @@ class FormularioController extends AbstractController
             $this->addFlash('warning', 'Esta evaluación ya está abierta.');
 
             return $this->redirectToRoute($this->rutaBase);
-        } else {
-            $cuestionaFormulario = new CuestionaFormulario();
-            $cuestionaFormulario
-                ->setCuestionario($cuestionario)
-                ->setUsuario($usuario)
-            ;
-            $formulario = new Formulario();
-            $formulario
-                ->setFormulario($cuestionaFormulario)
-                ->setEmpleado($empleado)
-                ->setEvaluador($evaluador)
-            ;
         }
 
         return $this->render('intranet/desempenyo/formulario.html.twig', [
             'evalua' => $evalua,
-            'formulario' => $formulario,
             'respuestas' => $respuestas,
             'codigo' => $codigo,
             'sesion' => $this->lock->getRemainingLifetime(),
@@ -297,13 +287,13 @@ class FormularioController extends AbstractController
         methods: ['POST']
     )]
     public function guardar(
-        Request                       $request,
-        CuestionarioRepository        $cuestionarioRepository,
-        EmpleadoRepository            $empleadoRepository,
-        CuestionaFormularioRepository $cuestionaFormularioRepository,
-        PreguntaRepository            $preguntaRepository,
-        RespuestaRepository           $respuestaRepository,
-        string                        $codigo,
+        Request                $request,
+        CuestionarioRepository $cuestionarioRepository,
+        EmpleadoRepository     $empleadoRepository,
+        FormularioRepository   $formularioRepository,
+        PreguntaRepository     $preguntaRepository,
+        RespuestaRepository    $respuestaRepository,
+        string                 $codigo,
     ): Response {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
@@ -332,7 +322,7 @@ class FormularioController extends AbstractController
             $this->addFlash('warning', 'No se encuentran datos de empleado.');
 
             return $this->redirectToRoute($this->rutaBase);
-        } elseif ($empleado !== $empleadoRepository->findOneByUsuario($usuario)) {
+        } elseif (0 === $idEvaluador && $empleado !== $empleadoRepository->findOneByUsuario($usuario)) {
             $this->addFlash('warning', 'El usuario no corresponde con el empleado del formulario.');
 
             return $this->redirectToRoute($this->rutaBase);
@@ -346,22 +336,20 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        $formulario = $this->formularioRepository->findByCuestionario($cuestionario, $empleado, $evaluador)[0] ?? null;
-        if ($formulario instanceof Formulario) {
-            $cuestionaFormulario = $formulario->getFormulario();
-        } else {
+        $evalua = $this->evaluaRepository->findBy([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'evaluador' => $evaluador,
+        ])[0];
+        $formulario = $evalua->getFormulario();
+        if (!$formulario instanceof Formulario) {
             // Nuevo formulario
-            $cuestionaFormulario = new CuestionaFormulario();
-            $cuestionaFormulario
+            $formulario = new Formulario();
+            $formulario
                 ->setCuestionario($cuestionario)
                 ->setUsuario($usuario)
             ;
-            $formulario = new Formulario();
-            $formulario
-                ->setFormulario($cuestionaFormulario)
-                ->setEmpleado($empleado)
-                ->setEvaluador($evaluador)
-            ;
+            $evalua->setFormulario($formulario);
         }
 
         /**
@@ -371,14 +359,14 @@ class FormularioController extends AbstractController
         foreach ($request->request->all() as $clave => $valor) {
             $pregunta = $preguntaRepository->find((int) u($clave)->after('_')->toString());
             if ($pregunta instanceof Pregunta) {
-                $respuesta = $cuestionaFormulario?->getRespuestas()->filter(
-                    static fn(Respuesta $respuesta) => $respuesta->getFormulario() === $formulario->getFormulario(
-                        ) && $respuesta->getPregunta() === $pregunta
+                $respuesta = $formulario->getRespuestas()->filter(
+                    static fn (Respuesta $respuesta) =>
+                        $respuesta->getFormulario() === $formulario && $respuesta->getPregunta() === $pregunta
                 )->first();
                 if (!$respuesta instanceof Respuesta) {
                     $respuesta = new Respuesta();
                     $respuesta
-                        ->setFormulario($cuestionaFormulario)
+                        ->setFormulario($formulario)
                         ->setPregunta($pregunta)
                     ;
                 }
@@ -391,17 +379,17 @@ class FormularioController extends AbstractController
                 }
 
                 $respuestaRepository->save($respuesta);
-                $cuestionaFormulario->addRespuesta($respuesta);
+                $formulario->addRespuesta($respuesta);
             }
         }
 
-        $cuestionaFormulario->setFechaGrabacion(new DateTimeImmutable());
+        $formulario->setFechaGrabacion(new DateTimeImmutable());
         if ($enviado) {
-            $cuestionaFormulario->setFechaEnvio(new DateTimeImmutable());
+            $formulario->setFechaEnvio(new DateTimeImmutable());
         }
 
-        $cuestionaFormularioRepository->save($cuestionaFormulario);
-        $this->formularioRepository->save($formulario, true);
+        $formularioRepository->save($formulario);
+        $this->evaluaRepository->save($evalua, true);
         if ($enviado) {
             $this->lock->release();
             $this->generator->logAndFlash('info', 'Formulario enviado correctamente.', [
@@ -417,7 +405,7 @@ class FormularioController extends AbstractController
 
         return $this->redirectToRoute($this->rutaBase . '_formulario_rellenar', [
             'codigo' => $codigo,
-            'id' => 0 === $idEvaluador ? null : $evaluador->getId(),
+            'id' => 0 === $idEvaluador ? null : $empleado->getId(),
         ]);
     }
 
