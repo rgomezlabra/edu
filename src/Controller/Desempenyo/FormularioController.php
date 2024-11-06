@@ -18,6 +18,7 @@ use App\Repository\Plantilla\EmpleadoRepository;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
 use App\Service\SirhusLock;
+use App\Service\Slug;
 use DateTimeImmutable;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -206,26 +207,33 @@ class FormularioController extends AbstractController
         );
     }
 
-    /** PDF del formulario. */
+    /** Generar PDF de formulario. */
     #[Route(
-        path: '/formulario/{codigo}/pdf',
+        path: '/formulario/{codigo}/pdf/{id?}',
         name: 'formulario_pdf',
-        requirements: ['codigo' => '[a-z0-9-]+'],
+        requirements: ['codigo' => '[a-z0-9-]+', 'evalua' => '\d+'],
         methods: ['GET']
     )]
     public function pdf(
-        Request                $request,
         CuestionarioRepository $cuestionarioRepository,
         EmpleadoRepository     $empleadoRepository,
         string                 $codigo,
-    ): Response {
+        ?int                   $id,
+    ): Response
+    {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
-        $empleado = $empleadoRepository->findOneByUsuario($usuario);
         $cuestionario = $cuestionarioRepository->findOneBy([
             'url' => sprintf('/%s/formulario/%s', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? '', $codigo),
         ]);
+        if (null === $id) {
+            $empleado = $empleadoRepository->findOneByUsuario($usuario);
+            $evaluador = null;
+        } else {
+            $empleado = $empleadoRepository->find($id);
+            $evaluador = $empleadoRepository->findOneByUsuario($usuario);
+        }
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
 
@@ -235,12 +243,17 @@ class FormularioController extends AbstractController
 
             return $this->redirectToRoute($this->rutaBase);
         }
-
         $evalua = $this->evaluaRepository->findByEntregados([
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
+            'evaluador' => $evaluador,
         ])[0] ?? null;
-        $formulario = $evalua?->getFormulario();
+        if (!$evalua instanceof Evalua) {
+            $this->addFlash('warning', 'El empleado no es evaluable.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+        $formulario = $evalua->getFormulario();
         if (!$formulario instanceof Formulario) {
             $this->addFlash('warning', 'El formulario solicitado no existe o no esta disponible.');
 
@@ -257,18 +270,20 @@ class FormularioController extends AbstractController
         // Generar PDF
         $html = $this->renderView('intranet/desempenyo/formulario_pdf.html.twig', [
             'codigo' => $codigo,
-            'formulario' => $evalua,
+            'evalua' => $evalua,
             'respuestas' => $respuestas,
         ]);
         $opciones = new Options();
         $opciones
             ->setDefaultFont('sans-serif')
             ->setDefaultPaperSize('A4')
+            ->setDefaultPaperOrientation('landscape')
         ;
         $dompdf = new Dompdf($opciones);
         $dompdf->loadHtml($html, 'UTF-8');
         $dompdf->render();
-        $dompdf->stream(sprintf('autoevaluacion-%s.pdf', $cuestionario->getCodigo()));
+        ob_start();
+        $dompdf->stream(sprintf('autoevaluacion-%s.pdf', (new Slug())((string) $cuestionario->getCodigo())), []);
 
         return new Response();
     }
@@ -329,8 +344,8 @@ class FormularioController extends AbstractController
             }
 
             if ($formulario->getFechaEnvio() instanceof DateTimeImmutable) {
-                return $this->render('intranet/desempenyo/formulario_ver.html.twig', [
-                    'formulario' => $evalua,
+                return $this->render('intranet/desempenyo/formulario.html.twig', [
+                    'evalua' => $evalua,
                     'respuestas' => $respuestas,
                     'codigo' => $codigo,
                 ]);

@@ -14,15 +14,18 @@
     {%- if evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
         <div class="pagina-seccion">Autoevaluación</div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
-        <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte del responsable</div>
+        <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte de agente principal</div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
         <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte de tercer agente</div>
     {%- endif %}
-    <form class="d-flex align-items-start my-2"
-          method="post" action="{{ path(aplicacion.ruta ~ '_formulario_guardar', {'codigo': codigo}) }}">
+    {#- Solo se muestra el formulario cuando no hay fecha de envío #}
+    {%- if evalua.formulario.fechaEnvio == null %}
+        <form method="post" action="{{ path(aplicacion.ruta ~ '_formulario_guardar', {'codigo': codigo}) }}">
+    {%- endif %}
+    <div class="d-flex align-items-start my-2">
         <div class="col-3 col-sm-2 me-3">
             <div class="nav flex-column nav-pills h-100" id="vert-tabs-tab" role="tablist" aria-orientation="vertical">
-                {%- if evalua.cuestionario.bienvenida %}
+                {%- if evalua.formulario.fechaEnvio == null %}
                     <a class="nav-link show active" id="vert-tabs-bienvenida-tab" role="tab"
                        data-bs-toggle="pill" href="#vert-tabs-bienvenida" aria-controls="vert-tabs-bienvenida"
                        aria-selected="true">
@@ -32,7 +35,8 @@
                 {%- if evalua.tipoEvaluador != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
                     {#- Grupos de preguntas de cuestionario completo #}
                     {%- for grupo in grupos %}
-                        <a class="nav-link" id="vert-tabs-{{ grupo.orden }}-tab" role="tab"
+                        <a class="nav-link {% if evalua.formulario.fechaEnvio != null and loop.first %}show active{% endif %}"
+                           id="vert-tabs-{{ grupo.orden }}-tab" role="tab"
                            data-bs-toggle="pill" href="#vert-tabs-{{ grupo.orden }}" aria-controls="vert-tabs-{{ grupo.orden }}"
                            aria-selected="false">
                             <span class="ms-3">{{ grupo.titulo }}</span>
@@ -45,21 +49,19 @@
                         <span class="ms-3">Cuestionario reducido</span>
                     </a>
                 {%- endif %}
-                {%- if evalua.cuestionario.bienvenida %}
-                    <a class="nav-link" id="vert-tabs-despedida-tab" role="tab"
-                       data-bs-toggle="pill" href="#vert-tabs-despedida" aria-controls="vert-tabs-despedida"
-                       aria-selected="false">
-                        Finalizar la evaluación
-                    </a>
-                {%- endif %}
+                <a class="nav-link" id="vert-tabs-despedida-tab" role="tab"
+                   data-bs-toggle="pill" href="#vert-tabs-despedida" aria-controls="vert-tabs-despedida"
+                   aria-selected="false">
+                    {% if evalua.formulario.fechaEnvio == null %}Finalizar la evaluación{% else %}Evaluación finalizada{% endif %}
+                </a>
             </div>
         </div>
         <div class="col-9 col-sm-10">
             <div class="tab-content" id="vert-tabs-tabContent">
                 {#- Página de bienvenida #}
-                <div class="tab-pane fade text-left show active" id="vert-tabs-bienvenida"
-                     role="tabpanel" aria-labelledby="vert-tabs-bienvenida-tab" tabindex="0">
-                    {%- if sesion > 0 %}
+                <div class="tab-pane fade text-left {% if evalua.formulario.fechaEnvio == null %}show active{% endif %}"
+                     id="vert-tabs-bienvenida" role="tabpanel" aria-labelledby="vert-tabs-bienvenida-tab" tabindex="0">
+                    {%- if sesion is defined and  sesion > 0 %}
                         <div class="badge-info">
                             Dispone de {{ sesion }} segundos para rellenar el formulario.
                         </div>
@@ -68,9 +70,10 @@
                 </div>
                 {%- if evalua.tipoEvaluador != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
                     {#- Páginas de grupos de preguntas de cuestionario completo #}
-                    {%- for grupo in grupos  %}
-                        <div class="tab-pane fade text-left" id="vert-tabs-{{ grupo.orden }}"
-                             role="tabpanel" aria-labelledby="vert-tabs-{{ grupo.orden }}-tab" tabindex="0">
+                    {%- for grupo in grupos %}
+                        <div class="tab-pane fade text-left {% if evalua.formulario.fechaEnvio != null and loop.first %}show active{% endif %}"
+                             id="vert-tabs-{{ grupo.orden }}" role="tabpanel"
+                             aria-labelledby="vert-tabs-{{ grupo.orden }}-tab" tabindex="0">
                             <div class="pagina-seccion">{{ grupo }}</div>
                             <div class="my-2">{{ grupo.descripcion|raw }}</div>
                             {#- Preguntas del grupo #}
@@ -88,8 +91,13 @@
                                         <div class="col-5">
                                             <div class="fw-bold" title="{{ pregunta.descripcion|raw }}">{{ pregunta }}</div>
                                         </div>
-                                        {{- include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {
-                                            etiqueta: 'preg_' ~ pregunta.id, valor: respuestas[pregunta.id]|default(puntos_iniciales)}) }}
+                                        {%- if evalua.formulario.fechaEnvio == null %}
+                                            {{- include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {
+                                                etiqueta: 'preg_' ~ pregunta.id, valor: respuestas[pregunta.id]|default(puntos_iniciales)}) }}
+                                        {%- else %}
+                                            <div class="col-2">{{ respuestas[pregunta.id].valor|default }}</div>
+                                            <div class="col-5">{{ respuestas[pregunta.id].observa|default }}</div>
+                                        {%- endif %}
                                     </div>
                                     {%- set puntos = puntos + respuestas[pregunta.id].valor|default(puntos_iniciales) %}
                                 {%- endfor %}
@@ -100,21 +108,23 @@
                                     </div>
                                 {%- endif %}
                             </div>
-                            <div class="d-flex">
-                                <input type="hidden" name="_token"
-                                       value="{{ csrf_token(codigo ~ '.' ~ evalua.cuestionario.id) }}" />
-                                <button class="btn btn-primary m-2"><em class="mx-1 fas fa-save"></em>Grabar</button>
-                                <div id="aviso_{{ grupo.orden }}" class="toast text-bg-warning align-self-center mx-2" role="alert"
-                                     aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
-                                    <div class="toast-body">
-                                        <div class="d-flex">
-                                            <div>Faltan evidencias.</div>
-                                            <button type="button" class="btn-close me-2 m-auto"
-                                                    data-bs-dismiss="toast" aria-label="Close"></button>
+                            {%- if evalua.formulario.fechaEnvio == null %}
+                                <div class="d-flex">
+                                    <input type="hidden" name="_token"
+                                           value="{{ csrf_token(codigo ~ '.' ~ evalua.cuestionario.id) }}" />
+                                    <button class="btn btn-primary m-2"><em class="mx-1 fas fa-save"></em>Grabar</button>
+                                    <div id="aviso_{{ grupo.orden }}" class="toast text-bg-warning align-self-center mx-2" role="alert"
+                                         aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
+                                        <div class="toast-body">
+                                            <div class="d-flex">
+                                                <div>Faltan evidencias.</div>
+                                                <button type="button" class="btn-close me-2 m-auto"
+                                                        data-bs-dismiss="toast" aria-label="Close"></button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            {%- endif %}
                         </div>
                     {%- endfor %}
                 {%- else %}
@@ -136,8 +146,13 @@
                                         <div class="col-5">
                                             <div class="fw-bold" title="{{ pregunta.descripcion|raw }}">{{ pregunta }}</div>
                                         </div>
-                                        {{- include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {
-                                            etiqueta: 'preg_' ~ pregunta.id, valor: respuestas[pregunta.id]|default(puntos_iniciales)}) }}
+                                        {%- if preguntas is defined and preguntas|length > 0 %}
+                                            {{- include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {
+                                                etiqueta: 'preg_' ~ pregunta.id, valor: respuestas[pregunta.id]|default(puntos_iniciales)}) }}
+                                        {%- else %}
+                                            <div class="col-2">{{ respuestas[pregunta.id].valor|default }}</div>
+                                            <div class="col-5">{{ respuestas[pregunta.id].observa|default }}</div>
+                                        {%- endif %}
                                     </div>
                                     {%- set puntos = puntos + respuestas[pregunta.id].valor|default(puntos_iniciales) %}
                                 {%- endfor %}
@@ -170,31 +185,45 @@
                 <div class="tab-pane fade text-left" id="vert-tabs-despedida" role="tabpanel"
                      aria-labelledby="vert-tabs-despedida-tab" tabindex="0">
                     <div>{{ evalua.cuestionario.despedida|default|raw }}</div>
-                    <input type="hidden" name="_token"
-                           value="{{ csrf_token(codigo ~ '.' ~ evalua.cuestionario.id) }}" />
-                    <div class="d-flex">
-                        <button class="btn btn-primary m-2 align-self-center" id="enviar">
-                            <em class="mx-1 fas fa-envelope"></em>Enviar
-                        </button>
-                        {#- Avisos #}
-                        <div id="aviso" class="toast text-bg-warning align-self-center mx-2" role="alert"
-                             aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
-                            <div class="toast-body">
-                                <div class="d-flex">
-                                    <div>No se han introducido evidencias en todas las preguntas necesarias.</div>
-                                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
-                                            aria-label="Close"></button>
+                    {%- if evalua.formulario.fechaEnvio == null %}
+                        <input type="hidden" name="_token"
+                               value="{{ csrf_token(codigo ~ '.' ~ evalua.cuestionario.id) }}" />
+                        <div class="d-flex">
+                            <button class="btn btn-primary m-2 align-self-center" id="enviar">
+                                <em class="mx-1 fas fa-envelope"></em>Enviar
+                            </button>
+                            {#- Avisos #}
+                            <div id="aviso" class="toast text-bg-warning align-self-center mx-2" role="alert"
+                                 aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
+                                <div class="toast-body">
+                                    <div class="d-flex">
+                                        <div>No se han introducido evidencias en todas las preguntas necesarias.</div>
+                                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
+                                                aria-label="Close"></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    {%- else %}
+                        {%- if evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
+                            {%- set url = path(aplicacion.ruta ~ '_formulario_pdf', {codigo: codigo}) -%}
+                        {%- else %}
+                            {%- set url = path(aplicacion.ruta ~ '_formulario_pdf', {codigo: codigo, id: evalua.empleado.id}) -%}
+                        {%- endif %}
+                        <a class="btn btn-primary" title="Descargar PDF de la evaluación" href="{{ url }}">
+                            <em class="me-1 fas fa-file-pdf"></em>PDF
+                        </a>
+                    {%- endif %}
                 </div>
             </div>
         </div>
+    </div>
+    {%- if evalua.formulario.fechaEnvio == null %}
         <input type="hidden" name="empleado" value="{{ evalua.empleado.id }}" />
         <input type="hidden" name="evaluador" value="{{ evalua.evaluador.id|default }}" />
         <input type="hidden" name="enviado" id="enviado" value="0" />
     </form>
+    {%- endif %}
 {% endblock %}
 
 {% block botones %}
