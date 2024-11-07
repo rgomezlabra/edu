@@ -42,9 +42,12 @@ use function Symfony\Component\String\u;
 #[Route(path: '/intranet/desempenyo', name: 'intranet_desempenyo_')]
 class EvaluadorController extends AbstractController
 {
-    private object $redis;
-    private int $ttl;   // Tiempo de bloqueo
-    private string $rutaBase;   // Ruta base de la aplicación actual
+    /** @var ClientInterface|Redis|RedisArray|RedisCluster $redis */
+    private readonly object $redis;
+    /** @var string $rutaBase Ruta base de la aplicación actual */
+    private readonly string $rutaBase;
+    /** @var int $ttl Tiempo de bloqueo en s. */
+    private readonly int $ttl;
 
     public function __construct(
         private readonly MessageGenerator $generator,
@@ -54,10 +57,8 @@ class EvaluadorController extends AbstractController
         #[Autowire('%app.redis_url%')]
         private readonly string           $redisUrl,
     ) {
+        $this->redis = RedisAdapter::createConnection($this->redisUrl);
         $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
-        /** @var ClientInterface|Redis|RedisArray|RedisCluster $redis */
-        $redis = RedisAdapter::createConnection($this->redisUrl);
-        $this->redis = $redis;
         $this->ttl = 60;
     }
 
@@ -79,11 +80,11 @@ class EvaluadorController extends AbstractController
         $ultimo = null;
 
         try {
-            /** @var array<array-key, mixed> $datos */
+            /** @var bool[]|array<string[]> $datos */
             $datos = json_decode((string) $this->redis->get($claveRedis), true);
             if (true === $datos['finalizado']) {
                 $ultimo = new DateTimeImmutable(
-                    (string) $datos['inicio']['date'],
+                    $datos['inicio']['date'],
                     new DateTimeZone($datos['inicio']['timezone'] ?? 'UTC')
                 );
             }
@@ -439,12 +440,10 @@ class EvaluadorController extends AbstractController
         if (!$evalua instanceof Evalua) {
             $this->generator->logAndFlash('warning', 'El empleado no existe o no es evaluable', [
                 'cuestionario' => $cuestionario->getCodigo(),
-                'usuario' => $empleado->getPersona()?->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(
-                    ),
+                'usuario' => $empleado->getPersona()?->getUsuario()?->getUvus() ?? $this->getUser()?->getUserIdentifier(),
             ]);
 
-            return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]
-            );
+            return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
         }
 
         $evalua
@@ -454,7 +453,7 @@ class EvaluadorController extends AbstractController
         $evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado ha sido marcado como no evaluable', [
             'cuestionario' => $cuestionario->getCodigo(),
-            'empleado' => $empleado->getPersona()?->getUsuario()->getUvus(),
+            'empleado' => $empleado->getPersona()?->getUsuario()?->getUvus(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
@@ -488,8 +487,7 @@ class EvaluadorController extends AbstractController
         if (!$evalua instanceof Evalua) {
             $this->generator->logAndFlash('warning', 'El empleado no existe o no es evaluable', [
                 'cuestionario' => $cuestionario?->getCodigo(),
-                'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser()?->getUserIdentifier(
-                    ),
+                'usuario' => $empleado?->getPersona()?->getUsuario()?->getUvus() ?? $this->getUser()?->getUserIdentifier(),
             ]);
 
             return $this->redirectToRoute($this->rutaBase);
@@ -502,7 +500,7 @@ class EvaluadorController extends AbstractController
         $evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado ha solicitado no ser evaluable', [
             'cuestionario' => $cuestionario?->getCodigo(),
-            'empleado' => $empleado?->getPersona()->getUsuario()->getUvus(),
+            'empleado' => $empleado?->getPersona()?->getUsuario()?->getUvus(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase);
@@ -532,13 +530,11 @@ class EvaluadorController extends AbstractController
                 'El empleado no existe o no había solicitado rechazar evaluación',
                 [
                     'cuestionario' => $cuestionario->getCodigo(),
-                    'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser(
-                        )?->getUserIdentifier(),
+                    'usuario' => $empleado?->getPersona()?->getUsuario()?->getUvus() ?? $this->getUser()?->getUserIdentifier(),
                 ]
             );
 
-            return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]
-            );
+            return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
         }
 
         $evalua
@@ -548,7 +544,7 @@ class EvaluadorController extends AbstractController
         $evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado vuelve a ser evaluable', [
             'cuestionario' => $cuestionario->getCodigo(),
-            'empleado' => $empleado?->getPersona()->getUsuario()->getUvus(),
+            'empleado' => $empleado?->getPersona()?->getUsuario()?->getUvus(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
@@ -585,8 +581,8 @@ class EvaluadorController extends AbstractController
                 'El empleado no existe o no había solicitado rechazar evaluación',
                 [
                     'cuestionario' => $cuestionario?->getCodigo(),
-                    'usuario' => $empleado?->getPersona()->getUsuario()->getUvus() ?? $this->getUser(
-                        )?->getUserIdentifier(),
+                    'usuario' => $empleado?->getPersona()?->getUsuario()?->getUvus() ?? $this->getUser(
+                    )?->getUserIdentifier(),
                 ]
             );
 
@@ -600,7 +596,7 @@ class EvaluadorController extends AbstractController
         $evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado vuelve a ser evaluable', [
             'cuestionario' => $cuestionario?->getCodigo(),
-            'empleado' => $empleado?->getPersona()->getUsuario()->getUvus(),
+            'empleado' => $empleado?->getPersona()?->getUsuario()?->getUvus(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase);

@@ -46,7 +46,7 @@ class EvaluaRepository extends ServiceEntityRepository
     /**
      * Buscar datos de evaluación para los criterios de búsqueda indicados (cuestionario, empleado, evaluador y tipo de
      * evaluación).
-     * @param  int[]|bool[]|Cuestionario[]|Empleado[] $criterios
+     * @param  int[]|list<int[]>|bool[]|Cuestionario[]|Empleado[]|null[] $criterios
      * @return Evalua[]
      */
     public function findByEvaluacion(array $criterios): array
@@ -116,55 +116,9 @@ class EvaluaRepository extends ServiceEntityRepository
     }
 
     /**
-     * Devuelve las evaluaciones con formularios según los criterios de búsqueda (cuestionario, empleado, evaluador y
-     * si han sido entregados.
-     * @param bool[]|Cuestionario[]|Empleado[] $criterios
-     * @return Evalua[]
-     */
-    public function findByFormularios(array $criterios): array
-    {
-        $qb = $this->createQueryBuilder('evalua')
-            ->addSelect('cuestionario')
-            ->join('evalua.cuestionario', 'cuestionario')
-        ;
-        foreach ($criterios as $criterio => $valor) {
-            switch ($criterio) {
-                case 'cuestionario':
-                    if ($valor instanceof Cuestionario) {
-                        $qb->andWhere('cuestionario.id = :cuestionario')
-                            ->setParameter('cuestionario', $valor->getId())
-                        ;
-                    }
-                    break;
-                case 'empleado':
-                    if ($valor instanceof Empleado) {
-                        $qb = $this->addEmpleados($qb)
-                            ->andWhere('empleado.id = :empleado')
-                            ->setParameter('empleado', $valor->getId())
-                        ;
-                    }
-                    break;
-                case 'evaluador':
-                    if ($valor instanceof Empleado) {
-                        $qb = $this->addEvaluadores($qb)
-                            ->andWhere('evaluador.id = :evaluador')
-                            ->setParameter('evaluador', $valor->getId())
-                        ;
-                    }
-                    break;
-                case 'entregados':
-                    $qb->join('evalua.formulario', 'formulario')
-                        ->andWhere('formulario.fecha_envio ' . ($valor ? 'IS NOT NULL' : 'IS NULL'));
-            }
-        }
-
-        return $qb->getQuery()->getResult();
-    }
-
-    /**
      * Devuelve las evaluaciones con formularios entregados según los criterios de búsqueda (cuestionario, empleado y
      * evaluador).
-     * @param int[]|Cuestionario[]|Empleado[] $criterios
+     * @param int[]|Cuestionario[]|Empleado[]|null[] $criterios
      * @return Evalua[]
      */
     public function findByEntregados(array $criterios): array

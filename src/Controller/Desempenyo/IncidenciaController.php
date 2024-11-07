@@ -31,7 +31,8 @@ use function Symfony\Component\String\u;
 #[Route(path: '/intranet/desempenyo', name: 'intranet_desempenyo_')]
 class IncidenciaController extends AbstractController
 {
-    private string $rutaBase;
+    /** @var string $rutaBase Ruta base de la aplicación actual */
+    private readonly string $rutaBase;
 
     public function __construct(
         private readonly MessageGenerator       $generator,

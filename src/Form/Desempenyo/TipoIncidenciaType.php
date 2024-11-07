@@ -3,6 +3,7 @@
 namespace App\Form\Desempenyo;
 
 use App\Entity\Desempenyo\TipoIncidencia;
+use Override;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -14,6 +15,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class TipoIncidenciaType extends AbstractType
 {
+    #[Override]
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -24,6 +26,7 @@ class TipoIncidenciaType extends AbstractType
         ;
     }
 
+    #[Override]
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([

@@ -11,14 +11,12 @@ use Symfony\Component\Validator\Constraints\Range;
 
 class ConfiguraCuestionarioType extends AbstractType
 {
-    /** @inheritDoc */
     #[Override]
     public function getParent(): string
     {
         return FormType::class;
     }
 
-    /** @inheritDoc */
     #[Override]
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {

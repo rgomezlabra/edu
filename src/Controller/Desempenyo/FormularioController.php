@@ -35,8 +35,10 @@ use function Symfony\Component\String\u;
 #[Route(path: '/intranet/desempenyo', name: 'intranet_desempenyo_')]
 class FormularioController extends AbstractController
 {
-    private int $ttl;   // Tiempo de bloqueo
-    private string $rutaBase;   // Ruta base de la aplicación actual
+    /** @var string $rutaBase Ruta base de la aplicación actual */
+    private readonly string $rutaBase;
+    /** @var int $ttl Tiempo de bloqueo en s. */
+    private readonly int $ttl;
 
     public function __construct(
         private readonly MessageGenerator $generator,
@@ -67,7 +69,7 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        $formularios = $evaluaRepository->findByFormularios(['cuestionario' => $cuestionario, 'entregados' => true]);
+        $formularios = $evaluaRepository->findByEntregados(['cuestionario' => $cuestionario]);
         $puntos = [];
         foreach ($formularios as $formulario) {
             $total = 0;
@@ -219,8 +221,7 @@ class FormularioController extends AbstractController
         EmpleadoRepository     $empleadoRepository,
         string                 $codigo,
         ?int                   $id,
-    ): Response
-    {
+    ): Response {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();

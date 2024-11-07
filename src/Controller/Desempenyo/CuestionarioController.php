@@ -26,7 +26,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(path: '/intranet/desempenyo/admin/cuestionario', name: 'intranet_desempenyo_admin_cuestionario_')]
 class CuestionarioController extends AbstractController
 {
-    private string $rutaBase;   // Ruta base de la aplicación actual
+    /** @var string $rutaBase Ruta base de la aplicación actual */
+    private readonly string $rutaBase;
 
     public function __construct(
         private readonly MessageGenerator       $generator,

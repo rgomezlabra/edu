@@ -23,7 +23,8 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 class PreguntaController extends AbstractController
 {
-    private string $rutaBase;   // Ruta base de la aplicación actual
+    /** @var string $rutaBase Ruta base de la aplicación actual */
+    private readonly string $rutaBase;
 
     // Opciones por defecto para las preguntas soportadas por la aplicación
     /** @var array<array-key, int[]|bool[]> $opciones */
@@ -140,13 +141,13 @@ class PreguntaController extends AbstractController
         ]);
     }
 
-     #[Route(
+    #[Route(
         path: '/intranet/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta/{pregunta}/',
         name: 'intranet_desempenyo_admin_pregunta_show',
         defaults: ['titulo' => 'Pregunta de Desempeño'],
         methods: ['GET']
     )]
-   public function show(Cuestionario $cuestionario, Grupo $grupo, Pregunta $pregunta): Response
+    public function show(Cuestionario $cuestionario, Grupo $grupo, Pregunta $pregunta): Response
     {
         $this->denyAccessUnlessGranted('admin');
         $tipos = $this->cargarTipos();
@@ -293,4 +294,3 @@ class PreguntaController extends AbstractController
         return array_intersect_key($tipos, $this->opciones);
     }
 }
-
