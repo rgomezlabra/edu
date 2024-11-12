@@ -61,9 +61,18 @@
                 {#- Página de bienvenida #}
                 <div class="tab-pane fade text-left {% if editar %}show active{% endif %}"
                      id="vert-tabs-bienvenida" role="tabpanel" aria-labelledby="vert-tabs-bienvenida-tab" tabindex="0">
-                    {%- if sesion is defined and  sesion > 0 %}
-                        <div class="badge-info">
-                            Dispone de {{ sesion }} segundos para rellenar el formulario.
+                    {%- if sesion is defined and sesion > 0 %}
+                        <div class="d-flex mb-2">
+                            <div class="badge-info align-self-center">
+                                Dispone de <span id="reloj">{{ sesion }}</span> segundos para rellenar el formulario.
+                            </div>
+                            <div id="poco" class="toast text-bg-warning align-self-center mx-2" role="alert"
+                                 aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
+                                <div class="toast-body">
+                                    <em class="me-1 fas fa-2x fa-exclamation-triangle"></em>
+                                    La sesión va a caducar, pulsar guardar en cualquier sección para no perder los datos.
+                                </div>
+                            </div>
                         </div>
                     {%- endif %}
                     <div>{{ evalua.cuestionario.bienvenida|raw }}</div>
@@ -218,6 +227,12 @@
         <input type="hidden" name="enviado" id="enviado" value="0">
         <input type="hidden" name="_token" value="{{ csrf_token(codigo ~ '.' ~ evalua.id) }}">
     </form>
+    <div class="d-none alert alert-warning" id="finSesion">
+        <div class="text-center fw-bold">La sesión ha caducado y los últimos cambios pueden no haber sido guardados.</div>
+        <div class="mt-2 text-center">
+            <a class="btn btn-primary" href=""><em class="me-1 fas fa-refresh"></em> Reiniciar cuestionario</a>
+        </div>
+    </div>
     {%- endif %}
 {% endblock %}
 
@@ -307,5 +322,24 @@
                 });
             }
         });
+        {%- if sesion is defined %}
+            // Tiemout
+            const reloj = $('#reloj');
+            setInterval(function () {
+                let cuenta = reloj.text();
+                --cuenta;
+                if (cuenta > 0) {
+                    reloj.text(cuenta);
+                } else {
+                    reloj.closest('form').addClass('d-none');
+                    $('#finSesion').removeClass('d-none')
+                }
+            }, 1000);
+            let ms = {{ sesion > 30 ? (sesion - 30) * 1000 : 0 }};
+            setTimeout(function () {
+                const poco = new Toast('#poco');
+                poco.show();
+            }, ms);
+        {%- endif %}
     </script>
 {% endblock %}
