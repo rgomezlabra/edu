@@ -6,6 +6,7 @@ use App\Entity\Desempenyo\TipoIncidencia;
 use App\Form\Desempenyo\TipoIncidenciaType;
 use App\Repository\Desempenyo\TipoIncidenciaRepository;
 use App\Service\MessageGenerator;
+use App\Service\RutaActual;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,10 +19,15 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(path: '/intranet/desempenyo/admin/tipo_incidencia', name: 'intranet_desempenyo_admin_tipo_incidencia_')]
 class TipoIncidenciaController extends AbstractController
 {
+    /** @var string $rutaBase Ruta base de la aplicación actual */
+    private readonly string $rutaBase;
+
     public function __construct(
         private readonly MessageGenerator         $generator,
+        private readonly RutaActual               $actual,
         private readonly TipoIncidenciaRepository $tipoRepository,
     ) {
+        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
     }
 
     #[Route(
@@ -59,7 +65,7 @@ class TipoIncidenciaController extends AbstractController
                 'nombre' => $tipo->getNombre(),
             ]);
 
-            return $this->redirectToRoute('intranet_desempenyo_admin_tipo_incidencia_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute($this->rutaBase . '_admin_tipo_incidencia_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('intranet/desempenyo/admin/tipo_incidencia/new.html.twig', [
@@ -103,7 +109,7 @@ class TipoIncidenciaController extends AbstractController
                 'nombre' => $tipo->getNombre(),
             ]);
 
-            return $this->redirectToRoute('intranet_desempenyo_admin_tipo_incidencia_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute($this->rutaBase . '_admin_tipo_incidencia_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('intranet/desempenyo/admin/tipo_incidencia/edit.html.twig', [
@@ -122,7 +128,7 @@ class TipoIncidenciaController extends AbstractController
     {
         $this->denyAccessUnlessGranted('admin');
         $id = $tipo->getId();
-        if ($this->isCsrfTokenValid('delete' . (int) $tipo->getId(), $request->request->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . (int) $id, $request->request->getString('_token'))) {
             $this->tipoRepository->remove($tipo, true);
             $this->generator->logAndFlash('info', 'Tipo de incidencias eliminado', [
                 'id' => $id,
@@ -130,6 +136,6 @@ class TipoIncidenciaController extends AbstractController
             ]);
         }
 
-        return $this->redirectToRoute('intranet_desempenyo_admin_tipo_incidencia_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute($this->rutaBase . '_admin_tipo_incidencia_index', [], Response::HTTP_SEE_OTHER);
     }
 }

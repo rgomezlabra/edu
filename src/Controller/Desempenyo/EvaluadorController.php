@@ -44,8 +44,10 @@ class EvaluadorController extends AbstractController
 {
     /** @var ClientInterface|Redis|RedisArray|RedisCluster $redis */
     private readonly object $redis;
+
     /** @var string $rutaBase Ruta base de la aplicación actual */
     private readonly string $rutaBase;
+
     /** @var int $ttl Tiempo de bloqueo en s. */
     private readonly int $ttl;
 

@@ -57,7 +57,7 @@
                         Otro evaluador
                     {%- endif -%}
                 </th>
-                <th rowspan="2">Origen</th>
+                <th rowspan="2">Cargado</th>
                 <th rowspan="2" data-dt-order="disable">Acciones</th>
             </tr>
             <tr>
@@ -118,15 +118,17 @@
                     </td>
                     <td>{{ evaluacion.origen.nombre|default|capitalize }}</td>
                     <td>
-                        <em class="mx-1 fas fa-people-arrows" title="Reasignar"></em>
-                        <form method="post" class="d-inline"
-                              action="{{ path(aplicacion.ruta ~ '_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion.id}) }}"
-                              onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluacion.evaluador.persona }} sobre {{ evaluacion.empleado.persona }}?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cuestionario.id ~ '-' ~ evaluacion.id) }}">
-                            <button class="border-0 text-primary">
-                                <em class="mx-1 fas fa-trash" title="Desasignar"></em>
-                            </button>
-                        </form>
+                        {%- if evaluacion.formulario.fechaGrabacion is not defined %}
+                            <em class="mx-1 fas fa-people-arrows" title="Reasignar"></em>
+                            <form method="post" class="d-inline"
+                                  action="{{ path(aplicacion.ruta ~ '_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion.id}) }}"
+                                  onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluacion.evaluador.persona }} sobre {{ evaluacion.empleado.persona }}?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cuestionario.id ~ '-' ~ evaluacion.id) }}">
+                                <button class="border-0 text-primary">
+                                    <em class="mx-1 fas fa-trash" title="Desasignar"></em>
+                                </button>
+                            </form>
+                        {%- endif %}
                     </td>
                 </tr>
             {%- endfor %}
