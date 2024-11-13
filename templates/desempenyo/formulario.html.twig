@@ -13,7 +13,7 @@
     <div class="m-3">{{ evalua.cuestionario.descripcion|raw }}</div>
 
     {%- if evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
-        <div class="pagina-seccion">Autoevaluación</div>
+        <div class="pagina-seccion">Autoevaluación enviada el {{ evalua.formulario.fechaEnvio|date('d/m/Y') }}</div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
         <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte de agente principal</div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
@@ -22,6 +22,21 @@
 
     {#- Solo se muestra el formulario cuando no hay fecha de envío #}
     {% if editar %}<form method="post">{% endif %}
+    {%- if sesion is defined %}
+        <div class="d-flex mb-2">
+            <div class="badge-info align-self-center">
+                Dispone de <span id="reloj">{{ sesion }}</span> segundos para grabar el cuestionario.
+            </div>
+            <div id="poco" class="toast text-bg-warning align-self-center mx-2" role="alert"
+                 aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
+                <div class="toast-body">
+                    <em class="me-1 fas fa-2x fa-exclamation-triangle"></em>
+                    La sesión va a caducar; grabar o enviar cuestionario para no perder los cambios.
+                </div>
+            </div>
+        </div>
+    {%- endif %}
+
     <div class="d-flex align-items-start my-2">
         <div class="col-3 col-sm-2 me-3">
             <div class="nav flex-column nav-pills h-100" id="vert-tabs-tab" role="tablist" aria-orientation="vertical">
@@ -61,20 +76,6 @@
                 {#- Página de bienvenida #}
                 <div class="tab-pane fade text-left {% if editar %}show active{% endif %}"
                      id="vert-tabs-bienvenida" role="tabpanel" aria-labelledby="vert-tabs-bienvenida-tab" tabindex="0">
-                    {%- if sesion is defined and sesion > 0 %}
-                        <div class="d-flex mb-2">
-                            <div class="badge-info align-self-center">
-                                Dispone de <span id="reloj">{{ sesion }}</span> segundos para rellenar el formulario.
-                            </div>
-                            <div id="poco" class="toast text-bg-warning align-self-center mx-2" role="alert"
-                                 aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
-                                <div class="toast-body">
-                                    <em class="me-1 fas fa-2x fa-exclamation-triangle"></em>
-                                    La sesión va a caducar, pulsar guardar en cualquier sección para no perder los datos.
-                                </div>
-                            </div>
-                        </div>
-                    {%- endif %}
                     <div>{{ evalua.cuestionario.bienvenida|raw }}</div>
                 </div>
                 {%- if evalua.tipoEvaluador != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}

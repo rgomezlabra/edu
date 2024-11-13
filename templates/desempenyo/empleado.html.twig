@@ -12,6 +12,7 @@
                     <th>Unidad</th>
                     <th>Empleado</th>
                     <th>Tipo evaluación</th>
+                    <th class="text-start">Enviado</th>
                     <th data-dt-order="disable">Acciones</th>
                 </tr>
             </thead>
@@ -32,9 +33,16 @@
                             <span class="badge-warning">Desconocido</span>
                         {%- endif -%}
                     </td>
+                    <td class="text-start">
+                        {{- evaluacion.formulario and evaluacion.formulario.fechaEnvio ? evaluacion.formulario.fechaEnvio|date('Y-m-d') -}}
+                    </td>
                     <td>
                         <a href="{{ cuestionario.url ~ '/' ~ evaluacion.empleado.id }}">
-                            <em class="mx-1 fas fa-user-pen" title="Evaluar"></em>
+                            {%- if evaluacion.formulario and evaluacion.formulario.fechaEnvio is not null %}
+                                <em class="mx-1 fas fa-envelope" title="Ver evaluación"></em>
+                            {%- else %}
+                                <em class="mx-1 fas fa-user-pen" title="Evaluar"></em>
+                            {%- endif %}
                         </a>
                     </td>
                 </tr>
@@ -106,6 +114,9 @@
             language: {
                 url: '{{ asset("includes/datatable.es.json") }}',
             },
+            order: [
+                [3, 'desc'],
+            ],
         });
     </script>
 {% endblock %}
