@@ -57,6 +57,9 @@ class Evalua
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $fecha_rechazo = null;
 
+    #[ORM\Column(type: 'smallint', nullable: false, options: ['default' => 0])]
+    private bool $habilita = false;
+
     #[ORM\ManyToOne(targetEntity: Origen::class)]
     private ?Origen $origen = null;
 
@@ -133,6 +136,18 @@ class Evalua
     public function setFechaRechazo(?DateTimeImmutable $fecha_rechazo): static
     {
         $this->fecha_rechazo = $fecha_rechazo;
+
+        return $this;
+    }
+
+    public function isHabilita(): bool
+    {
+        return $this->habilita;
+    }
+
+    public function setHabilita(bool $habilita = true): static
+    {
+        $this->habilita = $habilita;
 
         return $this;
     }
