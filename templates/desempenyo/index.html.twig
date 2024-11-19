@@ -2,8 +2,8 @@
 {% set titulo = titulo|default(aplicacion.nombre) %}
 
 {% block content %}
-    {# Pesos establecidos por defecto #}
-    {% set pesos = [34, 56, 10] %}
+    {#- Pesos establecidos por defecto #}
+    {%- set pesos = [34, 56, 10] %}
     <div class="pagina-titulo">
         {{- titulo }}
         {%- if aplicacion.estadoActual and aplicacion.estadoActual.color %}
@@ -73,7 +73,31 @@
                         El empleado ha solicitado no ser evaluado.
                     </div>
                 {%- else %}
-                    <li><a href="{{ activos[0].url }}">Cuestionario para autoevaluación de competencias</a></li>
+                    {%- if evaluados|filter(e => e.habilita)|length == 0 %}
+                        {#- Opciones antes de evaluar #}
+                        <li>Antes de empezar la autoevaluación, elija una de las siguientes opciones:</li>
+                        <ul>
+                            <li>
+                                <a id="habilita" href="" data-url="{{ activos[0].url ~ '/habilita' }}">
+                                    Doy mi habilitación para ser evaluado en mi actual puesto desempeñado
+                                </a>
+                            </li>
+                            {%- if evaluados|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION'))|length == 0 %}
+                                <li>
+                                    <a id="rechaza" href="" data-url="{{ activos[0].url ~ '/rechaza' }}">
+                                        Solicito no participar en el proceso de autoevaluación del desempeño
+                                    </a>
+                                </li>
+                            {%- endif %}
+                        </ul>
+                    {%- else %}
+                        {#- Evaluación #}
+                        <li>
+                            <a class="fw-bold" href="{{ activos[0].url }}">
+                                Cuestionario para autoevaluación de competencias
+                            </a>
+                        </li>
+                    {%- endif %}
                 {%- endif %}
                 <li><a href="{{ activos[0].url ~ '/evaluador' }}">Comprobar evaluadores</a></li>
                 <li>
@@ -82,13 +106,7 @@
                     </a>
                 </li>
                 {%- if activos[0].fechaBaja >= date() %}
-                    {%- if evaluados|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION'))|length == 0 %}
-                        <li class="alert alert-primary">
-                            <a id="rechaza" href="" data-url="{{ activos[0].url ~ '/rechaza' }}">
-                                Solicitar no participar en el proceso de autoevaluación del desempeño
-                            </a>
-                        </li>
-                    {%- else %}
+                    {%- if evaluados|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION'))|length > 0 %}
                         <li class="alert alert-success">
                             <a id="recupera" href="" data-url="{{ activos[0].url ~ '/recupera' }}">
                                 Volver a activar su participación (solo disponible hasta el día
@@ -249,11 +267,16 @@
 
 {% block modal %}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRechaza',
-        texto: 'Texto con las implicaciones de rechazar la evaluación.',
-        pregunta: '¿Continuar con la solicitud?'}) }}
+        texto: 'No deseo participar en este proceso de evaluación y me comprometo a comunicarlo de forma fehaciente a '
+            ~ 'la Gerencia, en virtud de lo dispuesto en el artículo 11.1.',
+        pregunta: ' ', cancelar: 'Volver atrás', aceptar: 'No deseo participar'}) }}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRecupera',
-        texto: 'Texto con las implicaciones de recuperar la evaluación.',
-        pregunta: '¿Continuar con la solicitud?'}) }}
+        texto: 'He cambiado de opinión y deseo participar en este proceso de evaluación. De haber comunicado a la '
+            ~ 'Gerencia mi rechazo, me comprometo a informar de forma fahaciente de este cambio de opinión.',
+        pregunta: ' ', cancelar: 'Volver atrás', aceptar: 'Deseo participar'}) }}
+    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoHabilita',
+        texto: 'Doy mi habilitación para ser evaluado en mi actual puesto desempeñado.',
+        cancelar: 'No', aceptar: 'Sí'}) }}
 {% endblock %}
 
 {% block js %}
@@ -261,8 +284,10 @@
     <script type="module">
         const rechaza = $('#rechaza');
         const recupera = $('#recupera');
+        const habilita = $('#habilita');
         const modalRechaza = $('#dialogoRechaza');
         const modalRecupera = $('#dialogoRecupera');
+        const modalHabilita = $('#dialogoHabilita');
         // Rechazar evaluación
         rechaza.on('click', function (e) {
             e.preventDefault();
@@ -286,6 +311,18 @@
         $('#dialogoRecuperaAceptar').on('click', function () {
             modalRecupera.fadeOut('fast');
             window.location.href = recupera.data('url');
+        });
+        // Habilitación para puesto actual
+        habilita.on('click', function (e) {
+            e.preventDefault();
+            modalHabilita.fadeIn('fast');
+        });
+        $('#dialogoHabilitaCancelar').on('click', function () {
+            modalHabilita.fadeOut('fast');
+        });
+        $('#dialogoHabilitaAceptar').on('click', function () {
+            modalHabilita.fadeOut('fast');
+            window.location.href = habilita.data('url');
         });
     </script>
 {% endblock %}

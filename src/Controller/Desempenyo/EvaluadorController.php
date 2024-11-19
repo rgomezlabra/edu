@@ -108,19 +108,19 @@ class EvaluadorController extends AbstractController
         methods: ['POST']
     )]
     public function delete(
-        Request          $request,
-        EvaluaRepository $evaluaRepository,
-        Cuestionario     $cuestionario,
-        Evalua           $evalua
+        Request      $request,
+        Cuestionario $cuestionario,
+        Evalua       $evalua
     ): Response {
         $this->denyAccessUnlessGranted('admin');
-        $token = sprintf('delete%d-%d', $cuestionario->getId() ?? 0, $evalua->getId() ?? 0);
+        $id = (int) $evalua->getId();
+        $token = sprintf('delete%d-%d', $cuestionario->getId() ?? 0, $id);
         if ($cuestionario->getId() !== $evalua->getCuestionario()?->getId()) {
             $this->addFlash('warning', 'La evaluación no corresponde a este cuestionario.');
         } elseif ($this->isCsrfTokenValid($token, $request->request->getString('_token'))) {
-            $evaluaRepository->remove($evalua, true);
+            $this->evaluaRepository->remove($evalua, true);
             $this->generator->logAndFlash('info', 'Evaluación eliminada correctamente', [
-                'id' => $evalua->getId(),
+                'id' => $id,
                 'codigo' => $cuestionario->getCodigo(),
                 'empleado' => $evalua->getEmpleado()?->getPersona(),
                 'evaluador' => $evalua->getEvaluador()?->getPersona(),
@@ -308,7 +308,6 @@ class EvaluadorController extends AbstractController
 
             // Grabar datos
             $fichero = $origenRepository->findOneBy(['nombre' => Origen::FICHERO]);
-            /** @var string[] $linea */
             foreach ($lineas as $linea) {
                 ++$datos['actual'];
                 // Guardar solo asignaciones nuevas
@@ -428,22 +427,18 @@ class EvaluadorController extends AbstractController
         methods: ['GET']
     )]
     public function rechazaAdmin(
-        EvaluaRepository $evaluaRepository,
-        Cuestionario     $cuestionario,
-        Empleado         $empleado,
+        Cuestionario $cuestionario,
+        Empleado     $empleado,
     ): Response {
         $this->denyAccessUnlessGranted('admin');
         // Comprobar si el empleado puede autoevaluarse
-        $evalua = $evaluaRepository->findOneBy([
+        $evalua = $this->evaluaRepository->findOneBy([
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
             'tipo_evaluador' => Evalua::AUTOEVALUACION,
         ]);
         if (!$evalua instanceof Evalua) {
-            $this->generator->logAndFlash('warning', 'El empleado no existe o no es evaluable', [
-                'cuestionario' => $cuestionario->getCodigo(),
-                'usuario' => $empleado->getPersona()?->getUsuario()?->getUvus() ?? $this->getUser()?->getUserIdentifier(),
-            ]);
+            $this->addFlash('warning', 'El empleado no existe o no es evaluable.');
 
             return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
         }
@@ -452,7 +447,7 @@ class EvaluadorController extends AbstractController
             ->setTipoEvaluador(Evalua::NO_EVALUACION)
             ->setFechaRechazo(new DateTimeImmutable())
         ;
-        $evaluaRepository->save($evalua, true);
+        $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado ha sido marcado como no evaluable', [
             'cuestionario' => $cuestionario->getCodigo(),
             'empleado' => $empleado->getPersona()?->getUsuario()?->getUvus(),
@@ -471,7 +466,6 @@ class EvaluadorController extends AbstractController
         Request                $request,
         CuestionarioRepository $cuestionarioRepository,
         EmpleadoRepository     $empleadoRepository,
-        EvaluaRepository       $evaluaRepository,
     ): Response {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         // Buscar usuario actual como empleado
@@ -481,28 +475,26 @@ class EvaluadorController extends AbstractController
         $ruta = u($request->getRequestUri())->beforeLast('/')->toString();
         $cuestionario = $cuestionarioRepository->findOneBy(['url' => $ruta]);
         // Comprobar si el empleado puede autoevaluarse
-        $evalua = $evaluaRepository->findOneBy([
+        $evalua = $this->evaluaRepository->findOneBy([
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
             'tipo_evaluador' => Evalua::AUTOEVALUACION,
         ]);
         if (!$evalua instanceof Evalua) {
-            $this->generator->logAndFlash('warning', 'El empleado no existe o no es evaluable', [
-                'cuestionario' => $cuestionario?->getCodigo(),
-                'usuario' => $empleado?->getPersona()?->getUsuario()?->getUvus() ?? $this->getUser()?->getUserIdentifier(),
-            ]);
+            $this->addFlash('warning', 'El empleado no existe o no es evaluable.');
 
             return $this->redirectToRoute($this->rutaBase);
         }
 
         $evalua
             ->setTipoEvaluador(Evalua::NO_EVALUACION)
+            ->setHabilita(false)
             ->setFechaRechazo(new DateTimeImmutable())
         ;
-        $evaluaRepository->save($evalua, true);
+        $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado ha solicitado no ser evaluable', [
             'cuestionario' => $cuestionario?->getCodigo(),
-            'empleado' => $empleado?->getPersona()?->getUsuario()?->getUvus(),
+            'empleado' => $usuario->getUvus(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase);
@@ -515,26 +507,18 @@ class EvaluadorController extends AbstractController
         methods: ['GET']
     )]
     public function recuperaAdmin(
-        EvaluaRepository $evaluaRepository,
-        Cuestionario     $cuestionario,
-        ?Empleado        $empleado = null,
+        Cuestionario $cuestionario,
+        ?Empleado    $empleado = null,
     ): Response {
         $this->denyAccessUnlessGranted('admin');
         // Comprobar si el empleado ha rechazado la evaluación
-        $evalua = $evaluaRepository->findOneBy([
+        $evalua = $this->evaluaRepository->findOneBy([
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
             'tipo_evaluador' => Evalua::NO_EVALUACION,
         ]);
         if (!$evalua instanceof Evalua) {
-            $this->generator->logAndFlash(
-                'warning',
-                'El empleado no existe o no había solicitado rechazar evaluación',
-                [
-                    'cuestionario' => $cuestionario->getCodigo(),
-                    'usuario' => $empleado?->getPersona()?->getUsuario()?->getUvus() ?? $this->getUser()?->getUserIdentifier(),
-                ]
-            );
+            $this->addFlash('warning', 'El empleado no existe o no había solicitado rechazar evaluación.');
 
             return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
         }
@@ -543,7 +527,7 @@ class EvaluadorController extends AbstractController
             ->setTipoEvaluador()
             ->setFechaRechazo(null)
         ;
-        $evaluaRepository->save($evalua, true);
+        $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado vuelve a ser evaluable', [
             'cuestionario' => $cuestionario->getCodigo(),
             'empleado' => $empleado?->getPersona()?->getUsuario()?->getUvus(),
@@ -562,7 +546,6 @@ class EvaluadorController extends AbstractController
         Request                $request,
         CuestionarioRepository $cuestionarioRepository,
         EmpleadoRepository     $empleadoRepository,
-        EvaluaRepository       $evaluaRepository,
     ): Response {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         // Buscar usuario actual como empleado
@@ -572,21 +555,13 @@ class EvaluadorController extends AbstractController
         $ruta = u($request->getRequestUri())->beforeLast('/')->toString();
         $cuestionario = $cuestionarioRepository->findOneBy(['url' => $ruta]);
         // Comprobar si el empleado ha rechazado la evaluación
-        $evalua = $evaluaRepository->findOneBy([
+        $evalua = $this->evaluaRepository->findOneBy([
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
             'tipo_evaluador' => Evalua::NO_EVALUACION,
         ]);
         if (!$evalua instanceof Evalua) {
-            $this->generator->logAndFlash(
-                'warning',
-                'El empleado no existe o no había solicitado rechazar evaluación',
-                [
-                    'cuestionario' => $cuestionario?->getCodigo(),
-                    'usuario' => $empleado?->getPersona()?->getUsuario()?->getUvus() ?? $this->getUser(
-                    )?->getUserIdentifier(),
-                ]
-            );
+            $this->addFlash('warning', 'El empleado no existe o no había solicitado rechazar evaluación.');
 
             return $this->redirectToRoute($this->rutaBase);
         }
@@ -595,10 +570,57 @@ class EvaluadorController extends AbstractController
             ->setTipoEvaluador()
             ->setFechaRechazo(null)
         ;
-        $evaluaRepository->save($evalua, true);
+        $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado vuelve a ser evaluable', [
             'cuestionario' => $cuestionario?->getCodigo(),
-            'empleado' => $empleado?->getPersona()?->getUsuario()?->getUvus(),
+            'empleado' => $usuario->getUvus(),
+        ]);
+
+        return $this->redirectToRoute($this->rutaBase);
+    }
+
+    /** Empleado indica que puede ser evaluado en su puesto actual. */
+    #[Route(
+        path: '/formulario/{codigo}/habilita',
+        name: 'formulario_habilita',
+        methods: ['GET']
+    )]
+    public function habilita(
+        Request                $request,
+        CuestionarioRepository $cuestionarioRepository,
+        EmpleadoRepository     $empleadoRepository,
+    ): Response
+    {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        $empleado = $empleadoRepository->findOneByUsuario($usuario);
+        $ruta = u($request->getRequestUri())->beforeLast('/')->toString();
+        $cuestionario = $cuestionarioRepository->findOneBy(['url' => $ruta]);
+        $evalua = $this->evaluaRepository->findOneBy([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'tipo_evaluador' => Evalua::AUTOEVALUACION,
+        ]);
+        if (!$evalua instanceof Evalua) {
+            $this->addFlash('warning', 'El empleado no existe o no es evaluable.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        } else if ($this->evaluaRepository->findOneBy([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'tipo_evaluador' => Evalua::NO_EVALUACION,
+        ]) instanceof Evalua) {
+            $this->addFlash('warning', 'El empleado ha solicitado no ser evaluado.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        $evalua->setHabilita();
+        $this->evaluaRepository->save($evalua, true);
+        $this->generator->logAndFlash('info', 'El empleado habilita su evaluación', [
+            'cuestionario' => $cuestionario?->getCodigo(),
+            'empleado' => $usuario->getUvus(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase);
