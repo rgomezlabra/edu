@@ -8,6 +8,7 @@ use App\Entity\Cuestiona\Pregunta;
 use App\Entity\Cuestiona\Respuesta;
 use App\Entity\Desempenyo\Evalua;
 use App\Entity\Plantilla\Empleado;
+use App\Entity\Sistema\Estado;
 use App\Entity\Sistema\Usuario;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Cuestiona\FormularioRepository;
@@ -319,6 +320,10 @@ class FormularioController extends AbstractController
 
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        } elseif (Estado::PUBLICADO !== $cuestionario->getEstado()?->getNombre()) {
+            $this->addFlash('warning', 'El cuestionario no está activo.');
 
             return $this->redirectToRoute($this->rutaBase);
         }

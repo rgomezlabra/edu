@@ -3,6 +3,16 @@
 {% block content %}
     <div class="badge-primary rounded-pill float-end">{{ app.user.persona }}</div>
     <div class="pagina-titulo">{{ titulo }}</div>
+    <div class="my-4">
+        <div>
+            En este apartado puede comprobar las personas evaluadoras y sus roles asignados:
+        </div>
+        <ul>
+            <li>Rol Responsable/Principal: {{ cuestionario.configuracion.peso2 }} %</li>
+            <li>Rol Agente colaborador: {{ cuestionario.configuracion.peso3 }} %</li>
+        </ul>
+        <div>Si detecta alguna incidencia, puede comunicarla pulsando sobre el botón "Nueva incidencia".</div>
+    </div>
 
     <div class="pagina-seccion">Cuestionario {{ cuestionario.titulo }}</div>
     <div class="my-4">
@@ -17,7 +27,7 @@
                     <tr>
                         <th>Unidad</th>
                         <th>Evaluador</th>
-                        <th>Tipo evaluador</th>
+                        <th>Rol evaluador</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -32,7 +42,7 @@
                             {%- if evaluacion.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') -%}
                                 Responsable/Principal
                             {%- elseif evaluacion.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') -%}
-                                Tercer agente
+                                Agente colaborador
                             {%- else -%}
                                 <span class="badge-warning">Desconocido</span>
                             {%- endif -%}

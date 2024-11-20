@@ -15,9 +15,9 @@
     {%- if evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
         <div class="pagina-seccion">Autoevaluación enviada el {{ evalua.formulario.fechaEnvio|date('d/m/Y') }}</div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
-        <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte de agente principal</div>
+        <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte del agente principal</div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
-        <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte de tercer agente</div>
+        <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte del agente colaborador</div>
     {%- endif %}
 
     {#- Solo se muestra el formulario cuando no hay fecha de envío #}
@@ -31,7 +31,7 @@
                  aria-live="assertive" aria-atomic="true" data-bs-delay="5000" data-bs-autohide="true">
                 <div class="toast-body">
                     <em class="me-1 fas fa-2x fa-exclamation-triangle"></em>
-                    La sesión va a caducar; grabar o enviar cuestionario para no perder los cambios.
+                    La sesión va a caducar; grabar el cuestionario para no perder los cambios.
                 </div>
             </div>
         </div>

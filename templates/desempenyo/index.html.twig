@@ -26,27 +26,41 @@
             </div>
             <div class="container-fluid my-2">
                 <a data-bs-toggle="collapse" href="#acordeonAuto" aria-expanded="false" aria-controls="acordeonAuto">
+                    <em class="me-2 fas fa-info-circle text-info"></em>
                     Pulsar para obtener más detalle del procedimiento.
                 </a>
             </div>
             <div class="collapse" id="acordeonAuto">
                 <div class="container-fluid my-2">
-                    <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
-                    Dirigida a todas las personas empleadas del PTGAS: la autoevaluación de las competencias se
-                    realiza mediante la cumplimentación del cuestionario de competencias. Cada conducta incluida en el
-                    cuestionario deberá ser valorada por la propia persona empleada pública, aplicando una escala Likert de
-                    1 a 10, y podrá señalar una o varias conductas específicas que sirvan como justificación y evidencia
-                    del valor dado en cada una de las conductas del cuestionario.
+                    Artículos 9 y 11, y anexo del "Cuestionario de evaluación de competencias profesionales".
                 </div>
                 <div class="container-fluid my-2">
-                    La autoevaluación por parte de la persona empleada pública tendrá un valor ponderado
-                    del 34%, con respecto al máximo de los 60 puntos con los que se puntúan las competencias profesionales.
+                    La autoevaluación de las competencias se realiza mediante la cumplimentación del cuestionario de
+                    evaluación de competencias profesionales. Cada conducta incluida en el cuestionario deberá ser
+                    valorada por la propia persona empleada pública, aplicando una escala Likert de 1 a 10 (siendo 1 el
+                    valor mínimo y 10 el valor máximo). Para cada conducta profesional con valores comprendidos en los
+                    intervalos de 1 a 4, y de 8 a 10, todos los agentes evaluadores deberán indicar una o varias
+                    evidencias específicas que sirvan de justificación del valor otorgado a esta. En caso de que la
+                    evidencia o conducta específica señalada no se considere adecuada como justificación del valor
+                    numérico otorgado, este podrá no ser tenido en cuenta en el resultado de la evaluación en el
+                    supuesto de desviación de las puntuaciones en más de 5 puntos entre las otorgadas por la persona
+                    responsable y la autoevaluación.
                 </div>
                 <div class="container-fluid my-2">
-                    La escala Likert queda definida en <a href="#documentos">documentos de interés</a>.
-                    A fin de homogeneizar los criterios de calificación, cada persona empleada pública debe consultar este
-                    documento <strong>antes de comenzar su autoevaluación</strong> y aplicar la escala Lickert conforme a
-                    sus indicaciones.
+                    La autoevaluación por parte de la persona empleada pública tiene un valor ponderado del
+                    {{ activos[0].configuracion.peso1|default(pesos[0]) }}%, con respecto a la puntuación máxima de la
+                    evaluación de la conducta profesional.
+                </div>
+                <div class="container-fluid my-2">
+                    Para más detalle sobre los criterios de valoración a aplicar por cada intervalo de valores de 1 a 4,
+                    de 5 a 8 y de 9 a 10, consultar el cuestionario facilitado en
+                    <a href="#documentos">documentos de interés</a>.
+                </div>
+                <div class="container-fluid my-2 bg-info bg-opacity-50">
+                    Para facilitar la evaluación, puede consultar la escala Likert que a efectos orientativos se
+                    muestra en <a href="#documentos">documentos de interés</a>.
+                    A fin de homogeneizar los criterios de calificación, se recomienda que cada persona empleada pública
+                     consulte este documento <strong>antes de comenzar la evaluación</strong>.
                 </div>
             </div>
             <ul class="lead my-3">
@@ -70,7 +84,11 @@
                     </div>
                 {%- elseif evaluados|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION'))|length > 0 %}
                     <div class="alert alert-warning">
-                        El empleado ha solicitado no ser evaluado.
+                        <em class="mx-1 fas fa-triangle-exclamation"></em>Usted ha solicitado no ser evaluado.<br>
+                        <a id="recupera" href="" data-url="{{ activos[0].url ~ '/recupera' }}">
+                            Volver a activar mi participación (solo disponible hasta el día
+                            {{ activos[0].fechaBaja|date('d/m/Y') }}, inclusive)
+                        </a>
                     </div>
                 {%- else %}
                     {%- if evaluados|filter(e => e.habilita)|length == 0 %}
@@ -105,16 +123,6 @@
                         Revisar o comunicar incidencias del proceso de autoevaluación
                     </a>
                 </li>
-                {%- if activos[0].fechaBaja >= date() %}
-                    {%- if evaluados|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION'))|length > 0 %}
-                        <li class="alert alert-success">
-                            <a id="recupera" href="" data-url="{{ activos[0].url ~ '/recupera' }}">
-                                Volver a activar su participación (solo disponible hasta el día
-                                {{ activos[0].fechaBaja|date('d/m/Y') }}, inclusive)
-                            </a>
-                        </li>
-                    {%- endif %}
-                {%- endif %}
             </ul>
 
             {# Evaluación por parte del responsable #}
@@ -125,22 +133,37 @@
                 </div>
                 <div class="container-fluid my-2">
                     <a data-bs-toggle="collapse" href="#acordeonEvalua" aria-expanded="false" aria-controls="acordeonAuto">
+                        <em class="me-2 fas fa-info-circle text-info"></em>
                         Pulsar para obtener más detalle del procedimiento.
                     </a>
                 </div>
                 <div class="collapse" id="acordeonEvalua">
                     <div class="container-fluid my-2">
-                        <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
-                        En esta fase participan los siguientes agentes: los validadores 1 realizan la evaluación de las
-                        personas que se han autoevaluado; los validadores 2 realizan la evaluación de las personas
-                        evaluadoras 1 que se han autoevaluado; los validadores 2 que no tienen superior jerárquico en la
-                        estructura de puestos son evaluados por todos sus validadores 1.
+                        Artículos 9 y 11, y anexo del "Cuestionario de evaluación de competencias profesionales".
                     </div>
                     <div class="container-fluid my-2">
-                        Deberá señalar una o varias conductas específicas que sirvan como justificación y evidencia del
-                        valor dado en cada una de las conductas del cuestionario. La evaluación de la Universidad tiene
-                        un valor ponderado del 66% del valor total, con respecto al máximo de 60 puntos con los que se
-                        puntúan las competencias profesionales.
+                        En este apartado debe realizar la evaluación de las personas indicadas como su responsable o
+                        evaluador principal (valor ponderado del
+                        {{ activos[0].configuracion.peso2|default(pesos[1]) }}%). Cada conducta incluida en el
+                        cuestionario deberá ser valorada aplicando una escala Likert de 1 a 10 (siendo 1 el valor mínimo
+                        y 10 el valor máximo). Para cada conducta profesional con valores comprendidos en los intervalos
+                        de 1 a 4, y de 8 a 10, deberá indicar una o varias evidencias específicas que sirvan de
+                        justificación del valor otorgado a esta. En caso de que la evidencia o conducta específica
+                        señalada no se considere adecuada como justificación del valor numérico otorgado, este podrá no
+                        ser tenido en cuenta en el resultado de la evaluación en el supuesto de desviación de las
+                        puntuaciones en más de 5 puntos entre las otorgadas por la persona responsable y la
+                        autoevaluación.
+                    </div>
+                    <div class="container-fluid my-2">
+                         Para más detalle sobre los criterios de valoración a aplicar por cada intervalo de valores de
+                        1 a 4, de 5 a 8 y de 9 a 10, consultar el cuestionario facilitado en
+                        <a href="#documentos">documentos de interés</a>.
+                    </div>
+                    <div class="container-fluid my-2 bg-info bg-opacity-50">
+                        Para facilitar la evaluación, puede consultar la escala Likert que a efectos orientativos se
+                        muestra en <a href="#documentos">documentos de interés</a>.
+                        A fin de homogeneizar los criterios de calificación, se recomienda que cada persona empleada pública
+                        consulte este documento <strong>antes de comenzar la evaluación</strong>.
                     </div>
                 </div>
                 <ul class="lead my-3">
@@ -180,6 +203,8 @@
                 </div>
                 <div class="container-fluid my-2">
                     <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
+                </div>
+                <div class="container-fluid my-2">
                     Esta fase va dirigida a otras personas evaluadoras que intervienen en el proceso de evaluación.
                 </div>
                 <ul class="lead my-3">
@@ -267,12 +292,14 @@
 
 {% block modal %}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRechaza',
-        texto: 'No deseo participar en este proceso de evaluación y me comprometo a comunicarlo de forma fehaciente a '
-            ~ 'la Gerencia, en virtud de lo dispuesto en el artículo 11.1.',
+        texto: 'Aunque conozco que uno de los requerimientos necesarios para la progresión en mi carrera profesional '
+            ~ 'horizontal es la superación de la evaluación del desempeño en los términos establecidos en el acuerdo '
+            ~ 'aplicable (Art. 4.3.e y Art. 6), NO DESEO PARTICIPAR en este proceso de evaluación y me comprometo a '
+            ~ 'comunicarlo de forma fehaciente a la Gerencia, en virtud de lo dispuesto en el artículo 11.1.',
         pregunta: ' ', cancelar: 'Volver atrás', aceptar: 'No deseo participar'}) }}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRecupera',
         texto: 'He cambiado de opinión y deseo participar en este proceso de evaluación. De haber comunicado a la '
-            ~ 'Gerencia mi rechazo, me comprometo a informar de forma fahaciente de este cambio de opinión.',
+            ~ 'Gerencia mi rechazo, me comprometo a informarla de forma fahaciente de este cambio de opinión.',
         pregunta: ' ', cancelar: 'Volver atrás', aceptar: 'Deseo participar'}) }}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoHabilita',
         texto: 'Doy mi habilitación para ser evaluado en mi actual puesto desempeñado.',
