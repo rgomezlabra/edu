@@ -214,7 +214,7 @@ class FormularioController extends AbstractController
     #[Route(
         path: '/formulario/{codigo}/pdf/{id?}',
         name: 'formulario_pdf',
-        requirements: ['codigo' => '[a-z0-9-]+', 'evalua' => '\d+'],
+        requirements: ['codigo' => '[a-z0-9-]+', 'id' => '\d+'],
         methods: ['GET']
     )]
     public function pdf(
@@ -294,7 +294,7 @@ class FormularioController extends AbstractController
     #[Route(
         path: '/formulario/{codigo}/{id?}',
         name: 'formulario_rellenar',
-        requirements: ['codigo' => '[a-z0-9-]+', 'evalua' => '\d+'],
+        requirements: ['codigo' => '[a-z0-9-]+', 'id' => '\d+'],
         methods: ['GET', 'POST']
     )]
     public function rellenar(

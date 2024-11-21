@@ -125,6 +125,10 @@ class CuestionarioController extends AbstractController
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
             return $this->redirectToRoute($this->rutaBase);
+        } elseif (Estado::BORRADOR !== $cuestionario->getEstado()?->getNombre()) {
+            $this->addFlash('warning', 'El cuestionario no puede ser editado porque no es un borrador.');
+
+            return $this->redirectToRoute($this->rutaBase);
         }
 
         $form = $this->createForm(CuestionarioType::class, $cuestionario, [
@@ -135,7 +139,6 @@ class CuestionarioController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // TODO revisar condiciones (por ejemplo fechas y estados)
             /** @var Usuario $autor */
             $autor = $this->getUser();
             $cuestionario->setAutor($autor);
@@ -184,7 +187,8 @@ class CuestionarioController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!$cuestionario->getFechaAlta() instanceof DateTimeImmutable || !$cuestionario->getFechaBaja() instanceof DateTimeImmutable) {
+            if (!$cuestionario->getFechaAlta() instanceof DateTimeImmutable
+                || !$cuestionario->getFechaBaja() instanceof DateTimeImmutable) {
                 $this->addFlash('warning', 'Las fechas inicial y final son obligatorias.');
 
                 return $this->redirectToRoute($request->attributes->getString('_route'), [
@@ -232,7 +236,7 @@ class CuestionarioController extends AbstractController
         path: '/{id}/desactivar',
         name: 'desactivar',
         defaults: ['titulo' => 'Desactivar Cuestionario'],
-        methods: ['GET', 'POST']
+        methods: ['GET']
     )]
     public function desactivar(EstadoRepository $estadoRepository, Cuestionario $cuestionario): Response
     {

@@ -460,6 +460,7 @@ class EvaluadorController extends AbstractController
     #[Route(
         path: '/formulario/{codigo}/rechaza',
         name: 'formulario_rechaza',
+        requirements: ['codigo' => '[a-z0-9-]+'],
         methods: ['GET']
     )]
     public function rechazaEmpleado(
@@ -540,6 +541,7 @@ class EvaluadorController extends AbstractController
     #[Route(
         path: '/formulario/{codigo}/recupera',
         name: 'formulario_recupera',
+        requirements: ['codigo' => '[a-z0-9-]+'],
         methods: ['GET']
     )]
     public function recuperaEmpleado(
@@ -583,6 +585,7 @@ class EvaluadorController extends AbstractController
     #[Route(
         path: '/formulario/{codigo}/habilita',
         name: 'formulario_habilita',
+        requirements: ['codigo' => '[a-z0-9-]+'],
         methods: ['GET']
     )]
     public function habilita(

@@ -29,8 +29,8 @@
     <div class="row py-2">
         <div class="fila-campo">Histórico de la incidencia</div>
         <div class="fila-valor w-75">
-            <table class="table" id="datosApuntes">
-                <thead>
+            <table class="tabla-condensada" id="datosApuntes">
+                <thead class="cabecera-condensada">
                 <tr>
                     <th>Estado</th>
                     <th>Fecha inicial</th>
@@ -77,7 +77,7 @@
 
 {% block botones %}
     {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Sistema\\Estado::INICIADO') %}
-        <li class="boton-inferior nav-item me-2">
+        <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_edit', {codigo: incidencia.cuestionario.url|u.afterLast('/'), id: incidencia.id}) }}">
                 <em class="fas fa-edit"></em> Editar
