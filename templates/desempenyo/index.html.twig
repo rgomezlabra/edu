@@ -31,20 +31,29 @@
                 </a>
             </div>
             <div class="collapse" id="acordeonAuto">
-                <div class="container-fluid my-2">
+                <div class="container-fluid my-2 fw-bold">
                     Artículos 9 y 11, y anexo del "Cuestionario de evaluación de competencias profesionales".
                 </div>
                 <div class="container-fluid my-2">
                     La autoevaluación de las competencias se realiza mediante la cumplimentación del cuestionario de
                     evaluación de competencias profesionales. Cada conducta incluida en el cuestionario deberá ser
                     valorada por la propia persona empleada pública, aplicando una escala Likert de 1 a 10 (siendo 1 el
-                    valor mínimo y 10 el valor máximo). Para cada conducta profesional con valores comprendidos en los
-                    intervalos de 1 a 4, y de 8 a 10, todos los agentes evaluadores deberán indicar una o varias
-                    evidencias específicas que sirvan de justificación del valor otorgado a esta. En caso de que la
-                    evidencia o conducta específica señalada no se considere adecuada como justificación del valor
-                    numérico otorgado, este podrá no ser tenido en cuenta en el resultado de la evaluación en el
-                    supuesto de desviación de las puntuaciones en más de 5 puntos entre las otorgadas por la persona
-                    responsable y la autoevaluación.
+                    valor mínimo y 10 el valor máximo).
+                </div>
+                <div class="container-fluid my-2">
+                    Para cada conducta profesional con valores comprendidos en el intervalo 5 a 7, no es obligatorio
+                    indicar evidencias.
+                </div>
+                <div class="container-fluid my-2">
+                    Para cada conducta profesional con valores comprendidos en los  intervalos de 1 a 4, y de 8 a 10,
+                    todos los agentes evaluadores deberán indicar una o varias  evidencias específicas que sirvan de
+                    justificación del valor otorgado a esta.
+                </div>
+                <div class="container-fluid my-2">
+                    En caso de que la evidencia o conducta específica señalada no se considere adecuada como
+                    justificación del valor numérico otorgado, este podrá no ser tenido en cuenta en el resultado de
+                    la evaluación en el supuesto de desviación de las puntuaciones en más de 5 puntos entre las
+                    otorgadas por la persona responsable y la autoevaluación.
                 </div>
                 <div class="container-fluid my-2">
                     La autoevaluación por parte de la persona empleada pública tiene un valor ponderado del
@@ -57,10 +66,9 @@
                     <a href="#documentos">documentos de interés</a>.
                 </div>
                 <div class="container-fluid my-2 bg-info bg-opacity-50">
-                    Para facilitar la evaluación, puede consultar la escala Likert que a efectos orientativos se
-                    muestra en <a href="#documentos">documentos de interés</a>.
-                    A fin de homogeneizar los criterios de calificación, se recomienda que cada persona empleada pública
-                     consulte este documento <strong>antes de comenzar la evaluación</strong>.
+                    Para facilitar la evaluación y la interpretación de los resultados, a efectos orientativos, puede
+                    consultar las escalas Likert propuestas por la Universidad de Sevilla en
+                    <a href="#documentos">documentos de interés</a>.
                 </div>
             </div>
             <ul class="lead my-3">
@@ -112,7 +120,7 @@
                         {#- Evaluación #}
                         <li>
                             <a class="fw-bold" href="{{ activos[0].url }}">
-                                Cuestionario para autoevaluación de competencias
+                                Realizar o consultar el cuestionario para su autoevaluación de competencias
                             </a>
                         </li>
                     {%- endif %}
@@ -138,32 +146,41 @@
                     </a>
                 </div>
                 <div class="collapse" id="acordeonEvalua">
-                    <div class="container-fluid my-2">
+                    <div class="container-fluid my-2 fw-bold">
                         Artículos 9 y 11, y anexo del "Cuestionario de evaluación de competencias profesionales".
                     </div>
                     <div class="container-fluid my-2">
-                        En este apartado debe realizar la evaluación de las personas indicadas como su responsable o
-                        evaluador principal (valor ponderado del
-                        {{ activos[0].configuracion.peso2|default(pesos[1]) }}%). Cada conducta incluida en el
-                        cuestionario deberá ser valorada aplicando una escala Likert de 1 a 10 (siendo 1 el valor mínimo
-                        y 10 el valor máximo). Para cada conducta profesional con valores comprendidos en los intervalos
-                        de 1 a 4, y de 8 a 10, deberá indicar una o varias evidencias específicas que sirvan de
-                        justificación del valor otorgado a esta. En caso de que la evidencia o conducta específica
-                        señalada no se considere adecuada como justificación del valor numérico otorgado, este podrá no
-                        ser tenido en cuenta en el resultado de la evaluación en el supuesto de desviación de las
-                        puntuaciones en más de 5 puntos entre las otorgadas por la persona responsable y la
-                        autoevaluación.
+                        En este apartado debe realizar su evaluación como responsable o evaluador principal (valor
+                        ponderado del {{ activos[0].configuracion.peso2|default(pesos[1]) }}%).
                     </div>
                     <div class="container-fluid my-2">
-                         Para más detalle sobre los criterios de valoración a aplicar por cada intervalo de valores de
+                        Cada conducta incluida en el cuestionario deberá ser valorada aplicando una escala Likert de 1 a
+                        10 (siendo 1 el valor mínimo y 10 el valor máximo).
+                    </div>
+                    <div class="container-fluid my-2">
+                        Para cada conducta profesional con valores comprendidos en el intervalo
+                        <strong>de 5 a 7, no es obligatorio</strong> indicar evidencias.
+                    </div>
+                    <div class="container-fluid my-2">
+                        Para cada conducta profesional con valores comprendidos en los  intervalos de 1 a 4, y de 8 a 10,
+                        todos los agentes evaluadores deberán indicar una o varias  evidencias específicas que sirvan de
+                        justificación del valor otorgado a esta.
+                    </div>
+                    <div class="container-fluid my-2">
+                        En caso de que la evidencia o conducta específica señalada no se considere adecuada como
+                        justificación del valor numérico otorgado, este podrá no ser tenido en cuenta en el resultado de
+                        la evaluación en el supuesto de desviación de las puntuaciones en más de 5 puntos entre las
+                        otorgadas por la persona responsable y la autoevaluación.
+                    </div>
+                    <div class="container-fluid my-2">
+                        Para más detalle sobre los criterios de valoración a aplicar por cada intervalo de valores de
                         1 a 4, de 5 a 8 y de 9 a 10, consultar el cuestionario facilitado en
                         <a href="#documentos">documentos de interés</a>.
                     </div>
                     <div class="container-fluid my-2 bg-info bg-opacity-50">
-                        Para facilitar la evaluación, puede consultar la escala Likert que a efectos orientativos se
-                        muestra en <a href="#documentos">documentos de interés</a>.
-                        A fin de homogeneizar los criterios de calificación, se recomienda que cada persona empleada pública
-                        consulte este documento <strong>antes de comenzar la evaluación</strong>.
+                        Para facilitar la evaluación y la interpretación de los resultados, a efectos orientativos, puede
+                        consultar las escalas Likert propuestas por la Universidad de Sevilla en
+                        <a href="#documentos">documentos de interés</a>.
                     </div>
                 </div>
                 <ul class="lead my-3">
@@ -181,8 +198,9 @@
                         </div>
                     {%- else %}
                         <li>
-                            <a href="{{ activos[0].url ~ '/empleado?tipo=' ~ constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') }}">
-                                Comprobar relación de personas a evaluar
+                            <a class="fw-bold"
+                               href="{{ activos[0].url ~ '/empleado?tipo=' ~ constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') }}">
+                                Comprobar relación de personas a evaluar y realizar o consultar sus evaluaciones
                             </a>
                         </li>
                     {%- endif %}
@@ -202,16 +220,55 @@
                     ({{ activos[0].configuracion.peso3|default(pesos[2]) }}%)
                 </div>
                 <div class="container-fluid my-2">
-                    <em class="me-2 fas fa-info-circle text-info"></em>Artículos 9 y 11<br>
+                    <a data-bs-toggle="collapse" href="#acordeonOtro" aria-expanded="false" aria-controls="acordeonOtro">
+                        <em class="me-2 fas fa-info-circle text-info"></em>
+                        Pulsar para obtener más detalle del procedimiento.
+                    </a>
                 </div>
-                <div class="container-fluid my-2">
-                    Esta fase va dirigida a otras personas evaluadoras que intervienen en el proceso de evaluación.
+                <div class="collapse" id="acordeonOtro">
+                    <div class="container-fluid my-2 fw-bold">
+                        Artículos 9 y 11, y anexo del "Cuestionario de evaluación de competencias profesionales".
+                    </div>
+                    <div class="container-fluid my-2">
+                        En este apartado debe realizar su evaluación como persona evaluadora colaboradora (tercer
+                        agente, con valor ponderado del {{ activos[0].configuracion.peso3|default(pesos[2]) }}%).
+                    </div>
+                    <div class="container-fluid my-2">
+                        El cuestionario deberá ser valorado aplicando una escala Likert de 1 a 10 (siendo 1 el valor
+                        mínimo y 10 el valor máximo).
+                    </div>
+                    <div class="container-fluid my-2">
+                        Para los valores comprendidos en el intervalo <strong>de 5 a 7, no es obligatorio</strong>
+                        indicar evidencias.
+                    </div>
+                    <div class="container-fluid my-2">
+                        Para los valores comprendidos en los  intervalos de 1 a 4, y de 8 a 10, todos los agentes
+                        evaluadores deberán indicar una o varias  evidencias específicas que sirvan de justificación del
+                        valor otorgado a esta.
+                    </div>
+                    <div class="container-fluid my-2">
+                        En caso de que la evidencia o conducta específica señalada no se considere adecuada como
+                        justificación del valor numérico otorgado, este podrá no ser tenido en cuenta en el resultado de
+                        la evaluación en el supuesto de desviación de las puntuaciones en más de 5 puntos entre las
+                        otorgadas por la persona responsable y la autoevaluación.
+                    </div>
+                    <div class="container-fluid my-2">
+                        Para más detalle sobre los criterios de valoración a aplicar por cada intervalo de valores de
+                        1 a 4, de 5 a 8 y de 9 a 10, consultar el cuestionario facilitado en
+                        <a href="#documentos">documentos de interés</a>.
+                    </div>
+                    <div class="container-fluid my-2 bg-info bg-opacity-50">
+                        Para facilitar la evaluación y la interpretación de los resultados, a efectos orientativos, puede
+                        consultar las escalas Likert propuestas por la Universidad de Sevilla en
+                        <a href="#documentos">documentos de interés</a>.
+                    </div>
                 </div>
                 <ul class="lead my-3">
                     {%- if activos[0].fechaAlta <= date() and date() <= activos[0].fechaBaja %}
                         <li>
-                            <a href="{{ activos[0].url ~ '/empleado?tipo=' ~ constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') }}">
-                                Comprobar relación de personas a evaluar
+                            <a class="fw-bold"
+                               href="{{ activos[0].url ~ '/empleado?tipo=' ~ constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') }}">
+                                Comprobar relación de personas a evaluar y realizar o consultar sus evaluaciones
                             </a>
                         </li>
                     {%- endif %}
@@ -221,9 +278,15 @@
             {# Otros #}
             <div class="pagina-seccion">Resultados del proceso de evaluación activo</div>
             <ul class="lead my-3">
-                <li>Resultado parcial fase 1 (autoevaluación)</li>
-                <li>Resultado parcial fase 2 (agentes evaluadores)</li>
-                <li>Resultado provisional del proceso de evaluación del desempeño</li>
+                <li>
+                    Resultado parcial fase 1 (autoevaluación)
+
+<p class="fst-italic">(solo mostrar si se ha enviado autoevaluación, al pulsar mostrar modal con puntuación sobre 60, sobre 100 y fecha de envío)</p>
+                </li>
+                <li>
+                    Resultado provisional del proceso de evaluación del desempeño
+<p class="fst-italic">(solo mostrar si se han enviado los 3 cuestionarios, al pulsar mostrar modal puntuación global sobre 60, sobre 100)</p>
+                </li>
                 <li>Resultado final del proceso de evaluación del desempeño</li>
             </ul>
             <div class="pagina-seccion" id="documentos">Área de desarrollo profesional</div>

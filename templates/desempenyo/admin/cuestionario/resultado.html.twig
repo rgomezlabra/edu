@@ -10,13 +10,17 @@
             <thead class="cabecera-condensada">
             <tr>
                 <th data-dt-order="disable"></th>
-                <th colspan="2" data-dt-order="disable">Autoevaluación ({{ config.peso1 }}%)</th>
-                <th colspan="2" data-dt-order="disable">Evaluación responsable ({{ config.peso2 }}%)</th>
-                <th colspan="2" data-dt-order="disable">Evaluación tercer agente ({{ config.peso3 }}%)</th>
+                <th data-dt-order="disable"></th>
+                <th data-dt-order="disable"></th>
+                <th colspan="2" data-dt-order="disable">({{ config.peso1 }}%)</th>
+                <th colspan="2" data-dt-order="disable">({{ config.peso2 }}%)</th>
+                <th colspan="2" data-dt-order="disable">({{ config.peso3 }}%)</th>
                 <th colspan="2" data-dt-order="disable">Total ponderado</th>
                 <th rowspan="2" data-dt-order="disable">Acciones</th>
             </tr>
             <tr>
+                <th>R</th>
+                <th>VR</th>
                 <th>Empleado</th>
                 <th class="text-start">Media</th>
                 <th class="text-start">Fecha</th>
@@ -31,9 +35,15 @@
             <tbody>
             {%- for formulario in formularios|filter(f => f.formulario.fechaEnvio) %}
             <tr>
+                <td>
+                    {%- if formulario.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION' )%}
+                        Sí
+                    {%- endif %}
+                </td>
+                <td></td>
                 <td>{{ formulario.empleado.persona }}</td>
                 {%- if formulario.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION' )%}
-                    <td><span class="badge-warning">No evaluable</span></td>
+                    <td>0</td>
                     <td>{{ formulario.fechaRechazo|date('Y-m-d') }}</td>
                     {%- set tipos = [
                         constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
