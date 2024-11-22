@@ -5,7 +5,7 @@
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
 
-    {{ include(path(aplicacion.ruta) ~ '/admin/tipo_incidencia/_form.html.twig', {'button_label': 'Actualizar'}) }}
+    {{ include(path(aplicacion.ruta) ~ '/admin/tipo_incidencia/_form.html.twig', {button_label: 'Actualizar'}) }}
 {% endblock %}
 
 {% block botones %}{% endblock %}

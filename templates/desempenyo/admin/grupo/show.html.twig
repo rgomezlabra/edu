@@ -27,7 +27,7 @@
     {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_grupo_edit', {'cuestionario': grupo.cuestionario.id, 'grupo': grupo.id}) }}">
+               href="{{ path(aplicacion.ruta ~ '_admin_grupo_edit', {cuestionario: grupo.cuestionario.id, grupo: grupo.id}) }}">
                 <em class="fas fa-edit"></em> Editar
             </a>
         </li>

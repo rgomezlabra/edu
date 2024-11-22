@@ -23,13 +23,13 @@
 
 {% block botones %}
     <li class="nav-item me-2">
-        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_edit', {'id': tipo.id}) }}">
+        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_edit', {id: tipo.id}) }}">
             <em class="fas fa-edit"></em> Editar
         </a>
     </li>
 {#    {% if num_incidencias == 0 %}#}
         <li class="nav-item ms-5 me-2">
-            {{ include(path(aplicacion.ruta) ~ '/admin/tipo_incidencia/_delete_form.html.twig', {'id': tipo.id}) }}
+            {{ include(path(aplicacion.ruta) ~ '/admin/tipo_incidencia/_delete_form.html.twig', {id: tipo.id}) }}
         </li>
 {#    {% endif %}#}
 {% endblock %}

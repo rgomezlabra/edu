@@ -59,7 +59,7 @@
                 <td>{{ (media * 10)|round(2) }}</td>
                 <td></td>
             </tr>
-            {%- endfor%}
+            {%- endfor %}
             </tbody>
         </table>
     </div>
@@ -72,7 +72,7 @@
     {{ parent() }}
     <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">Cuestionarios</a></li>
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {'id': cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
+        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
     </li>
 {% endblock %}
 
@@ -80,6 +80,28 @@
     {{ parent() }}
     <script type="module">
         $('#datosResultados').dataTable({
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="fas fa-copy"></i>',
+                    titleAttr: 'Copiar',
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i>',
+                    titleAttr: 'Imprimir',
+                },
+                {
+                    extend: 'csv',
+                    text: '<i class="fas fa-file-csv"></i>',
+                    titleAttr: 'Generar fichero CSV',
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel"></i>',
+                    titleAttr: 'Generar fichero Excel',
+                },
+            ],
             language: {
                 url: '{{ asset("includes/datatable.es.json") }}',
             },

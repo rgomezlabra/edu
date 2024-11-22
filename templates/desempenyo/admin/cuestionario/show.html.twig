@@ -76,37 +76,35 @@
 
 {% block botones %}
     <li class="nav-item me-2">
-        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {'id': cuestionario.id}) }}">
+        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id}) }}">
             <em class="mx-1 fas fa-user-check"></em> Evaluadores
         </a>
     </li>
     {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
         <li class="nav-item me-2">
-            <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_edit', {'id': cuestionario.id}) }}">
+            <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_edit', {id: cuestionario.id}) }}">
                 <em class="mx-1 fas fa-edit"></em> Editar
             </a>
         </li>
         <li class="nav-item me-2">
-            <a id="activa" class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_activar', {'id': cuestionario.id}) }}">
+            <a id="activa" class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_activar', {id: cuestionario.id}) }}">
                 <em class="fas fa-check"></em> Activar
             </a>
         </li>
     {%- elseif cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO') %}
         <li class="nav-item me-2">
-            <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_formulario_index', {'cuestionario': cuestionario.id}) }}">
+            <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_formulario_index', {cuestionario: cuestionario.id}) }}">
                 <em class="fas fa-list-check"></em> Formularios
             </a>
         </li>
     {%- endif %}
     <li class="nav-item me-2">
-        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {'id': cuestionario.id}) }}">
+        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_grupo_index', {id: cuestionario.id}) }}">
             <em class="fas fa-object-group"></em> Grupos
         </a>
     </li>
     <li class="nav-item me-2">
-        <a id="simula" class="btn btn-primary" href="">
-            <em class="fas fa-video"></em> Simular
-        </a>
+        <a id="simula" class="btn btn-primary" href=""><em class="fas fa-video"></em> Simular</a>
     </li>
 {% endblock %}
 

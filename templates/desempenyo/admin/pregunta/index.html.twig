@@ -7,11 +7,12 @@
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
 
-    <div class="pagina-seccion">
-        Cuestionario {{ cuestionario.codigo }}{% if grupo != null %} / {{ grupo.titulo }}{% endif %}
-    </div>
     <div class="mt-4">
         <table class="tabla-condensada" id="datosPreguntas">
+            <caption class="caption-top">
+                {{- cuestionario.titulo -}}
+                {%- if grupo != null %} / {{ grupo.codigo ~ '. ' ~ grupo.titulo }}{% endif -%}
+            </caption>
             <thead class="cabecera-condensada">
                 <tr>
                     <th>Orden</th>
@@ -20,7 +21,7 @@
                     <th>Cuestionario</th>
                     <th>Código</th>
                     <th>Pregunta</th>
-                    <th class="text-start">Tipo</th>
+                    <th>Tipo</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -28,9 +29,9 @@
             {%- for pregunta in preguntas %}
                 <tr class="fila" data-id="{{ pregunta.id }}">
                     <td>
-                        {%- if preguntas|length > 1 %}
+                        {%- if preguntas|length > 1 -%}
                             <span class="badge-secondary" title="Reordenar preguntas"><em class="fas fa-sort"></em></span>
-                        {%- endif %}
+                        {%- endif -%}
                     </td>
                     <td>{{ pregunta.orden }}</td>
                     <td class="text-center">
@@ -63,14 +64,14 @@
                 </tr>
             {%- endfor %}
             </tbody>
-            {%- if grupo != null and preguntas|length > 1 %}
-                <caption>
-                    <em class="fas fa-info-circle text-info"></em>
-                    El orden de las preguntas se modifica seleccionando y arrastrando el icono de la fila deseada.
-                    Al finalizar, los cambios pueden grabarse pulsando sobre el botón de guardar.
-                </caption>
-            {%- endif %}
         </table>
+        {%- if grupo != null and preguntas|length > 1 %}
+            <div>
+                <em class="mx-1 fas fa-info-circle text-info"></em>
+                El orden de las preguntas se modifica seleccionando y arrastrando el icono de la fila deseada.
+                Al finalizar, los cambios pueden grabarse pulsando sobre el botón de guardar.
+            </div>
+        {%- endif %}
     </div>
 {% endblock %}
 
@@ -148,7 +149,7 @@
                 {
                     extend: 'copy',
                     exportOptions: {
-                        columns: [1, 2, 3,4],
+                        columns: [2, 3, 4, 5],
                     },
                     text: '<i class="fas fa-copy"></i>',
                     titleAttr: 'Copiar',
@@ -156,8 +157,7 @@
                 {
                     extend: 'print',
                     exportOptions: {
-                        columns: [1, 2, 3,4],
-                        stripHtml: false,
+                        columns: [2, 3, 4, 5, 6],
                     },
                     text: '<i class="fas fa-print"></i>',
                     titleAttr: 'Imprimir',
@@ -165,7 +165,7 @@
                 {
                     extend: 'csv',
                     exportOptions: {
-                        columns: [1, 2, 3,4],
+                        columns: [2, 3, 4, 5],
                     },
                     text: '<i class="fas fa-file-csv"></i>',
                     titleAttr: 'Generar fichero CSV',
@@ -173,7 +173,7 @@
                 {
                     extend: 'excelHtml5',
                     exportOptions: {
-                        columns: [1, 2, 3,4],
+                        columns: [2, 3, 4, 5],
                     },
                     text: '<i class="fas fa-file-excel"></i>',
                     titleAttr: 'Generar fichero Excel',
