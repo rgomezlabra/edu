@@ -163,7 +163,7 @@
                     </td>
                     <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
                     <td>{{ evaluacion.empleado.persona }}</td>
-                    <td>{{ evaluacion.fechaRechazo|date('Y-m-d') }}</td>
+                    <td>{{ evaluacion.rechazado ? evaluacion.rechazado|date('Y-m-d') }}</td>
                     <td>
                         <a class="recuperar" href="" data-persona="{{ evaluacion.empleado.persona }}"
                            data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_recupera', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">

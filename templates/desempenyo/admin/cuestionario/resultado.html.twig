@@ -44,7 +44,7 @@
                 <td>{{ formulario.empleado.persona }}</td>
                 {%- if formulario.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION' )%}
                     <td>0</td>
-                    <td>{{ formulario.fechaRechazo|date('Y-m-d') }}</td>
+                    <td>{{ formulario.rechazado ? formulario.rechazado|date('Y-m-d') }}</td>
                     {%- set tipos = [
                         constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
                         constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'),

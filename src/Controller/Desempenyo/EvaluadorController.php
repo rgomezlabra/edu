@@ -9,6 +9,7 @@ use App\Entity\Desempenyo\Evalua;
 use App\Entity\Plantilla\Empleado;
 use App\Entity\Sistema\Origen;
 use App\Entity\Sistema\Usuario;
+use App\Form\Desempenyo\CorreccionType;
 use App\Form\Util\VolcadoType;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
@@ -445,7 +446,7 @@ class EvaluadorController extends AbstractController
 
         $evalua
             ->setTipoEvaluador(Evalua::NO_EVALUACION)
-            ->setFechaRechazo(new DateTimeImmutable())
+            ->setRechazado(new DateTimeImmutable())
         ;
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado ha sido marcado como no evaluable', [
@@ -490,7 +491,7 @@ class EvaluadorController extends AbstractController
         $evalua
             ->setTipoEvaluador(Evalua::NO_EVALUACION)
             ->setHabilita(false)
-            ->setFechaRechazo(new DateTimeImmutable())
+            ->setRechazado(new DateTimeImmutable())
         ;
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado ha solicitado no ser evaluable', [
@@ -526,7 +527,7 @@ class EvaluadorController extends AbstractController
 
         $evalua
             ->setTipoEvaluador()
-            ->setFechaRechazo(null)
+            ->setRechazado(null)
         ;
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado vuelve a ser evaluable', [
@@ -570,7 +571,7 @@ class EvaluadorController extends AbstractController
 
         $evalua
             ->setTipoEvaluador()
-            ->setFechaRechazo(null)
+            ->setRechazado(null)
         ;
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado vuelve a ser evaluable', [
@@ -581,7 +582,52 @@ class EvaluadorController extends AbstractController
         return $this->redirectToRoute($this->rutaBase);
     }
 
-    /** Empleado indica que puede ser evaluado en su puesto actual. */
+
+    /** Corregir la puntuación de una evaluación. */
+    #[Route(
+        path: '/admin/cuestionario/{cuestionario}/evaluador/corrige/{evalua}',
+        name: 'admin_evaluador_corrige',
+        methods: ['GET']
+    )]
+    public function corrige(
+        Request          $request,
+        EvaluaRepository $evaluaRepository,
+        Cuestionario     $cuestionario,
+        Evalua           $evalua,
+    ): Response {
+        $this->denyAccessUnlessGranted('admin');
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        if ($cuestionario !== $evalua->getCuestionario()) {
+            $this->addFlash('warning', 'La evaluación a corregir no corresponde con el cuestionario.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        $form = $this->createForm(CorreccionType::class, $evalua);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $evalua
+                ->setCorrector($usuario)
+                ->setCorregido(new DateTimeImmutable())
+            ;
+            $evaluaRepository->save($evalua, true);
+            $this->generator->logAndFlash('info', 'Evaluación corregida', [
+                'id' => $evalua->getId(),
+                'cuestionario' => $cuestionario->getCodigo(),
+                'empleado' => $evalua->getEmpleado()->getPersona(),
+                'evaluador' => $evalua->getEvaluador()->getPersona(),
+                'tipo' => $evalua->getTipoEvaluador(),
+            ]);
+
+            return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
+        }
+
+        // TODO mostrar formulario
+        return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
+    }
+
+        /** Empleado indica que puede ser evaluado en su puesto actual. */
     #[Route(
         path: '/formulario/{codigo}/habilita',
         name: 'formulario_habilita',

@@ -6,6 +6,7 @@ use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Cuestiona\Formulario;
 use App\Entity\Plantilla\Empleado;
 use App\Entity\Sistema\Origen;
+use App\Entity\Sistema\Usuario;
 use App\Repository\Desempenyo\EvaluaRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
@@ -44,7 +45,7 @@ class Evalua
     #[ORM\ManyToOne(targetEntity: Empleado::class)]
     private ?Empleado $evaluador = null;
 
-    #[ORM\Column(type: 'smallint', nullable: false, options: ['default' => 1])]
+    #[ORM\Column(type: Types::SMALLINT, nullable: false, options: ['default' => 1])]
     private int $tipo_evaluador = self::AUTOEVALUACION;
 
     #[ORM\ManyToOne(targetEntity: Cuestionario::class)]
@@ -55,9 +56,21 @@ class Evalua
     private ?Formulario $formulario = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
-    private ?DateTimeImmutable $fecha_rechazo = null;
+    private ?DateTimeImmutable $rechazado = null;
 
-    #[ORM\Column(type: 'smallint', nullable: false, options: ['default' => 0])]
+    #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    private ?float $correccion = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $comentario = null;
+
+    #[ORM\ManyToOne(targetEntity: Usuario::class)]
+    private ?Usuario $corrector = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $corregido = null;
+
+    #[ORM\Column(type: Types::BOOLEAN, nullable: false, options: ['default' => 0])]
     private bool $habilita = false;
 
     #[ORM\ManyToOne(targetEntity: Origen::class)]
@@ -128,14 +141,62 @@ class Evalua
         return $this;
     }
 
-    public function getFechaRechazo(): ?DateTimeImmutable
+    public function getRechazado(): ?DateTimeImmutable
     {
-        return $this->fecha_rechazo;
+        return $this->rechazado;
     }
 
-    public function setFechaRechazo(?DateTimeImmutable $fecha_rechazo): static
+    public function setRechazado(?DateTimeImmutable $fecha): static
     {
-        $this->fecha_rechazo = $fecha_rechazo;
+        $this->rechazado = $fecha;
+
+        return $this;
+    }
+
+    public function getCorreccion(): ?float
+    {
+        return $this->correccion;
+    }
+
+    public function setCorreccion(?float $puntuacion): static
+    {
+        $this->correccion = $puntuacion;
+
+        return $this;
+    }
+
+    public function getComentario(): ?string
+    {
+        return $this->comentario;
+    }
+
+    public function setComentario(?string $comentario): static
+    {
+        $this->comentario = $comentario;
+
+        return $this;
+    }
+
+    public function getCorrector(): ?Usuario
+    {
+        return $this->corrector;
+    }
+
+    public function setCorrector(?Usuario $corrector): static
+    {
+        $this->corrector = $corrector;
+
+        return $this;
+    }
+
+    public function getCorregido(): ?DateTimeImmutable
+    {
+        return $this->corregido;
+    }
+
+    public function setCorregido(?DateTimeImmutable $fecha): static
+    {
+        $this->corregido = $fecha;
 
         return $this;
     }
