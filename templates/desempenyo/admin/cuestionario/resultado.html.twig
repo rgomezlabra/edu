@@ -19,8 +19,8 @@
                 <th rowspan="2" data-dt-order="disable">Acciones</th>
             </tr>
             <tr>
-                <th>R</th>
-                <th>VR</th>
+                <th><span title="Rechazo">R</span></th>
+                <th><span title="Rechazo verificado">VR</span></th>
                 <th>Empleado</th>
                 <th class="text-start">Media</th>
                 <th class="text-start">Fecha</th>
@@ -33,42 +33,42 @@
             </tr>
             </thead>
             <tbody>
-            {%- for formulario in formularios|filter(f => f.formulario.fechaEnvio) %}
-            <tr>
-                <td>
-                    {%- if formulario.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION' )%}
-                        Sí
+            {%- for dato in datos %}
+                <tr>
+                    <td>
+                        {%- if (dato|first).formulario.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION' )%}
+                            Sí
+                        {%- endif %}
+                    </td>
+                    <td></td>
+                    <td>{{ (dato|first).formulario.empleado.persona }}</td>
+                    {%- if (dato|first).formulario.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION' )%}
+                        <td>0</td>
+                        <td>{{ (dato|first).formulario.rechazado ? (dato|first).formulario.rechazado|date('Y-m-d') }}</td>
+                        {%- set tipos = [
+                            constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
+                            constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'),
+                        ] %}
+                    {%- else %}
+                        {%- set tipos = [
+                            constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'),
+                            constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
+                            constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'),
+                        ] %}
                     {%- endif %}
-                </td>
-                <td></td>
-                <td>{{ formulario.empleado.persona }}</td>
-                {%- if formulario.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION' )%}
-                    <td>0</td>
-                    <td>{{ formulario.rechazado ? formulario.rechazado|date('Y-m-d') }}</td>
-                    {%- set tipos = [
-                        constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
-                        constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'),
-                    ] %}
-                {%- else %}
-                    {%- set tipos = [
-                        constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'),
-                        constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
-                        constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'),
-                    ] %}
-                {%- endif %}
-                {%- for tipo in tipos %}
-                    <td>{{ puntos[formulario.empleado.id][tipo]|default|round(2) }}</td>
-                    <td>{{ puntos[formulario.empleado.id][tipo]|default ? formulario.formulario.fechaEnvio|date('Y-m-d') }}</td>
-                {%- endfor %}
-                {%- set media =
-                    (puntos[formulario.empleado.id][constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')]|default(0) * config['peso1'] / 100)
-                    + (puntos[formulario.empleado.id][constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')]|default(0) * config['peso2'] / 100)
-                    + (puntos[formulario.empleado.id][constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')]|default(0) * config['peso3'] / 100)
-                -%}
-                <td {% if (media * 6) < 20 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|round(2) }}</td>
-                <td>{{ (media * 10)|round(2) }}</td>
-                <td></td>
-            </tr>
+                    {%- for tipo in tipos %}
+                        <td>{{ dato[tipo].puntos|default|number_format(2, ',' ) }}</td>
+                        <td>{{ dato[tipo] is defined ? (dato[tipo].formulario.formulario.fechaEnvio ? dato[tipo].formulario.formulario.fechaEnvio|date('Y-m-d')) }}</td>
+                    {%- endfor %}
+                    {%- set media =
+                        (dato[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')].puntos|default(0) * config['peso1'] / 100)
+                        + (dato[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')].puntos|default(0) * config['peso2'] / 100)
+                        + (dato[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')].puntos|default(0) * config['peso3'] / 100)
+                    -%}
+                    <td {% if (media * 6) < 20 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|number_format(2, ',' ) }}</td>
+                    <td {% if (media * 10) < 33.33 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 10)|number_format(2, ',' ) }}</td>
+                    <td></td>
+                </tr>
             {%- endfor %}
             </tbody>
         </table>
@@ -112,9 +112,15 @@
                     titleAttr: 'Generar fichero Excel',
                 },
             ],
+            dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +
+                '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
             language: {
                 url: '{{ asset("includes/datatable.es.json") }}',
             },
+            order: [
+                [2, 'asc'],
+            ],
         });
     </script>
 {% endblock %}

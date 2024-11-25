@@ -70,9 +70,8 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        $formularios = $evaluaRepository->findByEntregados(['cuestionario' => $cuestionario]);
-        $puntos = [];
-        foreach ($formularios as $formulario) {
+        $datos = [];
+        foreach ($evaluaRepository->findByEntregados(['cuestionario' => $cuestionario]) as $formulario) {
             $total = 0;
             /** @var Respuesta[] $respuestas */
             $respuestas = $formulario->getFormulario()?->getRespuestas();
@@ -83,13 +82,15 @@ class FormularioController extends AbstractController
             if ($total > 0) {
                 $total /= count($respuestas);
             }
-            $puntos[(int) $formulario->getEmpleado()?->getId()][$formulario->getTipoEvaluador()] = $total;
+            $datos[(int) $formulario->getEmpleado()?->getId()][$formulario->getTipoEvaluador()] = [
+                'formulario' => $formulario,
+                'puntos' => $total,
+            ];
         }
 
         return $this->render('intranet/desempenyo/admin/cuestionario/resultado.html.twig', [
             'cuestionario' => $cuestionario,
-            'formularios' => $formularios,
-            'puntos' => $puntos,
+            'datos' => $datos,
         ]);
     }
 

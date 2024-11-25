@@ -13,7 +13,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Entidad para gestionar permisos de valuación de desempeño (relación evaluador y empleado evaluado).
+ * Entidad para gestionar permisos de evaluación de desempeño (relación evaluador y empleado evaluado).
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
 #[ORM\Entity(repositoryClass: EvaluaRepository::class)]

@@ -43,7 +43,7 @@
                 {%- if loop.last %}
                     <tr class="ultimo">
                         <td>Media</td>
-                        <td class="text-end">{{ (puntos / loop.index)|round(2) }}</td>
+                        <td class="text-end">{{ (puntos / loop.index)|number_format(2, ',' ) }}</td>
                         <td></td>
                     </tr>
                 {%- endif %}
