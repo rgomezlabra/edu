@@ -14,12 +14,9 @@
 
     <div class="pagina-seccion">Gestionar componentes de la aplicación</div>
     <ul>
-        <li>
-            <a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_index') }}">Gestionar incidencias</a>
-        </li>
-        <li>
-            <a href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_index') }}">Definir tipos de incidencias</a>
-        </li>
+        <li><a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_index') }}">Gestionar incidencias</a></li>
+        <li><a href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_index') }}">Definir tipos de incidencias</a></li>
+        <li><a href="{{ path(aplicacion.ruta ~ '_admin_log_index') }}">Ver registro de operaciones</a></li>
     </ul>
 {% endblock %}
 
