@@ -69,7 +69,7 @@ class EvaluadorController extends AbstractController
         path: '/admin/cuestionario/{id}/evaluador/',
         name: 'admin_evaluador_index',
         defaults: ['titulo' => 'Evaluadores de Cuestionario de Competencias'],
-        methods: ['GET']
+        methods: ['GET', 'POST']
     )]
     public function index(Request $request, Cuestionario $cuestionario): Response
     {
@@ -447,11 +447,13 @@ class EvaluadorController extends AbstractController
         $evalua
             ->setTipoEvaluador(Evalua::NO_EVALUACION)
             ->setRechazado(new DateTimeImmutable())
+            ->setRechazoTexto(null)
+            ->setRegistrado(null)
         ;
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado ha sido marcado como no evaluable', [
             'cuestionario' => $cuestionario->getCodigo(),
-            'empleado' => $empleado->getPersona()?->getUsuario()?->getUvus(),
+            'empleado' => $empleado->getPersona()?->getDocIdentidad(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
@@ -492,6 +494,8 @@ class EvaluadorController extends AbstractController
             ->setTipoEvaluador(Evalua::NO_EVALUACION)
             ->setHabilita(false)
             ->setRechazado(new DateTimeImmutable())
+            ->setRechazoTexto(null)
+            ->setRegistrado(null)
         ;
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado ha solicitado no ser evaluable', [
@@ -500,6 +504,60 @@ class EvaluadorController extends AbstractController
         ]);
 
         return $this->redirectToRoute($this->rutaBase);
+    }
+
+    /** Notifica que una solicitud de rechazo ha sido entregada en el Registro General. */
+    #[Route(
+        path: '/admin/cuestionario/{cuestionario}/evaluador/registra/{empleado}',
+        name: 'admin_evaluador_registra',
+        methods: ['POST']
+    )]
+    public function registra(
+        Request      $request,
+        Cuestionario $cuestionario,
+        Empleado     $empleado,
+    ): Response {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
+        // Comprobar si el empleado ha solicitado no ser evaluado
+        $evalua = $this->evaluaRepository->findOneBy([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'tipo_evaluador' => Evalua::NO_EVALUACION,
+        ]);
+        if (!$evalua instanceof Evalua) {
+            $this->addFlash('warning', 'El empleado no existe o no ha rechazado ser evaluado.');
+
+            return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
+        }
+
+        $form = $this->createFormBuilder($evalua)
+            ->setMethod('POST')
+            ->add('rechazo_texto', null, [
+                'label' => 'Observaciones',
+            ])
+            ->add('registrado', null, [
+                'label' => 'Fecha de registro',
+                'required' => false,
+                'widget' => 'single_text',
+            ])
+            ->getForm()
+        ;
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->evaluaRepository->save($evalua, true);
+            $this->generator->logAndFlash('info', 'Registro general validado', [
+                'cuestionario' => $cuestionario->getCodigo(),
+                'empleado' => $empleado->getPersona()?->getDocIdentidad(),
+            ]);
+
+            return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', [
+                'id' => $cuestionario->getId()
+            ]);
+        }
+
+        return $this->render('intranet/desempenyo/admin/evaluador/_form.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     /** Recupera la evaluación de un empleado que la había rechazado previamente. */
@@ -528,11 +586,13 @@ class EvaluadorController extends AbstractController
         $evalua
             ->setTipoEvaluador()
             ->setRechazado(null)
+            ->setRechazoTexto(null)
+            ->setRegistrado(null)
         ;
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado vuelve a ser evaluable', [
             'cuestionario' => $cuestionario->getCodigo(),
-            'empleado' => $empleado?->getPersona()?->getUsuario()?->getUvus(),
+            'empleado' => $empleado?->getPersona()?->getDocIdentidad(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
@@ -572,6 +632,8 @@ class EvaluadorController extends AbstractController
         $evalua
             ->setTipoEvaluador()
             ->setRechazado(null)
+            ->setRechazoTexto(null)
+            ->setRegistrado(null)
         ;
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'El empleado vuelve a ser evaluable', [

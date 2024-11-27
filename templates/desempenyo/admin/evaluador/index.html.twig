@@ -35,7 +35,7 @@
                     </td>
                     <td>{{ evaluacion.empleado.persona }}</td>
                     <td>
-                        <a class="rechazar" href="" data-persona="{{ evaluacion.empleado.persona }}"
+                        <a id="rechazar" href="" data-persona="{{ evaluacion.empleado.persona }}"
                            data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_rechaza', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                             <em class="mx-1 fas fa-remove" title="Rechazar evaluación"></em>
                         </a>
@@ -151,6 +151,7 @@
                 <th>Doc. empleado</th>
                 <th>Nombre empleado</th>
                 <th>Fecha solicitud</th>
+                <th>Fecha registro</th>
                 <th data-dt-order="disable">Acciones</th>
             </tr>
             </thead>
@@ -164,8 +165,13 @@
                     <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
                     <td>{{ evaluacion.empleado.persona }}</td>
                     <td>{{ evaluacion.rechazado ? evaluacion.rechazado|date('Y-m-d') }}</td>
+                    <td>{{ evaluacion.registrado ? evaluacion.registrado|date('Y-m-d') }}</td>
                     <td>
-                        <a class="recuperar" href="" data-persona="{{ evaluacion.empleado.persona }}"
+                        <a id="registrar" href=""
+                           data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_registra', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
+                            <em class="fas fa-save" title="Registrar"></em>
+                        </a>
+                        <a id="recuperar" href="" data-persona="{{ evaluacion.empleado.persona }}"
                            data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_recupera', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                             <em class="mx-1 fas fa-check" title="Recuperar evaluación"></em>
                         </a>
@@ -207,14 +213,14 @@
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION')}) }}">
-                <em class="fas fa-user-times"></em> Ver no evaluados
+                <em class="fas fa-user-times"></em> Ver rechazados
             </a>
         </li>
     {%- endif %}
     {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
         <li class="nav-item ms-5 me-2">
             <button class="btn btn-primary cargar" id="cargarEmpleados"
-               data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_auto', {id: cuestionario.id}) }}">
+                    data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_auto', {id: cuestionario.id}) }}">
                 <em class="fas fa-person-arrow-down-to-line"></em> Cargar empleados
             </button>
         </li>
@@ -263,6 +269,7 @@
         pregunta: '¿Continuar con la carga de validaciones?'
     }) }}
     {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoValida', mensaje: 'Cargando validaciones', progreso: false}) }}
+    {{- include('layout/_dialogo_form.html.twig', {id: 'modal', titulo: 'Registrar solicitud de rechazo'}) }}
 {% endblock %}
 
 {% block js %}
@@ -320,7 +327,7 @@
 
         // Verificar rechazo y recuperación de autoevaluación
         const dialogo = $('#dialogo');
-        $('.rechazar').on('click', function (e) {
+        $('#rechazar').on('click', function (e) {
             e.preventDefault();
             $('#pregunta').html('¿Rechazar evaluaciones para ' + $(this).data('persona') + '?');
             dialogo.fadeIn('fast').data('url', $(this).data('url'));
@@ -328,7 +335,7 @@
                 $(this).addClass('disabled');
             });
         });
-        $('.recuperar').on('click', function (e) {
+        $('#recuperar').on('click', function (e) {
             e.preventDefault();
             $('#pregunta').html('¿Volver a aceptar evaluaciones para ' + $(this).data('persona') + '?');
             dialogo.fadeIn('fast').data('url', $(this).data('url'));
@@ -383,6 +390,35 @@
         $(window).on('unload', function () {
             $('#cargandoEmpleados').hide();
             $('#cargandoValida').hide();
+        });
+
+        // Formulario para registrar solicitud de rechado de evaluación
+        $('#registrar').on('click', function (e) {
+            e.preventDefault();
+            let url = $(this).data('url');
+            if (url === undefined) {
+                return confirm('Se ha producido un error al ejecutar la operación.');
+            }
+            $.ajax({
+                type: 'POST',
+                url: url,
+                async: true,
+                success: function (response) {
+                    $('#modalForm').html(response);
+                    $('#modal').fadeIn('fast');
+                    // $('#modal-etiqueta').html('Registrar solicitud de rechazo');
+                    // $('.modal-form').html(response);
+                    // modalDatos.show();
+                },
+                error: function (xhr) {
+                    $('#modalTitulo').html('Error ' + xhr.status);
+                    $('#modalForm').html(response);
+                    $('#modal').fadeIn('fast');
+                    // $('#modal-etiqueta').html('Error ' + xhr.status);
+                    // $('.modal-body').html(xhr.responseText);
+                    // modalDatos.show();
+                },
+            });
         });
     </script>
 {% endblock %}

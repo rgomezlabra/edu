@@ -58,6 +58,12 @@ class Evalua
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $rechazado = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $rechazo_texto = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $registrado = null;
+
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
     private ?float $correccion = null;
 
@@ -149,6 +155,30 @@ class Evalua
     public function setRechazado(?DateTimeImmutable $fecha): static
     {
         $this->rechazado = $fecha;
+
+        return $this;
+    }
+
+    public function getRechazoTexto(): ?string
+    {
+        return $this->rechazo_texto;
+    }
+
+    public function setRechazoTexto(?string $texto): static
+    {
+        $this->rechazo_texto = $texto;
+
+        return $this;
+    }
+
+    public function getRegistrado(): ?DateTimeImmutable
+    {
+        return $this->registrado;
+    }
+
+    public function setRegistrado(?DateTimeImmutable $fecha): static
+    {
+        $this->registrado = $fecha;
 
         return $this;
     }
