@@ -68,17 +68,34 @@ class EvaluadorController extends AbstractController
     #[Route(
         path: '/admin/cuestionario/{id}/evaluador/',
         name: 'admin_evaluador_index',
-        defaults: ['titulo' => 'Evaluadores de Cuestionario de Competencias'],
+        defaults: ['titulo' => 'Evaluadores de Cuestionario de Evaluación'],
         methods: ['GET', 'POST']
     )]
     public function index(Request $request, Cuestionario $cuestionario): Response
     {
         $this->denyAccessUnlessGranted('admin');
         $tipo = $request->query->getInt('tipo', Evalua::AUTOEVALUACION);
-        $evaluaciones = $this->evaluaRepository->findByEvaluacion([
-            'cuestionario' => $cuestionario,
-            'tipo' => $tipo,
-        ]);
+
+        switch ($tipo) {
+            case Evalua::AUTOEVALUACION:
+            case Evalua::NO_EVALUACION:
+                $evaluaciones = $this->evaluaRepository->findByEvaluacion([
+                    'cuestionario' => $cuestionario,
+                    'tipo' => $tipo,
+                ]);
+                break;
+            case Evalua::EVALUA_RESPONSABLE:
+            case Evalua::EVALUA_OTRO:
+                $evaluaciones = [];
+                foreach ($this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario,]) as $evaluacion) {
+                    if (in_array($evaluacion->getTipoEvaluador(), [Evalua::NO_EVALUACION, Evalua::AUTOEVALUACION, $tipo])) {
+                        $evaluaciones[(int) $evaluacion->getEmpleado()?->getId()][$evaluacion->getTipoEvaluador()] = $evaluacion;
+                    }
+                }
+                break;
+            default:
+                $evaluaciones = [];
+        }
         $claveRedis = sprintf('evaluacion-%d', $tipo);
         $ultimo = null;
 
@@ -551,7 +568,7 @@ class EvaluadorController extends AbstractController
             ]);
 
             return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', [
-                'id' => $cuestionario->getId()
+                'id' => $cuestionario->getId(),
             ]);
         }
 

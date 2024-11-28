@@ -2,6 +2,8 @@
 {% set avisos = {1: 'Ausente', 2: 'Vigencia futura'} %}
 
 {% block content %}
+    {%- set tipoAuto = constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
+    {%- set tipoNo = constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION') %}
     <div class="pagina-titulo">
         {{ titulo }}
         {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %} (responsables)
@@ -10,7 +12,7 @@
     </div>
 
     <div class="pagina-seccion">Cuestionario {{ cuestionario.codigo }}</div>
-    {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
+    {%- if tipo == tipoAuto %}
         {#- Empleados para autoevaluación #}
         {%- if evaluaciones|length > 0 %}
             <div class="badge-info">
@@ -22,6 +24,7 @@
             <thead class="cabecera-condensada">
                 <tr>
                     <th>Unidad</th>
+                    <th>Doc. identidad</th>
                     <th>Nombre empleado</th>
                     <th data-dt-order="disable">Acciones</th>
                 </tr>
@@ -33,9 +36,10 @@
                         {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
                             : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
                     </td>
+                    <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
                     <td>{{ evaluacion.empleado.persona }}</td>
                     <td>
-                        <a id="rechazar" href="" data-persona="{{ evaluacion.empleado.persona }}"
+                        <a class="rechazar" href="" data-persona="{{ evaluacion.empleado.persona }}"
                            data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_rechaza', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                             <em class="mx-1 fas fa-remove" title="Rechazar evaluación"></em>
                         </a>
@@ -77,57 +81,63 @@
             </thead>
             <tbody>
             {%- for evaluacion in evaluaciones %}
-                {%- set plazaEmpleado = evaluacion.empleado.plazaOcupada ?: evaluacion.empleado.plazaTitular %}
-                {%- set plazaEvaluador = evaluacion.evaluador.plazaOcupada ?: evaluacion.evaluador.plazaTitular %}
+                {%- set empleado = evaluacion[tipoAuto] is defined ? evaluacion[tipoAuto].empleado : evaluacion[tipoNo].empleado %}
+                {%- set evaluador = evaluacion[tipo].evaluador|default(null) %}
+                {%- set plazaEmpleado = empleado.plazaOcupada ?: empleado.plazaTitular %}
+                {%- set plazaEvaluador = evaluador.plazaOcupada|default ?: evaluador.plazaTitular|default %}
                 <tr {% if plazaEmpleado.unidad|default != plazaEvaluador.unidad|default %}class="table-info" {% endif %}>
                     <td>
                         <span title="{{ plazaEmpleado.unidad.nombre|default }}">{{ plazaEmpleado.unidad.codigo|default }}</span>
                     </td>
-                    <td>{{ evaluacion.empleado.persona }}</td>
-                    <td>{{ evaluacion.empleado.grupo.nombre ~ (evaluacion.empleado.nivel > 0 ? '/' ~ evaluacion.empleado.nivel) }}</td>
+                    <td>{{ empleado.persona }}</td>
+                    <td>{{ empleado.grupo.nombre ~ (empleado.nivel > 0 ? '/' ~ empleado.nivel) }}</td>
+                    <td>{{ empleado.antiguedad|default }}</td>
+                    <td>{{ empleado.vigente|date('Y-m-d') }}</td>
                     <td>
-                        {{- plazaEmpleado.ocupantes[0].antiguedad|default -}}
-                    </td>
-                    <td>
-                        {{- plazaEmpleado.ocupantes[0].enOcupada|default ?: evaluacion.empleado.vigente|date('Y-m-d') -}}
-                    </td>
-                    <td>
-                        {%- if evaluacion.empleado.ausencia -%}
-                            <sup class="badge bg-warning mx-1" title="{{ avisos[1] }}">1</sup>
+                        {%- if empleado.ausencia -%}
+                            <sup class="badge-warning mx-1" title="{{ avisos[1] }}">1</sup>
                         {%- endif %}
-                        {%- if date(evaluacion.empleado.vigente) > date() -%}
-                            <sup class="badge bg-warning mx-1" title="{{ avisos[2] }}">2</sup>
+                        {%- if date(empleado.vigente) > date() -%}
+                            <sup class="badge-warning mx-1" title="{{ avisos[2] }}">2</sup>
                         {%- endif -%}
                     </td>
-                    <td><span title="{{ plazaEvaluador.unidad.nombre|default }}">{{ plazaEvaluador.unidad.codigo|default }}</span></td>
-                    <td>{{ evaluacion.evaluador.persona }}</td>
-                    <td>{{ evaluacion.evaluador.grupo.nombre ~ (evaluacion.evaluador.nivel > 0 ? '/' ~ evaluacion.evaluador.nivel) }}</td>
-                    <td>
-                        {{- plazaEvaluador.ocupantes[0].antiguedad|default -}}
-                    </td>
-                    <td>
-                        {{- plazaEvaluador.ocupantes[0].enOcupada|default ?: evaluacion.evaluador.vigente|date('Y-m-d') -}}
-                    </td>
-                    <td>
-                        {%- if evaluacion.evaluador.ausencia -%}
-                            <sup class="badge bg-warning mx-1" title="{{ avisos[1] }}">1</sup>
-                        {%- endif %}
-                        {%- if date(evaluacion.evaluador.vigente) > date() -%}
-                            <sup class="badge bg-warning mx-1" title="{{ avisos[2] }}">2</sup>
-                        {%- endif -%}
-                    </td>
-                    <td>{{ evaluacion.origen.nombre|default|capitalize }}</td>
+                    {%- if evaluador %}
+                        <td><span title="{{ plazaEvaluador.unidad.nombre|default }}">{{ plazaEvaluador.unidad.codigo|default }}</span></td>
+                        <td>{{ evaluador.persona }}</td>
+                        <td>{{ evaluador.grupo.nombre ~ (evaluador.nivel > 0 ? '/' ~ evaluador.nivel) }}</td>
+                        <td>{{ evaluador.antiguedad|default }}</td>
+                        <td>{{ evaluador.vigente|date('Y-m-d') }}</td>
+                        <td>
+                            {%- if evaluador.ausencia -%}
+                                <sup class="badge-warning mx-1" title="{{ avisos[1] }}">1</sup>
+                            {%- endif %}
+                            {%- if date(evaluador.vigente) > date() -%}
+                                <sup class="badge-warning mx-1" title="{{ avisos[2] }}">2</sup>
+                            {%- endif -%}
+                        </td>
+                        <td>{{ evaluacion.origen.nombre|default|capitalize }}</td>
+                    {%- else %}
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    {%- endif %}
                     <td>
                         {%- if evaluacion.formulario.fechaGrabacion is not defined %}
                             <em class="mx-1 fas fa-people-arrows" title="Reasignar"></em>
-                            <form method="post" class="d-inline"
-                                  action="{{ path(aplicacion.ruta ~ '_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion.id}) }}"
-                                  onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluacion.evaluador.persona }} sobre {{ evaluacion.empleado.persona }}?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cuestionario.id ~ '-' ~ evaluacion.id) }}">
-                                <button class="border-0 text-primary">
-                                    <em class="mx-1 fas fa-trash" title="Desasignar"></em>
-                                </button>
-                            </form>
+                            {%- if evaluador %}
+                                <form method="post" class="d-inline"
+                                      action="{{ path(aplicacion.ruta ~ '_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion[tipo].id}) }}"
+                                      onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluador.persona }} sobre {{ empleado.persona }}?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cuestionario.id ~ '-' ~ evaluacion[tipo].id) }}">
+                                    <button class="border-0 text-primary">
+                                        <em class="mx-1 fas fa-trash" title="Desasignar"></em>
+                                    </button>
+                                </form>
+                            {%- endif %}
                         {%- endif %}
                     </td>
                 </tr>
@@ -171,7 +181,7 @@
                            data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_registra', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                             <em class="fas fa-save" title="Registrar"></em>
                         </a>
-                        <a id="recuperar" href="" data-persona="{{ evaluacion.empleado.persona }}"
+                        <a class="recuperar" href="" data-persona="{{ evaluacion.empleado.persona }}"
                            data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_recupera', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                             <em class="mx-1 fas fa-check" title="Recuperar evaluación"></em>
                         </a>
@@ -201,7 +211,7 @@
             </a>
         </li>
     {%- endif %}
-    {%- if tipo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
+    {%- if cuestionario.configuracion.peso3|default(0) > 0 and tipo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')}) }}">
@@ -327,7 +337,7 @@
 
         // Verificar rechazo y recuperación de autoevaluación
         const dialogo = $('#dialogo');
-        $('#rechazar').on('click', function (e) {
+        $('.rechazar').on('click', function (e) {
             e.preventDefault();
             $('#pregunta').html('¿Rechazar evaluaciones para ' + $(this).data('persona') + '?');
             dialogo.fadeIn('fast').data('url', $(this).data('url'));
@@ -335,7 +345,7 @@
                 $(this).addClass('disabled');
             });
         });
-        $('#recuperar').on('click', function (e) {
+        $('.recuperar').on('click', function (e) {
             e.preventDefault();
             $('#pregunta').html('¿Volver a aceptar evaluaciones para ' + $(this).data('persona') + '?');
             dialogo.fadeIn('fast').data('url', $(this).data('url'));
