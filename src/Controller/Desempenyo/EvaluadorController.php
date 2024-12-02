@@ -10,6 +10,8 @@ use App\Entity\Plantilla\Empleado;
 use App\Entity\Sistema\Origen;
 use App\Entity\Sistema\Usuario;
 use App\Form\Desempenyo\CorreccionType;
+use App\Form\Desempenyo\EvaluadorType;
+use App\Form\Desempenyo\RegistroType;
 use App\Form\Util\VolcadoType;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
@@ -547,20 +549,10 @@ class EvaluadorController extends AbstractController
             return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
         }
 
-        $form = $this->createFormBuilder($evalua)
-            ->setMethod('POST')
-            ->setAction($request->getPathInfo())
-            ->add('rechazo_texto', null, [
-                'label' => 'Observaciones',
-            ])
-            ->add('registrado', null, [
-                'help' => 'Opcional',
-                'label' => 'Fecha de registro',
-                'required' => false,
-                'widget' => 'single_text',
-            ])
-            ->getForm()
-        ;
+        $form = $this->createForm(RegistroType::class, $evalua, [
+            'action' => $request->getPathInfo(),
+            'method' => 'POST',
+        ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $this->evaluaRepository->save($evalua, true);
@@ -755,5 +747,52 @@ class EvaluadorController extends AbstractController
         ]);
 
         return $this->redirectToRoute($this->rutaBase);
+    }
+
+    /** Reasigna un evaluador a un empleado. */
+    #[Route(
+        path: '/admin/cuestionario/{cuestionario}/evaluador/reasigna/{evalua}',
+        name: 'admin_evaluador_reasigna',
+        methods: [ 'POST']
+    )]
+    public function reasigna(
+        Request            $request,
+        EmpleadoRepository $empleadoRepository,
+        EvaluaRepository   $evaluaRepository,
+        Cuestionario       $cuestionario,
+        Evalua             $evalua
+    ): Response {
+        $this->denyAccessUnlessGranted('admin');
+        if ($cuestionario !== $evalua->getCuestionario()) {
+            $this->addFlash('warning', 'La evaluación a corregir no corresponde con el cuestionario.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        $form = $this->createForm(EvaluadorType::class, $evalua, [
+            'action' => $request->getPathInfo(),
+            'method' => 'POST',
+        ]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $evaluaRepository->save($evalua, true);
+            $this->generator->logAndFlash('info', 'Nuevo evaluador asignado', [
+                'id' => $evalua->getId(),
+                'cuestionario' => $cuestionario->getCodigo(),
+                'empleado' => $evalua->getEmpleado()->getPersona(),
+                'evaluador' => $evalua->getEvaluador()->getPersona(),
+                'tipo' => $evalua->getTipoEvaluador(),
+            ]);
+
+            return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', [
+                'id' => $cuestionario->getId(),
+                'tipo' => $evalua->getTipoEvaluador(),
+            ]);
+        }
+
+        return $this->render('intranet/desempenyo/admin/evaluador/_form_evaluador.html.twig', [
+            'form' => $form->createView(),
+            'empleados' => $empleadoRepository->findCesados(false),
+        ]);
     }
 }

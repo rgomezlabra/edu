@@ -1,0 +1,34 @@
+{{ form_start(form) }}
+{{ form_row(form.empleado) }}
+{{ form_row(form.tipoEvaluador) }}
+<div class="mb-3 row">
+    {{ form_label(form.evaluador) }}
+    <div class="col-sm-2 py-3 bg-secondary bg-opacity-25 border-start border-4 border-secondary">
+        {{ form_widget(form.evaluador) }}
+    </div>
+    <div class="col-sm-7 py-3 bg-secondary bg-opacity-25">
+        <table class="tabla-condensada" id="evaluadores">
+            <thead class="cabecera-condensada">
+            <tr>
+                <th>Documento</th>
+                <th>Nombre</th>
+            </tr>
+            </thead>
+            <tbody>
+            {%- for empleado in empleados %}
+                <tr id="{{ empleado.persona.docIdentidad }}">
+                    <td>{{ empleado.persona.docIdentidad }}</td>
+                    <td>{{ empleado.persona }}</td>
+                </tr>
+            {%- endfor %}
+            </tbody>
+        </table>
+        {{ form_help(form.evaluador, {help_attr: {class: 'text-secondary'}}) }}
+    </div>
+</div>
+<div class="linea-botones">
+    <button id="guardar" class="btn btn-primary">
+        <em class="fas fa-save"></em> {{ button_label|default('Guardar') }}
+    </button>
+</div>
+{{ form_end(form) }}

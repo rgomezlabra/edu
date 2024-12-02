@@ -127,7 +127,12 @@
                     {%- endif %}
                     <td>
                         {%- if evaluacion.formulario.fechaGrabacion is not defined %}
-                            <em class="mx-1 fas fa-people-arrows" title="Reasignar"></em>
+                            {%- if evaluacion[tipo] is defined %}
+                                <a class="reasignar"
+                                   data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_reasigna', {cuestionario: cuestionario.id, evalua: evaluacion[tipo].id}) }}">
+                                    <em class="mx-1 fas fa-people-arrows" title="Reasignar"></em>
+                                </a>
+                            {%- endif %}
                             {%- if evaluador %}
                                 <form method="post" class="d-inline"
                                       action="{{ path(aplicacion.ruta ~ '_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion[tipo].id}) }}"
@@ -280,6 +285,7 @@
     }) }}
     {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoValida', mensaje: 'Cargando validaciones', progreso: false}) }}
     {{- include('layout/_dialogo_form.html.twig', {id: 'modal', titulo: 'Registrar solicitud de rechazo'}) }}
+    {{- include('layout/_dialogo_form.html.twig', {id: 'reasignar', titulo: 'Reasignar evaluador'}) }}
 {% endblock %}
 
 {% block js %}
@@ -421,6 +427,50 @@
                 error: function (xhr) {
                     $('#modalTitulo').html('Error ' + xhr.status);
                     $('#modalForm').html(response);
+                    modal.showModal();
+                },
+            });
+        });
+        // Formulario para reasignar evaluador a empleado
+        $('.reasignar').on('click', function (e) {
+            e.preventDefault();
+            let url = $(this).data('url');
+            if (url === undefined) {
+                return confirm('Se ha producido un error al ejecutar la operación.');
+            }
+            const modal = document.querySelector('#reasignar');
+            $.ajax({
+                method: 'POST',
+                url: url,
+                async: true,
+                success: function (response) {
+                    $('#reasignarForm').html(response);
+                    let marca = 'table-info';
+                    const cuadroEvaluador = $('#evaluador_evaluador');
+                    const tabla = $('#evaluadores').dataTable({
+                        info: false,
+                        language: {
+                            url: '{{ asset("includes/datatable_noinfo.es.json") }}',
+                        },
+                        select: 'single',
+                    });
+                    $('#evaluadores tr').each(function () {
+                        if (cuadroEvaluador.val() === $(this).find('td').eq(0).text()) {
+                            $(this).addClass(marca);
+                        }
+                    });
+                    $('#evaluadores tbody').on('click', 'tr', function () {
+                        cuadroEvaluador.val(tabla.api().row(this).id()).trigger('change');
+                        $('#evaluadores tr').each(function () {
+                            $(this).removeClass(marca);
+                        });
+                        $(this).addClass(marca);
+                    });
+                    modal.showModal();
+                },
+                error: function (xhr) {
+                    $('#reasignarTitulo').html('Error ' + xhr.status);
+                    $('#reasignarForm').html(response);
                     modal.showModal();
                 },
             });
