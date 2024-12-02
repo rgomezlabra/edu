@@ -1,6 +1,8 @@
 {{ form_start(form) }}
 {{ form_widget(form) }}
 <div class="linea-botones">
-    <button class="btn btn-primary"><em class="fas fa-save"></em> {{ button_label|default('Guardar') }}</button>
+    <button id="guardar" class="btn btn-primary">
+        <em class="fas fa-save"></em> {{ button_label|default('Guardar') }}
+    </button>
 </div>
 {{ form_end(form) }}

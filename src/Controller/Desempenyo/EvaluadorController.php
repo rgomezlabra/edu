@@ -69,7 +69,7 @@ class EvaluadorController extends AbstractController
         path: '/admin/cuestionario/{id}/evaluador/',
         name: 'admin_evaluador_index',
         defaults: ['titulo' => 'Evaluadores de Cuestionario de Evaluación'],
-        methods: ['GET', 'POST']
+        methods: ['GET']
     )]
     public function index(Request $request, Cuestionario $cuestionario): Response
     {
@@ -549,10 +549,12 @@ class EvaluadorController extends AbstractController
 
         $form = $this->createFormBuilder($evalua)
             ->setMethod('POST')
+            ->setAction($request->getPathInfo())
             ->add('rechazo_texto', null, [
                 'label' => 'Observaciones',
             ])
             ->add('registrado', null, [
+                'help' => 'Opcional',
                 'label' => 'Fecha de registro',
                 'required' => false,
                 'widget' => 'single_text',
@@ -569,6 +571,7 @@ class EvaluadorController extends AbstractController
 
             return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', [
                 'id' => $cuestionario->getId(),
+                'tipo' => Evalua::NO_EVALUACION,
             ]);
         }
 

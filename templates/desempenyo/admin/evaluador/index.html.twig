@@ -177,7 +177,7 @@
                     <td>{{ evaluacion.rechazado ? evaluacion.rechazado|date('Y-m-d') }}</td>
                     <td>{{ evaluacion.registrado ? evaluacion.registrado|date('Y-m-d') }}</td>
                     <td>
-                        <a id="registrar" href=""
+                        <a class="registrar" href=""
                            data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_registra', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                             <em class="fas fa-save" title="Registrar"></em>
                         </a>
@@ -403,30 +403,25 @@
         });
 
         // Formulario para registrar solicitud de rechado de evaluación
-        $('#registrar').on('click', function (e) {
+        $('.registrar').on('click', function (e) {
             e.preventDefault();
             let url = $(this).data('url');
             if (url === undefined) {
                 return confirm('Se ha producido un error al ejecutar la operación.');
             }
+            const modal = document.querySelector('#modal');
             $.ajax({
-                type: 'POST',
+                method: 'POST',
                 url: url,
                 async: true,
                 success: function (response) {
                     $('#modalForm').html(response);
-                    $('#modal').fadeIn('fast');
-                    // $('#modal-etiqueta').html('Registrar solicitud de rechazo');
-                    // $('.modal-form').html(response);
-                    // modalDatos.show();
+                    modal.showModal();
                 },
                 error: function (xhr) {
                     $('#modalTitulo').html('Error ' + xhr.status);
                     $('#modalForm').html(response);
-                    $('#modal').fadeIn('fast');
-                    // $('#modal-etiqueta').html('Error ' + xhr.status);
-                    // $('.modal-body').html(xhr.responseText);
-                    // modalDatos.show();
+                    modal.showModal();
                 },
             });
         });
