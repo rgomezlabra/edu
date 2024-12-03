@@ -76,6 +76,46 @@
             </div>
         {%- endfor %}
     </div>
+
+
+    <div class="my-4">
+        <table class="tabla-condensada" id="formularios">
+            <thead class="cabecera-condensada">
+            <tr>
+                <th>Pregunta</th>
+                {%- for tipo in tipos %}
+                    <th>{{ tipo.titulo }}</th>
+                {%- endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {%- for grupo in grupos %}
+                <tr class="table-info fw-bold">
+                    <td colspan="{{ tipos|length + 1 }}">{{ grupo.codigo }}. {{ grupo.titulo }}</td>
+                </tr>
+                {%- set preguntas = grupo.preguntas|filter(p => p.activa)|sort((a, b) => a.orden <=> b.orden)  %}
+                {%- for pregunta in preguntas %}
+                    <tr>
+                        <td class="fw-bold">{{ pregunta }}</td>
+                        {%- for tipo in tipos %}
+                            {%- if tipo.codigo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and not pregunta.reducida
+                                or tipo.codigo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and pregunta.reducida
+                            %}
+                                <td>
+                                    {{- respuestas[tipo.codigo][pregunta.id].valor|default|number_format(2, ',') -}}
+                                </td>
+                            {%- else %}
+                                <td></td>
+                            {%- endif %}
+                        {%- endfor %}
+                    </tr>
+                {%- endfor %}
+            {%- endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
 {% endblock %}
 
 {% block botones %}

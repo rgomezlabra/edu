@@ -367,10 +367,7 @@ class EvaluadorController extends AbstractController
             if ($datos['nuevos'] > 0) {
                 $this->generator->logAndFlash('info', 'Nuevos evaluadores cargados', $datos);
             } else {
-                $this->generator->logAndFlash('warning', 'No se han cargado evaluadores nuevos', [
-                    'descartados' => $datos['descartados'],
-                    'duracion' => $datos['duracion'],
-                ]);
+                $this->addFlash('warning', 'No se han cargado evaluadores nuevos.');
             }
 
             return $this->redirectToRoute('intranet_desempenyo_admin_evaluador_index', [
@@ -470,7 +467,7 @@ class EvaluadorController extends AbstractController
             ->setRegistrado(null)
         ;
         $this->evaluaRepository->save($evalua, true);
-        $this->generator->logAndFlash('info', 'El empleado ha sido marcado como no evaluable', [
+        $this->generator->logAndFlash('info', 'Empleado marcado como no evaluable', [
             'cuestionario' => $cuestionario->getCodigo(),
             'empleado' => $empleado->getPersona()?->getDocIdentidad(),
         ]);
@@ -517,7 +514,7 @@ class EvaluadorController extends AbstractController
             ->setRegistrado(null)
         ;
         $this->evaluaRepository->save($evalua, true);
-        $this->generator->logAndFlash('info', 'El empleado ha solicitado no ser evaluable', [
+        $this->generator->logAndFlash('info', 'Empleado solicita no ser evaluable', [
             'cuestionario' => $cuestionario?->getCodigo(),
             'empleado' => $usuario->getUvus(),
         ]);
@@ -602,7 +599,7 @@ class EvaluadorController extends AbstractController
             ->setRegistrado(null)
         ;
         $this->evaluaRepository->save($evalua, true);
-        $this->generator->logAndFlash('info', 'El empleado vuelve a ser evaluable', [
+        $this->generator->logAndFlash('info', 'Empleado vuelve a ser evaluable', [
             'cuestionario' => $cuestionario->getCodigo(),
             'empleado' => $empleado?->getPersona()?->getDocIdentidad(),
         ]);
@@ -648,7 +645,7 @@ class EvaluadorController extends AbstractController
             ->setRegistrado(null)
         ;
         $this->evaluaRepository->save($evalua, true);
-        $this->generator->logAndFlash('info', 'El empleado vuelve a ser evaluable', [
+        $this->generator->logAndFlash('info', 'Empleado solicita ser evaluable', [
             'cuestionario' => $cuestionario?->getCodigo(),
             'empleado' => $usuario->getUvus(),
         ]);
@@ -741,7 +738,7 @@ class EvaluadorController extends AbstractController
 
         $evalua->setHabilita();
         $this->evaluaRepository->save($evalua, true);
-        $this->generator->logAndFlash('info', 'El empleado habilita su evaluación', [
+        $this->generator->logAndFlash('info', 'Empleado habilita su evaluación', [
             'cuestionario' => $cuestionario?->getCodigo(),
             'empleado' => $usuario->getUvus(),
         ]);

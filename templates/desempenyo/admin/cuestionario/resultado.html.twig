@@ -65,7 +65,7 @@
                         + (dato[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')].puntos|default(0) * config['peso2'] / 100)
                         + (dato[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')].puntos|default(0) * config['peso3'] / 100)
                     -%}
-                    <td {% if (media * 6) < 20 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|number_format(2, ',' ) }}</td>
+                    <td {% if (media * 6) < 36 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|number_format(2, ',' ) }}</td>
                     <td {% if (media * 10) < 60 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 10)|number_format(2, ',' ) }}</td>
                     <td>
                         <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">

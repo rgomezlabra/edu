@@ -457,7 +457,7 @@ class FormularioController extends AbstractController
         ])[0];
         $token = sprintf('%s.%d', $codigo, (int) $evalua->getId());
         if (!$this->isCsrfTokenValid($token, $request->request->getString('_token'))) {
-            $this->generator->logAndFlash('error', 'Token de validación incorrecto');
+            $this->addFlash('error', 'Token de validación incorrecto.');
 
             return $this->redirectToRoute($this->rutaBase);
         }
@@ -513,10 +513,11 @@ class FormularioController extends AbstractController
         $this->evaluaRepository->save($evalua, true);
         if ($enviado) {
             $this->lock->release();
-            $this->generator->logAndFlash('info', 'Formulario enviado correctamente.', [
+            $this->generator->logAndFlash('info', 'Formulario enviado', [
                 'codigo' => $codigo,
-                'empleado' => $empleado,
-                'evaluador' => $evaluador,
+                'empleado' => $evalua->getEmpleado()?->getPersona()->getDocIdentidad(),
+                'evaluador' => $evalua->getEvaluador()?->getPersona()->getDocIdentidad(),
+                'tipo' => $evalua->getTipoEvaluador(),
             ]);
 
             return $this->redirectToRoute($this->rutaBase);

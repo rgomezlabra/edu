@@ -78,7 +78,7 @@ class CuestionarioController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->cuestionarioRepository->save($cuestionario, true);
-            $this->generator->logAndFlash('info', 'Nuevo cuestionario de evaluación', [
+            $this->generator->logAndFlash('info', 'Nuevo cuestionario de desempeño', [
                 'id' => $cuestionario->getId(),
                 'codigo' => $cuestionario->getCodigo(),
             ]);
@@ -143,7 +143,7 @@ class CuestionarioController extends AbstractController
             $autor = $this->getUser();
             $cuestionario->setAutor($autor);
             $this->cuestionarioRepository->save($cuestionario, true);
-            $this->generator->logAndFlash('info', 'Cuestionario de evaluación modificado', [
+            $this->generator->logAndFlash('info', 'Cuestionario de desempeño modificado', [
                 'id' => $cuestionario->getId(),
                 'codigo' => $cuestionario->getCodigo(),
             ]);
