@@ -33,7 +33,7 @@
             </tr>
             </thead>
             <tbody>
-            {%- for dato in datos %}
+            {%- for idEmpleado, dato in datos %}
                 <tr>
                     <td>
                         {%- if (dato|first).formulario.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION' )%}
@@ -67,7 +67,14 @@
                     -%}
                     <td {% if (media * 6) < 20 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|number_format(2, ',' ) }}</td>
                     <td {% if (media * 10) < 60 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 10)|number_format(2, ',' ) }}</td>
-                    <td></td>
+                    <td>
+                        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
+                            <em class="mx-1 fas fa-table" title="Matriz de resultados"></em>
+                        </a>
+                        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado, detalle: true}) }}">
+                            <em class="mx-1 fas fa-table-cells" title="Matriz detallada"></em>
+                        </a>
+                    </td>
                 </tr>
             {%- endfor %}
             </tbody>
@@ -93,21 +100,33 @@
             buttons: [
                 {
                     extend: 'copy',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                    },
                     text: '<i class="fas fa-copy"></i>',
                     titleAttr: 'Copiar',
                 },
                 {
                     extend: 'print',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                    },
                     text: '<i class="fas fa-print"></i>',
                     titleAttr: 'Imprimir',
                 },
                 {
                     extend: 'csv',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                    },
                     text: '<i class="fas fa-file-csv"></i>',
                     titleAttr: 'Generar fichero CSV',
                 },
                 {
                     extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                    },
                     text: '<i class="fas fa-file-excel"></i>',
                     titleAttr: 'Generar fichero Excel',
                 },

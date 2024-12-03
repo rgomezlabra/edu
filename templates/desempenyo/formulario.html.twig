@@ -13,7 +13,9 @@
     <div class="m-3">{{ evalua.cuestionario.descripcion|raw }}</div>
 
     {%- if evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
-        <div class="pagina-seccion">Autoevaluación enviada el {{ evalua.formulario.fechaEnvio|date('d/m/Y') }}</div>
+        <div class="pagina-seccion">
+            Autoevaluación {{ evalua.formulario ? ('enviada el ' ~ evalua.formulario.fechaEnvio|date('d/m/Y')) }}
+        </div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
         <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte del agente principal</div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}

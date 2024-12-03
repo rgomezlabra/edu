@@ -1,0 +1,100 @@
+{% extends path(aplicacion.ruta) ~ '/admin/cuestionario/resultado.html.twig' %}
+
+{% block content %}
+    {%- set config = cuestionario.configuracion %}
+    {%- if config.peso3 == 0 %}
+        {%- set tipos = [
+            {codigo: constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'), titulo: 'Autoevaluación'},
+            {codigo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'), titulo: 'Responsable'},
+        ] %}
+    {%- else %}
+        {%- set tipos = [
+            {codigo: constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'), titulo: 'Autoevaluación'},
+            {codigo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'), titulo: 'Responsable'},
+            {codigo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'), titulo: 'Tercer agente'},
+        ] %}
+    {%- endif %}
+    {%- set grupos = cuestionario.grupos|filter(g => g.activa)|sort((a, b) => a.orden <=> b.orden) -%}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <div class="pagina-seccion">{{ cuestionario.titulo }}</div>
+    <div>{{ cuestionario.descripcion|raw }}</div>
+
+    <div class="pagina-seccion">Resultados de {{ empleado.persona }}</div>
+    <div class="my-4">
+        {%- for grupo in grupos %}
+            <div class="h4">{{ grupo.codigo }}. {{ grupo.titulo }}</div>
+            <div class="d-grid m-4">
+                {%- if detalle %}
+                    <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
+                        <div class="col-3"></div>
+                        {%- for tipo in tipos %}
+                            <div class="col-3">{{ tipo.titulo }}</div>
+                        {%- endfor %}
+                    </div>
+                    <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
+                        <div class="col-3">Pregunta</div>
+                        {%- for tipo in tipos %}
+                            <div class="col-1">Puntos</div>
+                            <div class="col-2">Evidencias</div>
+                        {%- endfor %}
+                    </div>
+                {%- else %}
+                    <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
+                        <div class="col-6">Pregunta</div>
+                        {%- for tipo in tipos %}
+                            <div class="col-2 text-end">{{ tipo.titulo }}</div>
+                        {%- endfor %}
+                    </div>
+                {%- endif %}
+                {%- set preguntas = grupo.preguntas|filter(p => p.activa)|sort((a, b) => a.orden <=> b.orden)  %}
+                {%- for pregunta in preguntas %}
+                    <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
+                        <div class="{% if detalle %}col-3{% else %}col-6{% endif %}">
+                            <div class="fw-bold">{{ pregunta }}</div>
+                        </div>
+                        {%- for tipo in tipos %}
+                            {%- if tipo.codigo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and not pregunta.reducida
+                                or tipo.codigo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and pregunta.reducida
+                            %}
+                                {%- if detalle %}
+                                    <div class="col-1 text-end">
+                                        {{- respuestas[tipo.codigo][pregunta.id].valor|default|number_format(2, ',') -}}
+                                    </div>
+                                    <div class="col-2">{{ respuestas[tipo.codigo][pregunta.id].observa|default }}</div>
+                                {%- else %}
+                                    <div class="col-2 text-end">
+                                        {{- respuestas[tipo.codigo][pregunta.id].valor|default|number_format(2, ',') -}}
+                                    </div>
+                                {%- endif %}
+                            {%- else %}
+                                <div class="{% if detalle %}col-3{% else %}col-2{% endif %}"></div>
+                            {%- endif %}
+                        {%- endfor %}
+                    </div>
+                {%- endfor %}
+            </div>
+        {%- endfor %}
+    </div>
+{% endblock %}
+
+{% block botones %}
+    <li class="nav-item me-2">
+        <a class="btn btn-primary" href="{{ path(app.current_route, app.current_route_parameters|merge({detalle: not detalle})) }}">
+            {%- if detalle %}
+                <em class="fas fa-table"></em> Matriz de resultados
+            {%- else %}
+                <em class="fas fa-table-cells"></em> Matriz detallada
+            {%- endif %}
+        </a>
+    </li>
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item">
+        <a href="{{ path(aplicacion.ruta ~ '_admin_formulario_index', {cuestionario: cuestionario.id}) }}">
+            Entregados
+        </a>
+    </li>
+{% endblock %}

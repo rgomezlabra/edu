@@ -116,6 +116,44 @@ class FormularioController extends AbstractController
         ]);
     }
 
+    /** Obtener la matriz comparativa con los formularios entregados para un empleado. */
+    #[Route(
+        path: '/admin/cuestionario/{cuestionario}/formulario/empleado/{empleado}',
+        name: 'admin_cuestionario_formulario_matriz',
+        defaults: ['titulo' => 'Matriz de Formularios Entregados'],
+        methods: ['GET']
+    )]
+    public function matriz(
+        Request          $request,
+        EvaluaRepository $evaluaRepository,
+        Cuestionario     $cuestionario,
+        Empleado         $empleado
+    ): Response {
+        $this->denyAccessUnlessGranted('admin');
+        /** @var array<Respuesta[]> $respuestas */
+        $respuestas = [];
+        $formularios = $evaluaRepository->findByEntregados([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+        ]);
+        foreach ($formularios as $formulario) {
+            foreach ($formulario->getFormulario()?->getRespuestas() ?? [] as $respuesta) {
+                $pregunta = $respuesta->getPregunta();
+                if ($pregunta instanceof Pregunta) {
+                    $respuestas[$formulario->getTipoEvaluador()][(int) $pregunta->getId()] = $respuesta->getValor();
+                }
+            }
+        }
+
+        return $this->render('intranet/desempenyo/admin/cuestionario/matriz.html.twig', [
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'formularios' => $formularios,
+            'respuestas' => $respuestas,
+            'detalle' => $request->query->getBoolean('detalle', false),
+        ]);
+    }
+
     #[Route(
         path: '/formulario/{codigo}/evaluador',
         name: 'formulario_evaluador_index',

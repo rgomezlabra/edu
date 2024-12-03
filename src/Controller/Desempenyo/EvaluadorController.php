@@ -749,24 +749,34 @@ class EvaluadorController extends AbstractController
         return $this->redirectToRoute($this->rutaBase);
     }
 
-    /** Reasigna un evaluador a un empleado. */
+    /** Asigna un evaluador de un tipo determinado a un empleado. */
     #[Route(
-        path: '/admin/cuestionario/{cuestionario}/evaluador/reasigna/{evalua}',
-        name: 'admin_evaluador_reasigna',
-        methods: [ 'POST']
+        path: '/admin/cuestionario/{cuestionario}/evaluador/asigna/{empleado}',
+        name: 'admin_evaluador_asigna',
+        methods: ['POST']
     )]
-    public function reasigna(
+    public function asigna(
         Request            $request,
         EmpleadoRepository $empleadoRepository,
         EvaluaRepository   $evaluaRepository,
+        OrigenRepository   $origenRepository,
         Cuestionario       $cuestionario,
-        Evalua             $evalua
+        Empleado           $empleado
     ): Response {
         $this->denyAccessUnlessGranted('admin');
-        if ($cuestionario !== $evalua->getCuestionario()) {
-            $this->addFlash('warning', 'La evaluación a corregir no corresponde con el cuestionario.');
-
-            return $this->redirectToRoute($this->rutaBase);
+        $tipo = $request->request->getInt('tipo', Evalua::EVALUA_RESPONSABLE);
+        $evalua = $evaluaRepository->findOneBy([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'tipo_evaluador' => $tipo,
+        ]);
+        if (!$evalua instanceof Evalua) {
+            $evalua = new Evalua();
+            $evalua
+                ->setCuestionario($cuestionario)
+                ->setEmpleado($empleado)
+                ->setTipoEvaluador($tipo)
+            ;
         }
 
         $form = $this->createForm(EvaluadorType::class, $evalua, [
@@ -775,12 +785,13 @@ class EvaluadorController extends AbstractController
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $evalua->setOrigen($origenRepository->findOneBy(['nombre' => Origen::MANUAL]));
             $evaluaRepository->save($evalua, true);
-            $this->generator->logAndFlash('info', 'Nuevo evaluador asignado', [
+            $this->generator->logAndFlash('info', 'Evaluador asignado', [
                 'id' => $evalua->getId(),
                 'cuestionario' => $cuestionario->getCodigo(),
-                'empleado' => $evalua->getEmpleado()->getPersona(),
-                'evaluador' => $evalua->getEvaluador()->getPersona(),
+                'empleado' => $evalua->getEmpleado()?->getPersona()?->getDocIdentidad(),
+                'evaluador' => $evalua->getEvaluador()?->getPersona()?->getDocIdentidad(),
                 'tipo' => $evalua->getTipoEvaluador(),
             ]);
 

@@ -127,12 +127,14 @@
                     {%- endif %}
                     <td>
                         {%- if evaluacion.formulario.fechaGrabacion is not defined %}
-                            {%- if evaluacion[tipo] is defined %}
-                                <a class="reasignar"
-                                   data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_reasigna', {cuestionario: cuestionario.id, evalua: evaluacion[tipo].id}) }}">
-                                    <em class="mx-1 fas fa-people-arrows" title="Reasignar"></em>
-                                </a>
-                            {%- endif %}
+                            <a class="asignar"
+                               data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_asigna', {
+                                   cuestionario: cuestionario.id,
+                                   empleado: empleado.id,
+                                   tipo: tipo
+                               }) }}">
+                                <em class="mx-1 fas fa-people-arrows" title="Asignar evaluador"></em>
+                            </a>
                             {%- if evaluador %}
                                 <form method="post" class="d-inline"
                                       action="{{ path(aplicacion.ruta ~ '_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion[tipo].id}) }}"
@@ -285,7 +287,7 @@
     }) }}
     {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoValida', mensaje: 'Cargando validaciones', progreso: false}) }}
     {{- include('layout/_dialogo_form.html.twig', {id: 'modal', titulo: 'Registrar solicitud de rechazo'}) }}
-    {{- include('layout/_dialogo_form.html.twig', {id: 'reasignar', titulo: 'Reasignar evaluador'}) }}
+    {{- include('layout/_dialogo_form.html.twig', {id: 'asignar', titulo: 'Asignar evaluador'}) }}
 {% endblock %}
 
 {% block js %}
@@ -431,20 +433,20 @@
                 },
             });
         });
-        // Formulario para reasignar evaluador a empleado
-        $('.reasignar').on('click', function (e) {
+        // Formulario para asignar evaluador a empleado
+        $('.asignar').on('click', function (e) {
             e.preventDefault();
             let url = $(this).data('url');
             if (url === undefined) {
                 return confirm('Se ha producido un error al ejecutar la operación.');
             }
-            const modal = document.querySelector('#reasignar');
+            const modal = document.querySelector('#asignar');
             $.ajax({
                 method: 'POST',
                 url: url,
                 async: true,
                 success: function (response) {
-                    $('#reasignarForm').html(response);
+                    $('#asignarForm').html(response);
                     let marca = 'table-info';
                     const cuadroEvaluador = $('#evaluador_evaluador');
                     const tabla = $('#evaluadores').dataTable({
@@ -469,8 +471,8 @@
                     modal.showModal();
                 },
                 error: function (xhr) {
-                    $('#reasignarTitulo').html('Error ' + xhr.status);
-                    $('#reasignarForm').html(response);
+                    $('#asignarTitulo').html('Error ' + xhr.status);
+                    $('#asignarForm').html(response);
                     modal.showModal();
                 },
             });
