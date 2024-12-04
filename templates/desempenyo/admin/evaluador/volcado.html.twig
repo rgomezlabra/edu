@@ -21,10 +21,10 @@
     </div>
 
     {{ form_start(form) }}
-        {{ form_widget(form) }}
-        <button id="cargar" class="btn btn-primary my-4">
-            <em class="fas fa-upload"></em> Cargar fichero
-        </button>
+    {{ form_widget(form) }}
+    <div class="linea-botones">
+        <button id="cargar" class="btn btn-primary my-4"><em class="fas fa-upload"></em> Cargar fichero</button>
+    </div>
     {{ form_end(form) }}
 {% endblock %}
 
@@ -34,6 +34,9 @@
     <li class="breadcrumb-item">
         <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
     </li>
+{% endblock %}
+
+{% block botones %}
 {% endblock %}
 
 {%  block modal %}

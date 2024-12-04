@@ -276,12 +276,12 @@
 {%  block modal %}
     {{- include('layout/_dialogo_confirmar.html.twig') }}
     {{- include('layout/_dialogo_confirmar.html.twig', {
-        id: 'dialogoEmpleados',
+        id: 'confirmarEmpleados',
         pregunta: '¿Cargar datos de empleados para su autoevaluación?'
     }) }}
     {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoEmpleados', mensaje: 'Cargando empleados', progreso: false}) }}
     {{- include('layout/_dialogo_confirmar.html.twig', {
-        id: 'dialogoValida',
+        id: 'confirmarValida',
         texto: 'La carga online de validaciones desde Temponet puede tardar bastante tiempo.',
         pregunta: '¿Continuar con la carga de validaciones?'
     }) }}
@@ -344,30 +344,20 @@
         });
 
         // Verificar rechazo y recuperación de autoevaluación
-        const dialogo = $('#dialogo');
+        const dialogo = $('#modalConfirma');
         $('.rechazar').on('click', function (e) {
             e.preventDefault();
-            $('#pregunta').html('¿Rechazar evaluaciones para ' + $(this).data('persona') + '?');
-            dialogo.fadeIn('fast').data('url', $(this).data('url'));
-            $('.cargar').each(function () {
-                $(this).addClass('disabled');
-            });
+            document.querySelector('#modalConfirmaTexto').innerHTML = 'Rechazar evaluaciones para ' + $(this).data('persona') + '.';
+            document.querySelector('#modalConfirma').showModal();
+            dialogo.data('url', $(this).data('url'));
         });
         $('.recuperar').on('click', function (e) {
             e.preventDefault();
-            $('#pregunta').html('¿Volver a aceptar evaluaciones para ' + $(this).data('persona') + '?');
-            dialogo.fadeIn('fast').data('url', $(this).data('url'));
-            $('.cargar').each(function () {
-                $(this).addClass('disabled');
-            });
+            document.querySelector('#modalConfirmaTexto').innerHTML = 'Volver a aceptar evaluaciones para ' + $(this).data('persona') + '.';
+            document.querySelector('#modalConfirma').showModal();
+            dialogo.data('url', $(this).data('url'));
         });
-        $('#cancelar').on('click', function () {
-            dialogo.fadeOut('fast').data('url', '');
-            $('.cargar').each(function () {
-                $(this).removeClass('disabled');
-            });
-        });
-        $('#aceptar').on('click', function () {
+        $('#modalConfirmaAceptar').on('click', function () {
             window.location.href = dialogo.data('url');
         });
 
@@ -375,33 +365,18 @@
         const dialogoEmpleados = $('#dialogoEmpleados');
         $('#cargarEmpleados').on('click', function (e) {
             e.preventDefault();
-            dialogoEmpleados.fadeIn('fast');
-            $('.cargar').each(function () {
-                $(this).addClass('disabled');
-            });
+            document.querySelector('#confirmarEmpleados').showModal();
         });
-        $('#dialogoEmpleadosCancelar').on('click', function () {
-            dialogoEmpleados.fadeOut('fast');
-            $('.cargar').each(function () {
-                $(this).removeClass('disabled');
-            });
-        });
-        $('#dialogoEmpleadosAceptar').on('click', function () {
-            dialogoEmpleados.fadeOut('fast');
+        $('#confirmarEmpleadosAceptar').on('click', function () {
             $('#cargandoEmpleados').fadeIn('fast');
             window.location.href = $('#cargarEmpleados').data('url');
         });
         // Volcado de validaciones
-        const dialogoValida = $('#dialogoValida');
         $('#cargarValida').on('click', function (e) {
             e.preventDefault();
-            dialogoValida.fadeIn('fast');
+            document.querySelector('#confirmarValida').showModal();
         });
-        $('#dialogoValidaCancelar').on('click', function () {
-            dialogoValida.fadeOut('fast');
-        });
-        $('#dialogoValidaAceptar').on('click', function () {
-            dialogoValida.fadeOut('fast');
+        $('#confirmarValidaAceptar').on('click', function () {
             $('#cargandoValida').fadeIn('fast');
             window.location.href = $('#cargarValida').data('url');
         });
