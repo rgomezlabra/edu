@@ -2,115 +2,88 @@
 
 {% block content %}
     {%- set config = cuestionario.configuracion %}
-    {%- if config.peso3 == 0 %}
-        {%- set tipos = [
-            {codigo: constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'), titulo: 'Autoevaluación'},
-            {codigo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'), titulo: 'Responsable'},
-        ] %}
-    {%- else %}
-        {%- set tipos = [
-            {codigo: constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'), titulo: 'Autoevaluación'},
-            {codigo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'), titulo: 'Responsable'},
-            {codigo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'), titulo: 'Tercer agente'},
-        ] %}
+    {%- set tipos = {
+        (constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')): 'Autoevaluación',
+        (constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')): 'Responsable'
+    } -%}
+    {%- if config.peso3 > 0 %}
+        {%- set tipos = tipos|merge({(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')): 'Tercer agente'}) %}
     {%- endif %}
-    {%- set grupos = cuestionario.grupos|filter(g => g.activa)|sort((a, b) => a.orden <=> b.orden) -%}
+    {%- set grupos = cuestionario.grupos|filter(g => g.activa)|sort((a, b) => a.orden <=> b.orden) %}
     <div class="pagina-titulo">{{ titulo }}</div>
 
     <div class="pagina-seccion">{{ cuestionario.titulo }}</div>
-    <div>{{ cuestionario.descripcion|raw }}</div>
-
-    <div class="pagina-seccion">Resultados de {{ empleado.persona }}</div>
-    <div class="my-4">
-        {%- for grupo in grupos %}
-            <div class="h4">{{ grupo.codigo }}. {{ grupo.titulo }}</div>
-            <div class="d-grid m-4">
-                {%- if detalle %}
-                    <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
-                        <div class="col-3"></div>
-                        {%- for tipo in tipos %}
-                            <div class="col-3">{{ tipo.titulo }}</div>
-                        {%- endfor %}
-                    </div>
-                    <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
-                        <div class="col-3">Pregunta</div>
-                        {%- for tipo in tipos %}
-                            <div class="col-1">Puntos</div>
-                            <div class="col-2">Evidencias</div>
-                        {%- endfor %}
-                    </div>
-                {%- else %}
-                    <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
-                        <div class="col-6">Pregunta</div>
-                        {%- for tipo in tipos %}
-                            <div class="col-2 text-end">{{ tipo.titulo }}</div>
-                        {%- endfor %}
-                    </div>
-                {%- endif %}
-                {%- set preguntas = grupo.preguntas|filter(p => p.activa)|sort((a, b) => a.orden <=> b.orden)  %}
-                {%- for pregunta in preguntas %}
-                    <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
-                        <div class="{% if detalle %}col-3{% else %}col-6{% endif %}">
-                            <div class="fw-bold">{{ pregunta }}</div>
-                        </div>
-                        {%- for tipo in tipos %}
-                            {%- if tipo.codigo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and not pregunta.reducida
-                                or tipo.codigo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and pregunta.reducida
-                            %}
-                                {%- if detalle %}
-                                    <div class="col-1 text-end">
-                                        {{- respuestas[tipo.codigo][pregunta.id].valor|default|number_format(2, ',') -}}
-                                    </div>
-                                    <div class="col-2">{{ respuestas[tipo.codigo][pregunta.id].observa|default }}</div>
-                                {%- else %}
-                                    <div class="col-2 text-end">
-                                        {{- respuestas[tipo.codigo][pregunta.id].valor|default|number_format(2, ',') -}}
-                                    </div>
-                                {%- endif %}
-                            {%- else %}
-                                <div class="{% if detalle %}col-3{% else %}col-2{% endif %}"></div>
-                            {%- endif %}
-                        {%- endfor %}
-                    </div>
-                {%- endfor %}
-            </div>
-        {%- endfor %}
-    </div>
-
 
     <div class="my-4">
-        <table class="tabla-condensada" id="formularios">
+        <table class="tabla-condensada" id="datosMatriz">
+            <caption class="caption-top">Resultados de {{ empleado.persona }}</caption>
             <thead class="cabecera-condensada">
-            <tr>
-                <th>Pregunta</th>
-                {%- for tipo in tipos %}
-                    <th>{{ tipo.titulo }}</th>
-                {%- endfor %}
-            </tr>
+            {% if detalle -%}
+                <tr>
+                    <th rowspan="2">Pregunta</th>
+                    {% for tipo in tipos -%}
+                        <th colspan="2">{{ tipo }}</th>
+                    {% endfor -%}
+                </tr>
+                <tr>
+                    {% for i in 1..tipos|length -%}
+                        <th class="text-start">Puntos</th>
+                        <th>Evidencias</th>
+                    {% endfor -%}
+                </tr>
+            {% else -%}
+                <tr>
+                    <th>Pregunta</th>
+                    {% for tipo in tipos -%}
+                        <th>{{ tipo }}</th>
+                    {% endfor -%}
+                </tr>
+            {%- endif %}
             </thead>
             <tbody>
-            {%- for grupo in grupos %}
+            {% for grupo in grupos -%}
                 <tr class="table-info fw-bold">
-                    <td colspan="{{ tipos|length + 1 }}">{{ grupo.codigo }}. {{ grupo.titulo }}</td>
+                    {% set cols = detalle ? tipos|length * 2 : tipos|length -%}
+                    <td colspan="{{ cols + 1 }}" class="">{{ grupo.codigo }}. {{ grupo.titulo }}</td>
+                    {% for i in 1..cols %}<td style="display: none;"></td>{% endfor %}
                 </tr>
-                {%- set preguntas = grupo.preguntas|filter(p => p.activa)|sort((a, b) => a.orden <=> b.orden)  %}
-                {%- for pregunta in preguntas %}
+                {% set preguntas = grupo.preguntas|filter(p => p.activa)|sort((a, b) => a.orden <=> b.orden) %}
+                {% for pregunta in preguntas -%}
                     <tr>
                         <td class="fw-bold">{{ pregunta }}</td>
-                        {%- for tipo in tipos %}
-                            {%- if tipo.codigo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and not pregunta.reducida
-                                or tipo.codigo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and pregunta.reducida
-                            %}
-                                <td>
-                                    {{- respuestas[tipo.codigo][pregunta.id].valor|default|number_format(2, ',') -}}
-                                </td>
-                            {%- else %}
+                        {% for codigo, tipo in tipos -%}
+                            {% if codigo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and not pregunta.reducida
+                                or codigo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and pregunta.reducida
+                            -%}
+                                <td>{{ respuestas[codigo][pregunta.id].valor|default|number_format(2, ',') }}</td>
+                                {% if detalle %}<td>{{ respuestas[codigo][pregunta.id].observa|default }}</td>{% endif %}
+                            {% else -%}
                                 <td></td>
-                            {%- endif %}
-                        {%- endfor %}
+                                {% if detalle %}<td></td>{% endif %}
+                            {% endif -%}
+                        {% endfor -%}
                     </tr>
-                {%- endfor %}
-            {%- endfor %}
+                {% endfor -%}
+            {% endfor -%}
+            <tr class="border-3 border-tertiary">
+                <th>Media</th>
+                {% for codigo, tipo in tipos -%}
+                    <th>{{ medias[codigo]|default|number_format(2, ',') }}</th>
+                    {% if detalle %}<th></th>{% endif %}
+                {% endfor -%}
+            </tr>
+            <tr class="border-3 border-tertiary">
+                <th>Nota final</th>
+                <th>
+                    {% set media =
+                        (medias[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')]|default(0) * config['peso1'] / 100)
+                        + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')]|default(0) * config['peso2'] / 100)
+                        + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')]|default(0) * config['peso3'] / 100)
+                    -%}
+                    {{ (media * 6)|number_format(2, ',' ) }}
+                </th>
+                {% for i in 1..(detalle ? (tipos|length * 2) - 1 : tipos|length - 1) %}<th></th>{% endfor %}
+            </tr>
             </tbody>
         </table>
     </div>
@@ -137,4 +110,41 @@
             Entregados
         </a>
     </li>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+        $('#datosMatriz').dataTable({
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="fas fa-copy"></i>',
+                    titleAttr: 'Copiar',
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i>',
+                    titleAttr: 'Imprimir',
+                },
+                {
+                    extend: 'csv',
+                    text: '<i class="fas fa-file-csv"></i>',
+                    titleAttr: 'Generar fichero CSV',
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel"></i>',
+                    titleAttr: 'Generar fichero Excel',
+                },
+            ],
+            dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +
+                '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            language: {
+                url: '{{ asset("includes/datatable.es.json") }}',
+            },
+            ordering: false,
+        });
+    </script>
 {% endblock %}

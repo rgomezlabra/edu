@@ -1,5 +1,6 @@
 {% extends '/layout/base.html.twig' %}
 {% set titulo = titulo|default(aplicacion.nombre) %}
+{% set activos = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO')) %}
 
 {% block content %}
     {#- Pesos establecidos por defecto #}
@@ -14,7 +15,6 @@
     </div>
     <p class="">{{ aplicacion.descripcion }}</p>
 
-    {%- set activos = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO')) %}
     {#- Acciones comunes #}
     <div class="my-4">
         {%- if activos|length == 0 %}
@@ -278,10 +278,13 @@
             {# Otros #}
             <div class="pagina-seccion">Resultados del proceso de evaluación activo</div>
             <ul class="lead my-3">
-                <li>
-                    Resultado provisional del proceso de evaluación del desempeño
-<p class="fst-italic">(solo mostrar si se han enviado los 3 cuestionarios, al pulsar mostrar modal puntuación global sobre 60, sobre 100 y "superada" o "no superada")</p>
-                </li>
+                {% if (activos[0].configuracion.peso3|default(0) == 0 and medias|length == 2)
+                    or (activos[0].configuracion.peso3|default(0) > 0 and medias|length == 3)
+                -%}
+                    <li>
+                        <a id="verProvisional" href="">Resultado provisional del proceso de evaluación del desempeño</a>
+                    </li>
+                {% endif -%}
                 <li>Resultado final del proceso de evaluación del desempeño</li>
             </ul>
             <div class="pagina-seccion" id="documentos">Área de desarrollo profesional</div>
@@ -366,6 +369,47 @@
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoHabilita',
         texto: 'Doy mi habilitación para ser evaluado en mi actual puesto desempeñado.',
         cancelar: 'No', aceptar: 'Sí'}) }}
+    {% set datosProvisional -%}
+        <div class="row">
+            <div class="col">Media autovaloración:</div>
+            <div class="col">
+                {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'))]|number_format(2, ',' ) -}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">Media evaluación responsable/principal:</div>
+            <div class="col">
+                {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'))]|number_format(2, ',' ) -}}
+            </div>
+        </div>
+        {% if activos[0].configuracion.peso3 > 0 -%}
+            <div class="row">
+                <div class="col">Media evaluación tercer agente:</div>
+                <div class="col">
+                    {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'))]|number_format(2, ',' ) -}}
+                </div>
+            </div>
+        {%- endif %}
+        {% set media =
+            (medias[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')]|default(0) * activos[0].configuracion.peso1 / 100)
+            + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')]|default(0) * activos[0].configuracion.peso2 / 100)
+            + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')]|default(0) * activos[0].configuracion.peso3 / 100)
+        -%}
+        <div class="row">
+            <div class="col">Puntuación sobre 60:</div>
+            <div class="col">{{ (media * 6)|number_format(2, ',' ) }}</div>
+        </div>
+        <div class="row">
+            <div class="col">Puntuación sobre 100:</div>
+            <div class="col">{{ (media * 10)|number_format(2, ',' ) }}</div>
+        </div>
+        <div class="row">
+            <div class="col fw-bold">Resultado:</div>
+            <div class="col fw-bold">{{ media < 6 ? 'NO SUPERADO' : 'SUPERADO' }}</div>
+        </div>
+    {% endset -%}
+    {{- include('layout/_dialogo_info.html.twig', {id: 'provisional', ancho: 'w-50', titulo: 'Resultado provisional',
+        contenido: datosProvisional}) }}
 {% endblock %}
 
 {% block js %}
@@ -412,6 +456,11 @@
         $('#dialogoHabilitaAceptar').on('click', function () {
             modalHabilita.fadeOut('fast');
             window.location.href = habilita.data('url');
+        });
+        // Mostrar resultado provisioanl
+        $('#verProvisional').on('click', function (e) {
+            e.preventDefault();
+            document.querySelector('#provisional').showModal();
         });
     </script>
 {% endblock %}

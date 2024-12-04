@@ -2,6 +2,8 @@
 
 namespace App\Controller\Intranet;
 
+use App\Entity\Cuestiona\Formulario;
+use App\Entity\Cuestiona\Pregunta;
 use App\Entity\Sistema\Estado;
 use App\Entity\Sistema\Usuario;
 use App\Repository\Cuestiona\CuestionarioRepository;
@@ -35,11 +37,38 @@ class DesempenyoController extends AbstractController
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
         $empleado = $empleadoRepository->findOneByUsuario($usuario);
+        $cuestionarios = $cuestionarioRepository->findBy(['aplicacion' => $this->actual->getAplicacion()]);
+        $evaluados = $evaluaRepository->findByEntregados([
+            'cuestionario' => array_filter(
+                $cuestionarios,
+                static fn ($cuestionario) => Estado::PUBLICADO === $cuestionario->getEstado()?->getNombre()
+            ),
+            'empleado' => $empleado,
+        ]);
+        // Calcular las medias de los formularios enviados para mostrar resultados finales del usuario
+        /** @var float[] $medias */
+        $medias = [];
+        foreach ($evaluados as $evaluado) {
+            $formulario = $evaluado->getFormulario();
+            if ($formulario instanceof Formulario && null !== $formulario->getFechaEnvio()) {
+                $total = 0;
+                $n = 0;
+                foreach ($formulario->getRespuestas() as $respuesta) {
+                    $pregunta = $respuesta->getPregunta();
+                    if ($pregunta instanceof Pregunta) {
+                        $total += (float) $respuesta->getValor()['valor'];
+                        $n++;
+                    }
+                }
+                $medias[$evaluado->getTipoEvaluador()] = $total / $n;
+            }
+        }
 
         return $this->render('intranet/desempenyo/index.html.twig', [
-            'cuestionarios' => $cuestionarioRepository->findBy(['aplicacion' => $this->actual->getAplicacion()]),
-            'evaluados' => $evaluaRepository->findBy(['empleado' => $empleado]),
+            'cuestionarios' => $cuestionarios,
+            'evaluados' => $evaluados,
             'evaluaciones' => $evaluaRepository->findBy(['evaluador' => $empleado]),
+            'medias' => $medias,
         ]);
     }
 

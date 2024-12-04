@@ -37,13 +37,18 @@
                         {{- evaluacion.formulario and evaluacion.formulario.fechaEnvio ? evaluacion.formulario.fechaEnvio|date('Y-m-d') -}}
                     </td>
                     <td>
-                        <a href="{{ cuestionario.url ~ '/' ~ evaluacion.empleado.id }}">
-                            {%- if evaluacion.formulario and evaluacion.formulario.fechaEnvio is not null %}
+                        {% if evaluacion.formulario and evaluacion.formulario.fechaEnvio is not null %}
+                            <a href="{{ cuestionario.url ~ '/' ~ evaluacion.empleado.id }}">
                                 <em class="mx-1 fas fa-envelope" title="Ver evaluación"></em>
-                            {%- else %}
+                            </a>
+                            <a href="{{ cuestionario.url ~ '/pdf/' ~ evaluacion.empleado.id }}">
+                                <em class="mx-1 fas fa-file-pdf" title="PDF"></em>
+                            </a>
+                        {%- else %}
+                            <a href="{{ cuestionario.url ~ '/' ~ evaluacion.empleado.id }}">
                                 <em class="mx-1 fas fa-user-pen" title="Evaluar"></em>
-                            {%- endif %}
-                        </a>
+                            </a>
+                        {%- endif %}
                     </td>
                 </tr>
             {%- endfor %}

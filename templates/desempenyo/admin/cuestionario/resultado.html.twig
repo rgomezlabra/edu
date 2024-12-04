@@ -15,12 +15,13 @@
                 <th colspan="2" data-dt-order="disable">({{ config.peso1 }}%)</th>
                 <th colspan="2" data-dt-order="disable">({{ config.peso2 }}%)</th>
                 <th colspan="2" data-dt-order="disable">({{ config.peso3 }}%)</th>
-                <th colspan="2" data-dt-order="disable">Total ponderado</th>
+                <th colspan="2" data-dt-order="disable" class="text-center">Piloto</th>
+                <th colspan="2" data-dt-order="disable" class="text-center">Desempeño</th>
                 <th rowspan="2" data-dt-order="disable">Acciones</th>
             </tr>
             <tr>
-                <th><span title="Rechazo">R</span></th>
-                <th><span title="Rechazo verificado">VR</span></th>
+                <th><abbr title="Rechazo">R</abbr></th>
+                <th><abbr title="Rechazo verificado">VR</abbr></th>
                 <th>Empleado</th>
                 <th class="text-start">Media</th>
                 <th class="text-start">Fecha</th>
@@ -28,8 +29,10 @@
                 <th class="text-start">Fecha</th>
                 <th class="text-start">Media</th>
                 <th class="text-start">Fecha</th>
-                <th class="text-start">60 puntos</th>
-                <th class="text-start">100 puntos</th>
+                <th class="text-start">A 60</th>
+                <th class="text-start">A 100</th>
+                <th class="text-start"><abbr title="Competencias">CCIAS</abbr></th>
+                <th class="text-start"><abbr title="Objetivos">DPO.</abbr></th>
             </tr>
             </thead>
             <tbody>
@@ -67,6 +70,8 @@
                     -%}
                     <td {% if (media * 6) < 36 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|number_format(2, ',' ) }}</td>
                     <td {% if (media * 10) < 60 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 10)|number_format(2, ',' ) }}</td>
+                    <td {% if (media * 6) < 20 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|number_format(2, ',' ) }}</td>
+                    <td>{{ 0|number_format(2, ',' ) }}</td>
                     <td>
                         <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
                             <em class="mx-1 fas fa-table" title="Matriz de resultados"></em>
@@ -74,6 +79,7 @@
                         <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado, detalle: true}) }}">
                             <em class="mx-1 fas fa-table-cells" title="Matriz detallada"></em>
                         </a>
+                        <em class="mx-1 fas fa-pen-clip" title="Correción tribunal"></em>
                     </td>
                 </tr>
             {%- endfor %}
@@ -101,7 +107,7 @@
                 {
                     extend: 'copy',
                     exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
                     },
                     text: '<i class="fas fa-copy"></i>',
                     titleAttr: 'Copiar',
@@ -109,15 +115,16 @@
                 {
                     extend: 'print',
                     exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
                     },
+                    orientation: 'landscape',
                     text: '<i class="fas fa-print"></i>',
                     titleAttr: 'Imprimir',
                 },
                 {
                     extend: 'csv',
                     exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
                     },
                     text: '<i class="fas fa-file-csv"></i>',
                     titleAttr: 'Generar fichero CSV',
@@ -125,7 +132,7 @@
                 {
                     extend: 'excelHtml5',
                     exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
                     },
                     text: '<i class="fas fa-file-excel"></i>',
                     titleAttr: 'Generar fichero Excel',

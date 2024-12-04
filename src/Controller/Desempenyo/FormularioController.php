@@ -132,17 +132,24 @@ class FormularioController extends AbstractController
         $this->denyAccessUnlessGranted('admin');
         /** @var array<Respuesta[]> $respuestas */
         $respuestas = [];
+        /** @var float[] $medias */
+        $medias = [];
         $formularios = $evaluaRepository->findByEntregados([
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
         ]);
         foreach ($formularios as $formulario) {
+            $total = 0;
+            $n = 0;
             foreach ($formulario->getFormulario()?->getRespuestas() ?? [] as $respuesta) {
                 $pregunta = $respuesta->getPregunta();
                 if ($pregunta instanceof Pregunta) {
                     $respuestas[$formulario->getTipoEvaluador()][(int) $pregunta->getId()] = $respuesta->getValor();
+                    $total += (float) $respuesta->getValor()['valor'];
+                    $n++;
                 }
             }
+            $medias[$formulario->getTipoEvaluador()] = $total / $n;
         }
 
         return $this->render('intranet/desempenyo/admin/cuestionario/matriz.html.twig', [
@@ -150,6 +157,7 @@ class FormularioController extends AbstractController
             'empleado' => $empleado,
             'formularios' => $formularios,
             'respuestas' => $respuestas,
+            'medias' => $medias,
             'detalle' => $request->query->getBoolean('detalle', false),
         ]);
     }
