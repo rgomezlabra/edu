@@ -390,7 +390,7 @@
                     <div class="row py-2">
                         <div class="fila-campo col-sm-6">Media tercer agente</div>
                         <div class="fila-valor col-sm-6">
-                            {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'))]|number_format(2, ',' ) -}}
+                            {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'))]|default|number_format(2, ',' ) -}}
                         </div>
                     </div>
                 {%- endif %}

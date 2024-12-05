@@ -14,7 +14,7 @@
 
     {%- if evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
         <div class="pagina-seccion">
-            Autoevaluación {{ evalua.formulario ? ('enviada el ' ~ evalua.formulario.fechaEnvio|date('d/m/Y')) }}
+            Autoevaluación {{ evalua.formulario and evalua.formulario.fechaEnvio ? ('enviada el ' ~ evalua.formulario.fechaEnvio|date('d/m/Y')) }}
         </div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
         <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte del agente principal</div>
@@ -265,7 +265,6 @@
         // Pedir confirmación antes de enviar formulario si las evidencias son adecuadas
         const enviar = $('#enviar');
         const enviado = $('#enviado');
-        const modalEnviar = $('#dialogoEnviar');
         enviado.val(false);
         enviar.on('click', function (e) {
             e.preventDefault();
@@ -280,13 +279,9 @@
             if (!seguir) {
                 return false;
             }
-            modalEnviar.show();
-        });
-        $('#dialogoEnviarCancelar').on('click', function () {
-            modalEnviar.hide();
+            document.querySelector('#dialogoEnviar').showModal();
         });
         $('#dialogoEnviarAceptar').on('click', function () {
-            modalEnviar.hide();
             enviado.val(true).parent().submit();
         });
         // Actualizar color y media de puntos

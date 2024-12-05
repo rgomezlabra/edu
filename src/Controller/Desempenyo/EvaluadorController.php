@@ -748,7 +748,7 @@ class EvaluadorController extends AbstractController
 
     /** Asigna un evaluador de un tipo determinado a un empleado. */
     #[Route(
-        path: '/admin/cuestionario/{cuestionario}/evaluador/asigna/{empleado}',
+        path: '/admin/cuestionario/{cuestionario}/evaluador/asigna/{empleado}/{tipo?}',
         name: 'admin_evaluador_asigna',
         methods: ['POST']
     )]
@@ -758,10 +758,10 @@ class EvaluadorController extends AbstractController
         EvaluaRepository   $evaluaRepository,
         OrigenRepository   $origenRepository,
         Cuestionario       $cuestionario,
-        Empleado           $empleado
+        Empleado           $empleado,
+        ?int               $tipo = Evalua::EVALUA_RESPONSABLE
     ): Response {
         $this->denyAccessUnlessGranted('admin');
-        $tipo = $request->request->getInt('tipo', Evalua::EVALUA_RESPONSABLE);
         $evalua = $evaluaRepository->findOneBy([
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,

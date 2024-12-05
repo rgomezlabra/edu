@@ -49,7 +49,6 @@
     <script type="module">
         // Confirmar el volcado, mostrar progreso de carga y cerrar diálogo al finalizar
         const cargar = $('#cargar');
-        const dialogo = $('#dialogo');
         const modalCarga = $('#modalCarga');
         cargar.on('click', function (e) {
             e.preventDefault();
@@ -57,18 +56,14 @@
                 dialogo.hide();
                 return false;
             }
-            $('#textoDialogo').html('<p>Se actualizarán los datos de evaluadores y empleados para la evaluación del '
+            document.querySelector('#modalConfirmaTexto').innerHTML = '<p>Se actualizarán los datos de evaluadores y empleados para la evaluación del '
                 + 'desempeño de la plantilla.<p>'
-                + '<p>El proceso de carga puede tardar un tiempo.</p>');
-            dialogo.fadeIn('fast');
+                + '<p>El proceso de carga puede tardar un tiempo.</p>';
+            document.querySelector('#modalConfirma').showModal();
         });
-        $('#cancelar').on('click', function () {
-            dialogo.fadeOut('fast');
-        });
-        $('#aceptar').on('click', function () {
-            dialogo.fadeOut('fast');
+        $('#modalConfirmaAceptar').on('click', function () {
             modalCarga.fadeIn('fast');
-            cargar.parent().submit();
+            cargar.closest('form').submit();
         });
         $(window).on('unload', function () {
             modalCarga.hide();
