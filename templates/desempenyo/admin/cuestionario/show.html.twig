@@ -93,6 +93,11 @@
         </li>
     {%- elseif cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO') %}
         <li class="nav-item me-2">
+            <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_activar', {id: cuestionario.id}) }}">
+                <em class="fas fa-calendar"></em> Plazo
+            </a>
+        </li>
+        <li class="nav-item me-2">
             <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_formulario_index', {cuestionario: cuestionario.id}) }}">
                 <em class="fas fa-list-check"></em> Formularios
             </a>

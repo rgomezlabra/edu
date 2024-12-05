@@ -1,4 +1,4 @@
-{% extends path(aplicacion.ruta) ~ '/admin/cuestionario/index.html.twig' %}
+{% extends path(aplicacion.ruta) ~ '/admin/cuestionario/show.html.twig' %}
 
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
@@ -11,5 +11,7 @@
 
 {% block migas %}
     {{ parent() }}
-    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">Cuestionarios</a></li>
+    <li class="breadcrumb-item">
+        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
+    </li>
 {% endblock %}

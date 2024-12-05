@@ -38,7 +38,7 @@ class DesempenyoController extends AbstractController
         $usuario = $this->getUser();
         $empleado = $empleadoRepository->findOneByUsuario($usuario);
         $cuestionarios = $cuestionarioRepository->findBy(['aplicacion' => $this->actual->getAplicacion()]);
-        $evaluados = $evaluaRepository->findByEntregados([
+        $evaluados = $evaluaRepository->findBy([
             'cuestionario' => array_filter(
                 $cuestionarios,
                 static fn ($cuestionario) => Estado::PUBLICADO === $cuestionario->getEstado()?->getNombre()

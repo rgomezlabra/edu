@@ -72,16 +72,19 @@
                     {% if detalle %}<th></th>{% endif %}
                 {% endfor -%}
             </tr>
+            {% set media =
+                (medias[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')]|default(0) * config['peso1'] / 100)
+                + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')]|default(0) * config['peso2'] / 100)
+                + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')]|default(0) * config['peso3'] / 100)
+            -%}
             <tr class="border-3 border-tertiary">
-                <th>Nota final</th>
-                <th>
-                    {% set media =
-                        (medias[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')]|default(0) * config['peso1'] / 100)
-                        + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')]|default(0) * config['peso2'] / 100)
-                        + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')]|default(0) * config['peso3'] / 100)
-                    -%}
-                    {{ (media * 6)|number_format(2, ',' ) }}
-                </th>
+                <th>Nota final sobre 60 puntos</th>
+                <th>{{ (media * 6)|number_format(2, ',' ) }}</th>
+                {% for i in 1..(detalle ? (tipos|length * 2) - 1 : tipos|length - 1) %}<th></th>{% endfor %}
+            </tr>
+            <tr class="border-3 border-tertiary">
+                <th>Nota final sobre 100 puntos</th>
+                <th>{{ (media * 10)|number_format(2, ',' ) }}</th>
                 {% for i in 1..(detalle ? (tipos|length * 2) - 1 : tipos|length - 1) %}<th></th>{% endfor %}
             </tr>
             </tbody>

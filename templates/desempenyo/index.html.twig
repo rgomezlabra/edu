@@ -373,42 +373,50 @@
     {% set activo = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO'))[0]|default -%}
     {% if activo -%}
         {% set datosProvisional -%}
-            <div class="row">
-                <div class="col">Media autovaloración:</div>
-                <div class="col">
-                    {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'))]|default|number_format(2, ',' ) -}}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">Media evaluación responsable/principal:</div>
-                <div class="col">
-                    {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'))]|default|number_format(2, ',' ) -}}
-                </div>
-            </div>
-            {% if activo.configuracion.peso3 > 0 -%}
-                <div class="row">
-                    <div class="col">Media evaluación tercer agente:</div>
-                    <div class="col">
-                        {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'))]|number_format(2, ',' ) -}}
+            <div class="container-fluid py-4 g-4">
+                <div class="row py-2">
+                    <div class="fila-campo col-sm-6">Media autovaloración</div>
+                    <div class="fila-valor col-sm-6">
+                        {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'))]|default|number_format(2, ',' ) -}}
                     </div>
                 </div>
-            {%- endif %}
-            {% set media =
-                (medias[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')]|default(0) * activo.configuracion.peso1 / 100)
-                + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')]|default(0) * activo.configuracion.peso2 / 100)
-                + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')]|default(0) * activo.configuracion.peso3 / 100)
-            -%}
-            <div class="row">
-                <div class="col">Puntuación sobre 60:</div>
-                <div class="col">{{ (media * 6)|number_format(2, ',' ) }}</div>
-            </div>
-            <div class="row">
-                <div class="col">Puntuación sobre 100:</div>
-                <div class="col">{{ (media * 10)|number_format(2, ',' ) }}</div>
-            </div>
-            <div class="row">
-                <div class="col fw-bold">Resultado:</div>
-                <div class="col fw-bold">{{ media < 6 ? 'NO SUPERADO' : 'SUPERADO' }}</div>
+                <div class="row py-2">
+                    <div class="fila-campo col-sm-6">Media evaluación responsable/principal</div>
+                    <div class="fila-valor col-sm-6">
+                        {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'))]|default|number_format(2, ',' ) -}}
+                    </div>
+                </div>
+                {% if activo.configuracion.peso3 > 0 -%}
+                    <div class="row py-2">
+                        <div class="fila-campo col-sm-6">Media tercer agente</div>
+                        <div class="fila-valor col-sm-6">
+                            {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'))]|number_format(2, ',' ) -}}
+                        </div>
+                    </div>
+                {%- endif %}
+                {% set media =
+                    (medias[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')]|default(0) * activo.configuracion.peso1 / 100)
+                    + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')]|default(0) * activo.configuracion.peso2 / 100)
+                    + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')]|default(0) * activo.configuracion.peso3 / 100)
+                -%}
+                <div class="row py-2">
+                    <div class="fila-campo col-sm-6">Puntuación sobre 60</div>
+                    <div class="fila-valor col-sm-6">{{ (media * 6)|number_format(2, ',' ) }}</div>
+                </div>
+                <div class="row py-2">
+                    <div class="fila-campo col-sm-6">Puntuación sobre 100</div>
+                    <div class="fila-valor col-sm-6">{{ (media * 10)|number_format(2, ',' ) }}</div>
+                </div>
+                <div class="row py-2">
+                    <div class="fila-campo col-sm-6">Resultado</div>
+                    <div class="fila-valor col-sm-6 fw-bold">
+                        {%- if media < 6 -%}
+                            {{ ux_icon('fa-solid:times', {class: 'icon-primary'}) }} NO SUPERADO
+                        {%- else -%}
+                            {{ ux_icon('fa-solid:check', {class: 'icon-success'}) }} SUPERADO
+                        {%- endif -%}
+                    </div>
+                </div>
             </div>
         {% endset -%}
         {{- include('layout/_dialogo_info.html.twig', {id: 'provisional', ancho: 'w-50', titulo: 'Resultado provisional',

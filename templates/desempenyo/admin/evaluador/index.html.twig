@@ -1,4 +1,4 @@
-{% extends path(aplicacion.ruta) ~ '/admin/cuestionario/index.html.twig' %}
+{% extends path(aplicacion.ruta) ~ '/admin/cuestionario/show.html.twig' %}
 {% set avisos = {1: 'Ausente', 2: 'Vigencia futura'} %}
 
 {% block content %}
@@ -155,7 +155,7 @@
                 {%- for indice, aviso in avisos -%}
                     <span class="me-4"><sup class="badge-warning">{{ indice }}</sup> {{ aviso }}</span>
                 {%- endfor -%}
-                <span class="me-4 px-2 bg-info rounded">Distinta unidad</span>
+                <span class="me-4 px-2 bg-info-subtle rounded">Distinta unidad</span>
             </caption>
         </table>
     {%- elseif tipo == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION') %}
@@ -267,7 +267,6 @@
 
 {% block migas %}
     {{ parent() }}
-    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">Cuestionarios</a></li>
     <li class="breadcrumb-item">
         <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
     </li>
