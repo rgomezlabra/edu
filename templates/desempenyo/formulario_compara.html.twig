@@ -1,0 +1,58 @@
+{% extends path(aplicacion.ruta) ~ '/index.html.twig' %}
+
+{% block content %}
+    <div class="badge-primary rounded-pill float-end">{{ app.user.persona }}</div>
+    <div class="pagina-titulo">{{ titulo }}</div>
+    <div>
+        Valoraciones con una diferencia de más de {{ constant('App\\Controller\\Desempenyo\\FormularioController::RANGO_COMPARA') }}
+        puntos entre autoevaluación y evaluación del responsable/principal.
+    </div>
+
+    <div class="d-grid m-4">
+        <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
+            <div class="col-4"></div>
+            <div class="col-4">Autoevaluación</div>
+            <div class="col-4">Evaluación responsable</div>
+        </div>
+        <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
+            <div class="col-4">Pregunta</div>
+            <div class="col-1">Valor</div>
+            <div class="col-3">Evidencias</div>
+            <div class="col-1">Valor</div>
+            <div class="col-3">Evidencias</div>
+        </div>
+        {% for respuesta in respuestas -%}
+            <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
+                <div class="col-4 fw-bold">{{ respuesta.pregunta.codigo }}. {{ respuesta.pregunta.titulo }}</div>
+                <div class="col-1 text-end">{{ respuesta.auto.valor }}</div>
+                <div class="col-3">{{ respuesta.auto.observa }}</div>
+                <div class="col-1 text-end">{{ respuesta.principal.valor }}</div>
+                <div class="col-3">{{ respuesta.principal.observa }}</div>
+            </div>
+        {% else -%}
+            <div class="row">No hay respuestas dispares.</div>
+        {%- endfor %}
+    </div>
+{% endblock %}
+
+{% block botones %}
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item">
+        <a href="{{ path(aplicacion.ruta) }}">
+            <em class="me-1 fas {{ aplicacion.icono }}"></em>{{ aplicacion.nombreCorto }}
+        </a>
+    </li>
+{% endblock %}
+
+{% block modal %}
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+
+    </script>
+{% endblock %}

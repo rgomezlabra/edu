@@ -41,6 +41,9 @@ class FormularioController extends AbstractController
     /** @var int $ttl Tiempo de bloqueo en s. */
     private readonly int $ttl;
 
+    /** @var int Diferencia de puntos para considerar que las valoraciones son dispares */
+    public const int RANGO_COMPARA = 5;
+
     public function __construct(
         private readonly MessageGenerator $generator,
         private readonly RutaActual       $actual,
@@ -158,7 +161,7 @@ class FormularioController extends AbstractController
             'formularios' => $formularios,
             'respuestas' => $respuestas,
             'medias' => $medias,
-            'detalle' => $request->query->getBoolean('detalle', false),
+            'detalle' => $request->query->getBoolean('detalle'),
         ]);
     }
 
@@ -332,7 +335,7 @@ class FormularioController extends AbstractController
         $dompdf->loadHtml($html, 'UTF-8');
         $dompdf->render();
         ob_start();
-        $dompdf->stream(sprintf('autoevaluacion-%s.pdf', (new Slug())((string) $cuestionario->getCodigo())), []);
+        $dompdf->stream(sprintf('autoevaluacion-%s.pdf', (new Slug())((string) $cuestionario->getCodigo())));
 
         return new Response();
     }
@@ -536,6 +539,76 @@ class FormularioController extends AbstractController
         return $this->redirectToRoute($this->rutaBase . '_formulario_rellenar', [
             'codigo' => $codigo,
             'id' => 0 === $idEvaluador ? null : $empleado->getId(),
+        ]);
+    }
+
+    /** Compara las respuestas con diferencia mayor de 5 entre autoevaluación y evaluación principal. */
+    #[Route(
+        path: '/formulario/{codigo}/compara',
+        name: 'formulario_evaluador_compara',
+        defaults: ['titulo' => 'Valoraciones Dispares'],
+        methods: ['GET']
+    )]
+    public function comparar(
+        Request                $request,
+        CuestionarioRepository $cuestionarioRepository,
+        EmpleadoRepository     $empleadoRepository,
+        string                 $codigo,
+    ): Response {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        $empleado = $empleadoRepository->findOneByUsuario($usuario);
+        $cuestionario = $cuestionarioRepository->findOneBy([
+            'url' => u($request->getRequestUri())->beforeLast("/")->toString(),
+        ]);
+        if (!$cuestionario instanceof Cuestionario) {
+            $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        } elseif (!$empleado instanceof Empleado) {
+            $this->addFlash('warning', 'No se encuentran datos de empleado.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        $auto = $this->evaluaRepository->findByEvaluacion([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'tipo' => Evalua::AUTOEVALUACION,
+        ])[0] ?? null;
+        $principal = $this->evaluaRepository->findByEntregados([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'tipo' => Evalua::EVALUA_RESPONSABLE,
+        ])[0] ?? null;
+        if (!$auto instanceof Evalua || !$principal instanceof Evalua) {
+            $this->addFlash('warning', 'Deben estar entregadas la autoevaluación y la evaluación del responsable.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        /** @var array<Respuesta[]> $respuestas */
+        $respuestas = [];
+        foreach ($auto->getFormulario()?->getRespuestas() ?? [] as $respuesta) {
+            if ($respuesta->getPregunta()?->isActiva()) {
+                $respPrincipal = $principal->getFormulario()?->getRespuestas()->filter(
+                    static fn (Respuesta $resp) => $resp->getPregunta()?->getId() === $respuesta->getPregunta()->getId()
+                )->first();
+                if ($respPrincipal instanceof Respuesta &&
+                    abs((int) $respuesta->getValor()['valor'] - (int) $respPrincipal->getValor()['valor']) > self::RANGO_COMPARA) {
+                    $respuestas[] = [
+                        'pregunta' => $respuesta->getPregunta(),
+                        'auto' => $respuesta->getValor(),
+                        'principal' => $respPrincipal->getValor(),
+                    ];
+                }
+            }
+        }
+
+        return $this->render('intranet/desempenyo/formulario_compara.html.twig', [
+            'respuestas' => $respuestas,
+            'codigo' => $codigo,
         ]);
     }
 
