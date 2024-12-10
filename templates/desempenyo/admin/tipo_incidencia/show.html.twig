@@ -18,6 +18,10 @@
             <div class="fila-campo">Descripción</div>
             <div class="fila-valor">{{ tipo.descripcion }}</div>
         </div>
+        <div class="row py-2">
+            <div class="fila-campo">Nº incidencias</div>
+            <div class="fila-valor">{{ num_incidencias }}</div>
+        </div>
     </div>
 {% endblock %}
 
@@ -27,11 +31,11 @@
             <em class="fas fa-edit"></em> Editar
         </a>
     </li>
-{#    {% if num_incidencias == 0 %}#}
+    {% if num_incidencias == 0 %}
         <li class="nav-item ms-5 me-2">
             {{ include(path(aplicacion.ruta) ~ '/admin/tipo_incidencia/_delete_form.html.twig', {id: tipo.id}) }}
         </li>
-{#    {% endif %}#}
+    {% endif %}
 {% endblock %}
 
 {% block migas %}

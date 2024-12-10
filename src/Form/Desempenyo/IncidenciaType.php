@@ -3,6 +3,7 @@
 namespace App\Form\Desempenyo;
 
 use App\Entity\Desempenyo\Incidencia;
+use App\Form\Cirhus\IncidenciaType as CirhusIncidenciaType;
 use Override;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -19,12 +20,14 @@ class IncidenciaType extends AbstractType
     #[Override]
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        /** @var Incidencia $incidencia */
+        $incidencia = $options['data'];
         $builder
             ->add('cuestionario', TextType::class, [
                 'attr' => [
-                    'class' => 'w-25',
+                    'class' => 'w-50',
                 ],
-                'data' => $options['data']->getCuestionario()->getTitulo(),
+                'data' => $incidencia->getCuestionario()?->getTitulo(),
                 'disabled' => true,
             ])
             ->add('tipo', null, [
@@ -35,7 +38,7 @@ class IncidenciaType extends AbstractType
                 'label' => 'Tipo de incidencia',
                 'placeholder' => false,
             ])
-            ->add('incidencia', \App\Form\Cirhus\IncidenciaType::class, [
+            ->add('incidencia', CirhusIncidenciaType::class, [
                 'label' => false,
             ])
         ;

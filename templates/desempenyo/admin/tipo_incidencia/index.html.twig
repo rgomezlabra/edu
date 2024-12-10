@@ -21,7 +21,7 @@
                 <td>{{ tipo.id }}</td>
                 <td>{{ tipo.nombre }}</td>
                 <td>{{ tipo.descripcion }}</td>
-                <td></td>
+                <td>{{ num_incidencias[tipo.id]|default(0) }}</td>
                 <td>
                     <a href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_show', {'id': tipo.id}) }}">
                         <em class="mx-1 fas fa-eye" title="Ver"></em>

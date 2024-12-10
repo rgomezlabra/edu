@@ -2,12 +2,17 @@
 
 {% block content %}
     {%- set config = cuestionario.configuracion %}
-    {%- set tipos = {
-        (constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')): 'Autoevaluación',
-        (constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')): 'Responsable'
-    } -%}
-    {%- if config.peso3 > 0 %}
-        {%- set tipos = tipos|merge({(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')): 'Tercer agente'}) %}
+    {%- if config.peso3 == 0 %}
+        {%- set tipos = {
+            (constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')): 'Autoevaluación',
+            (constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')): 'Responsable'
+        } -%}
+    {%- else %}
+        {%- set tipos = {
+            (constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')): 'Autoevaluación',
+            (constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')): 'Responsable',
+            (constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')): 'Tercer agente'
+        } -%}
     {%- endif %}
     {%- set grupos = cuestionario.grupos|filter(g => g.activa)|sort((a, b) => a.orden <=> b.orden) %}
     <div class="pagina-titulo">{{ titulo }}</div>
