@@ -70,14 +70,13 @@ class EvaluadorController extends AbstractController
     #[Route(
         path: '/admin/cuestionario/{id}/evaluador/',
         name: 'admin_evaluador_index',
-        defaults: ['titulo' => 'Evaluadores de Cuestionario de Evaluación'],
+        defaults: ['titulo' => 'Evaluaciones de Cuestionario de Desempeño'],
         methods: ['GET']
     )]
     public function index(Request $request, Cuestionario $cuestionario): Response
     {
         $this->denyAccessUnlessGranted('admin');
-        $tipo = $request->query->getInt('tipo', Evalua::AUTOEVALUACION);
-
+        $tipo = is_numeric($request->query->get('tipo')) ? $request->query->getInt('tipo') : -1;
         switch ($tipo) {
             case Evalua::AUTOEVALUACION:
             case Evalua::NO_EVALUACION:
@@ -89,7 +88,7 @@ class EvaluadorController extends AbstractController
             case Evalua::EVALUA_RESPONSABLE:
             case Evalua::EVALUA_OTRO:
                 $evaluaciones = [];
-                foreach ($this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario,]) as $evaluacion) {
+                foreach ($this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario]) as $evaluacion) {
                     if (in_array($evaluacion->getTipoEvaluador(), [Evalua::NO_EVALUACION, Evalua::AUTOEVALUACION, $tipo])) {
                         $evaluaciones[(int) $evaluacion->getEmpleado()?->getId()][$evaluacion->getTipoEvaluador()] = $evaluacion;
                     }
@@ -97,6 +96,9 @@ class EvaluadorController extends AbstractController
                 break;
             default:
                 $evaluaciones = [];
+                foreach ($this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario]) as $evaluacion) {
+                    $evaluaciones[(int) $evaluacion->getEmpleado()?->getId()][$evaluacion->getTipoEvaluador()] = $evaluacion;
+                }
         }
         $claveRedis = sprintf('evaluacion-%d', $tipo);
         $ultimo = null;

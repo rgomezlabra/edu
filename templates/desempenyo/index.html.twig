@@ -374,20 +374,20 @@
         {% set datosProvisional -%}
             <div class="container-fluid py-4 g-4">
                 <div class="row py-2">
-                    <div class="fila-campo col-sm-6">Media autovaloración</div>
+                    <div class="fila-campo col-sm-6">Autoevaluación</div>
                     <div class="fila-valor col-sm-6">
                         {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'))]|default|number_format(2, ',' ) -}}
                     </div>
                 </div>
                 <div class="row py-2">
-                    <div class="fila-campo col-sm-6">Media evaluación responsable/principal</div>
+                    <div class="fila-campo col-sm-6">Evaluación responsable/principal</div>
                     <div class="fila-valor col-sm-6">
                         {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'))]|default|number_format(2, ',' ) -}}
                     </div>
                 </div>
                 {% if activo.configuracion.peso3 > 0 -%}
                     <div class="row py-2">
-                        <div class="fila-campo col-sm-6">Media tercer agente</div>
+                        <div class="fila-campo col-sm-6">Evaluación tercer agente</div>
                         <div class="fila-valor col-sm-6">
                             {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'))]|default|number_format(2, ',' ) -}}
                         </div>

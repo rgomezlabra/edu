@@ -1,15 +1,21 @@
 {% extends path(aplicacion.ruta) ~ '/admin/cuestionario/show.html.twig' %}
+{% set tipoAuto = constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
+{% set tipoNo = constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION') %}
+{% set tipoResp = constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
+{% set tipoOtro = constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
 {% set avisos = {1: 'Ausente', 2: 'Vigencia futura'} %}
+{% if tipo == tipoNo %}
+    {% set titulo = titulo ~ ' (rechazos)'%}
+{% elseif tipo == tipoAuto %}
+    {% set titulo = titulo ~ ' (empleados)'%}
+{% elseif tipo == tipoResp %}
+    {% set titulo = titulo ~ ' (responsables)'%}
+{% elseif tipo == tipoOtro %}
+    {% set titulo = titulo ~ ' (terceros agentes)'%}
+{% endif %}
 
 {% block content %}
-    {%- set tipoAuto = constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
-    {%- set tipoNo = constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION') %}
-    <div class="pagina-titulo">
-        {{ titulo }}
-        {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %} (responsables)
-        {%- elseif tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %} (terceros agentes)
-        {%- endif -%}
-    </div>
+    <div class="pagina-titulo">{{ titulo }}</div>
 
     <div class="pagina-seccion">Cuestionario {{ cuestionario.codigo }}</div>
     {%- if tipo == tipoAuto %}
@@ -18,19 +24,19 @@
             <div class="badge-info">
                 Último volcado de datos: {{ volcado_empleados ? volcado_empleados|date('d/m/Y, H:i') : 'sin datos' -}}
             </div>
-        {%- endif %}
+        {% endif %}
         <table class="tabla-condensada" id="datosEmpleados">
             <caption class="caption-top">Autoevaluación</caption>
             <thead class="cabecera-condensada">
                 <tr>
                     <th>Unidad</th>
                     <th>Doc. identidad</th>
-                    <th>Nombre empleado</th>
+                    <th>Nombre</th>
                     <th data-dt-order="disable">Acciones</th>
                 </tr>
             </thead>
             <tbody>
-            {%- for evaluacion in evaluaciones %}
+            {% for evaluacion in evaluaciones -%}
                 <tr>
                     <td>
                         {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
@@ -45,21 +51,17 @@
                         </a>
                     </td>
                 </tr>
-            {%- endfor %}
+            {% endfor %}
             </tbody>
         </table>
-    {%- elseif tipo in [constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'), constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')] %}
+    {% elseif tipo in [tipoResp, tipoOtro] %}
         {#- Relación de evaluadores y empleados #}
         <table class="tabla-condensada" id="datosEvaluadores">
             <thead class="cabecera-condensada">
             <tr>
                 <th colspan="6" data-dt-order="disable">Empleado</th>
                 <th colspan="6" data-dt-order="disable">
-                    {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') -%}
-                        Evaluador responsable
-                    {%- else -%}
-                        Otro evaluador
-                    {%- endif -%}
+                    {{- tipo == tipoResp ? 'Evaluador responsable' : 'Tercer agente' -}}
                 </th>
                 <th rowspan="2">Cargado</th>
                 <th rowspan="2" data-dt-order="disable">Acciones</th>
@@ -67,20 +69,20 @@
             <tr>
                 <th>Unidad</th>
                 <th>Nombre</th>
-                <th><span title="Grupo y nivel">Gr./Niv.</span></th>
-                <th><span title="Antigüedad total">Antig.</span></th>
+                <th><abbr title="Grupo y nivel">Gr./Niv.</abbr></th>
+                <th><abbr title="Antigüedad total">Antig.</abbr></th>
                 <th>Vigente</th>
                 <th>Avisos</th>
                 <th>Unidad</th>
                 <th>Nombre</th>
-                <th><span title="Grupo y nivel">Gr./Niv.</span></th>
-                <th><span title="Antigüedad total">Antig.</span></th>
+                <th><abbr title="Grupo y nivel">Gr./Niv.</abbr></th>
+                <th><abbr title="Antigüedad total">Antig.</abbr></th>
                 <th>Vigente</th>
                 <th>Avisos</th>
             </tr>
             </thead>
             <tbody>
-            {%- for evaluacion in evaluaciones %}
+            {% for evaluacion in evaluaciones -%}
                 {%- set empleado = evaluacion[tipoAuto] is defined ? evaluacion[tipoAuto].empleado : evaluacion[tipoNo].empleado %}
                 {%- set evaluador = evaluacion[tipo].evaluador|default(null) %}
                 {%- set plazaEmpleado = empleado.plazaOcupada ?: empleado.plazaTitular %}
@@ -148,7 +150,7 @@
                         {%- endif %}
                     </td>
                 </tr>
-            {%- endfor %}
+            {% endfor %}
             </tbody>
             <caption>
                 <span class="me-4">Avisos:</span>
@@ -158,22 +160,22 @@
                 <span class="me-4 px-2 bg-info-subtle rounded">Distinta unidad</span>
             </caption>
         </table>
-    {%- elseif tipo == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION') %}
+    {% elseif tipo == tipoNo %}
         {# Empleados que rechazan la evaluación #}
         <table class="tabla-condensada" id="datosRechazan">
             <caption class="caption-top">Solicitudes de no evaluación</caption>
             <thead class="cabecera-condensada">
             <tr>
                 <th>Unidad</th>
-                <th>Doc. empleado</th>
-                <th>Nombre empleado</th>
+                <th>Doc. identidad</th>
+                <th>Nombre</th>
                 <th>Fecha solicitud</th>
                 <th>Fecha registro</th>
                 <th data-dt-order="disable">Acciones</th>
             </tr>
             </thead>
             <tbody>
-            {%- for evaluacion in evaluaciones %}
+            {% for evaluacion in evaluaciones -%}
                 <tr>
                     <td>
                         {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
@@ -194,54 +196,103 @@
                         </a>
                     </td>
                 </tr>
-            {%- endfor %}
+            {% endfor %}
             </tbody>
         </table>
-        {#- Falta lista de empleados sin evaluador #}
+    {% else %}
+        {#- Listar todas las evaluaciones definidas #}
+        <table class="tabla-condensada" id="datosTodos">
+            <thead class="cabecera-condensada">
+            <tr>
+                <th colspan="3" data-dt-order="disable">Empleado</th>
+                <th colspan="2" data-dt-order="disable">Evaluador principal</th>
+                <th colspan="2" data-dt-order="disable">Tercer agente</th>
+            </tr>
+            <tr>
+                <th>Documento</th>
+                <th>Nombre</th>
+                <th>Rechazo</th>
+                <th>Documento</th>
+                <th>Nombre</th>
+                <th>Documento</th>
+                <th>Nombre</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for evalua in evaluaciones -%}
+            <tr>
+                <td>{{ (evalua|first).empleado.persona.docIdentidad }}</td>
+                <td>{{ (evalua|first).empleado.persona }}</td>
+                <td>
+                    {% if evalua[tipoNo] is defined %}
+                        <sup class="badge-warning">{{ evalua[tipoNo].registrado ? 'VR' : 'R' }}</sup>
+                    {% endif %}
+                </td>
+                <td>{{ evalua[tipoResp].evaluador.persona.docIdentidad|default }}</td>
+                <td>{{ evalua[tipoResp].evaluador.persona|default }}</td>
+                <td>{{ evalua[tipoOtro].evaluador.persona.docIdentidad|default }}</td>
+                <td>{{ evalua[tipoOtro].evaluador.persona|default }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+            <caption>
+                <span class="me-4">Avisos:</span>
+                <span class="me-4"><sup class="badge-warning">R</sup> Rechazado</span>
+                <span class="me-4"><sup class="badge-warning">VR</sup> Validado</span>
+            </caption>
+        </table>
     {%- endif  %}
 {% endblock %}
 
 {% block botones %}
-    {%- if tipo != constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
+    {% if tipo in [tipoNo, tipoAuto, tipoResp, tipoOtro] -%}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')}) }}">
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id}) }}">
+                <em class="fas fa-table"></em> Ver todos
+            </a>
+        </li>
+    {%- endif %}
+    {% if tipo != tipoAuto -%}
+        <li class="nav-item me-2">
+            <a class="btn btn-primary"
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: tipoAuto}) }}">
                 <em class="fas fa-users"></em> Ver empleados
             </a>
         </li>
     {%- endif %}
-    {%- if tipo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
+    {% if tipo != tipoResp -%}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')}) }}">
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: tipoResp}) }}">
                 <em class="fas fa-user-check"></em> Ver responsables
             </a>
         </li>
     {%- endif %}
-    {%- if cuestionario.configuracion.peso3|default(0) > 0 and tipo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
+    {% if cuestionario.configuracion.peso3|default(0) > 0 and tipo != tipoOtro -%}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')}) }}">
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: tipoOtro}) }}">
                 <em class="fas fa-user-pen"></em> Ver otros
             </a>
         </li>
     {%- endif %}
-    {%- if tipo != constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION') %}
+    {% if tipo != tipoNo -%}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION')}) }}">
+               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: tipoNo}) }}">
                 <em class="fas fa-user-times"></em> Ver rechazados
             </a>
         </li>
     {%- endif %}
-    {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
+    {% if tipo == tipoAuto -%}
         <li class="nav-item ms-5 me-2">
             <button class="btn btn-primary cargar" id="cargarEmpleados"
                     data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_auto', {id: cuestionario.id}) }}">
                 <em class="fas fa-person-arrow-down-to-line"></em> Cargar empleados
             </button>
         </li>
-    {%- elseif tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
+    {% elseif tipo == tipoResp -%}
         <li class="nav-item ms-5 me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id, tipo: 'evaluador'}) }}">
@@ -255,7 +306,7 @@
             </button>
         </li>
     {%- endif %}
-    {%- if tipo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
+    {% if tipo == tipoOtro -%}
         <li class="nav-item ms-5 me-2">
             <a class="btn btn-primary"
                href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id, tipo: 'otro'}) }}">
@@ -341,6 +392,7 @@
                 [3, 'desc'],
             ],
         });
+        $('#datosTodos').dataTable(config);
 
         // Verificar rechazo y recuperación de autoevaluación
         const dialogo = $('#modalConfirma');

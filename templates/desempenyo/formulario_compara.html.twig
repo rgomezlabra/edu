@@ -9,25 +9,16 @@
     </div>
 
     <div class="d-grid m-4">
-        <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
-            <div class="col-4"></div>
-            <div class="col-4">Autoevaluación</div>
-            <div class="col-4">Evaluación responsable</div>
-        </div>
-        <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
-            <div class="col-4">Pregunta</div>
-            <div class="col-1">Valor</div>
-            <div class="col-3">Evidencias</div>
-            <div class="col-1">Valor</div>
-            <div class="col-3">Evidencias</div>
+        <div class="row bg-dark text-bg-dark opacity-50 fw-bolder py-1">
+            <div class="col-8">Pregunta</div>
+            <div class="col-2 text-end">Autoevaluación</div>
+            <div class="col-2 text-end">Evaluación responsable</div>
         </div>
         {% for respuesta in respuestas -%}
             <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
-                <div class="col-4 fw-bold">{{ respuesta.pregunta.codigo }}. {{ respuesta.pregunta.titulo }}</div>
-                <div class="col-1 text-end">{{ respuesta.auto.valor }}</div>
-                <div class="col-3">{{ respuesta.auto.observa }}</div>
-                <div class="col-1 text-end">{{ respuesta.principal.valor }}</div>
-                <div class="col-3">{{ respuesta.principal.observa }}</div>
+                <div class="col-8 fw-bold">{{ respuesta.pregunta.codigo }}. {{ respuesta.pregunta.titulo }}</div>
+                <div class="col-2 text-end">{{ respuesta.auto.valor }}</div>
+                <div class="col-2 text-end">{{ respuesta.principal.valor }}</div>
             </div>
         {% else -%}
             <div class="row">No hay respuestas dispares.</div>
