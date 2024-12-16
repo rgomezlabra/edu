@@ -52,8 +52,12 @@ class EvaluaRepository extends ServiceEntityRepository
     public function findByEvaluacion(array $criterios): array
     {
         $qb = $this->createQueryBuilder('evalua')
-            ->addSelect('origen')
+            ->addSelect('origen', 'empleado', 'empleado_persona', 'evaluador', 'evaluador_persona')
             ->join('evalua.origen', 'origen')
+            ->join('evalua.empleado', 'empleado')
+            ->join('empleado.persona', 'empleado_persona')
+            ->leftJoin('evalua.evaluador', 'evaluador')
+            ->leftJoin('evaluador.persona', 'evaluador_persona')
         ;
         $empleados = false;
         $evaluaciones = false;
@@ -129,15 +133,9 @@ class EvaluaRepository extends ServiceEntityRepository
     /** Mejorar consulta para obtener datos de empleado evaluado. */
     private function addEmpleados(QueryBuilder $qb): QueryBuilder
     {
-        return $qb->addSelect('empleado')
-            ->addSelect('empleado_persona')
-            ->addSelect('empleado_grupo')
-            ->addSelect('empleado_plaza_titular')
-            ->addSelect('empleado_unidad_titular')
-            ->addSelect('empleado_plaza_ocupada')
-            ->addSelect('empleado_unidad_ocupada')
-            ->join('evalua.empleado', 'empleado')
-            ->join('empleado.persona', 'empleado_persona')
+        return $qb->addSelect('empleado_grupo')
+            ->addSelect('empleado_plaza_titular', 'empleado_unidad_titular')
+            ->addSelect('empleado_plaza_ocupada', 'empleado_unidad_ocupada')
             ->join('empleado.grupo', 'empleado_grupo')
             ->leftJoin('empleado.plaza_titular', 'empleado_plaza_titular')
             ->leftJoin('empleado_plaza_titular.unidad', 'empleado_unidad_titular')
@@ -149,15 +147,9 @@ class EvaluaRepository extends ServiceEntityRepository
     /** Mejorar consulta para obtener datos de evaluador. */
     private function addEvaluadores(QueryBuilder $qb): QueryBuilder
     {
-        return $qb->addSelect('evaluador')
-            ->addSelect('evaluador_persona')
-            ->addSelect('evaluador_grupo')
-            ->addSelect('evaluador_plaza_titular')
-            ->addSelect('evaluador_unidad_titular')
-            ->addSelect('evaluador_plaza_ocupada')
-            ->addSelect('evaluador_unidad_ocupada')
-            ->join('evalua.evaluador', 'evaluador')
-            ->join('evaluador.persona', 'evaluador_persona')
+        return $qb->addSelect('evaluador_grupo')
+            ->addSelect('evaluador_plaza_titular', 'evaluador_unidad_titular')
+            ->addSelect('evaluador_plaza_ocupada', 'evaluador_unidad_ocupada')
             ->join('evaluador.grupo', 'evaluador_grupo')
             ->leftJoin('evaluador.plaza_titular', 'evaluador_plaza_titular')
             ->leftJoin('evaluador_plaza_titular.unidad', 'evaluador_unidad_titular')
