@@ -3,7 +3,7 @@
 {% set tipoNo = constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION') %}
 {% set tipoResp = constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
 {% set tipoOtro = constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
-{% set avisos = {1: 'Ausente', 2: 'Vigencia futura'} %}
+{% set avisos = {VF: 'Vigencia futura', DU: 'Distinta unidad'} %}
 {% if tipo == tipoNo %}
     {% set titulo = titulo ~ ' (rechazos)'%}
 {% elseif tipo == tipoAuto %}
@@ -59,8 +59,8 @@
         <table class="tabla-condensada" id="datosEvaluadores">
             <thead class="cabecera-condensada">
             <tr>
-                <th colspan="6" data-dt-order="disable">Empleado</th>
-                <th colspan="6" data-dt-order="disable">
+                <th colspan="8" data-dt-order="disable">Empleado</th>
+                <th colspan="8" data-dt-order="disable">
                     {{- tipo == tipoResp ? 'Evaluador responsable' : 'Tercer agente' -}}
                 </th>
                 <th rowspan="2">Cargado</th>
@@ -72,12 +72,16 @@
                 <th><abbr title="Grupo y nivel">Gr./Niv.</abbr></th>
                 <th><abbr title="Antigüedad total">Antig.</abbr></th>
                 <th>Vigente</th>
+                <th><abbr title="Ausencia">Aus.</abbr></th>
+                <th><abbr title="Situación Administrativa">S.A.</abbr></th>
                 <th>Avisos</th>
                 <th>Unidad</th>
                 <th>Nombre</th>
                 <th><abbr title="Grupo y nivel">Gr./Niv.</abbr></th>
                 <th><abbr title="Antigüedad total">Antig.</abbr></th>
                 <th>Vigente</th>
+                <th><abbr title="Ausencia">Aus.</abbr></th>
+                <th><abbr title="Situación Administrativa">S.A.</abbr></th>
                 <th>Avisos</th>
             </tr>
             </thead>
@@ -97,11 +101,21 @@
                     <td>{{ empleado.vigente|date('Y-m-d') }}</td>
                     <td>
                         {%- if empleado.ausencia -%}
-                            <sup class="badge-warning mx-1" title="{{ avisos[1] }}">1</sup>
-                        {%- endif %}
-                        {%- if date(empleado.vigente) > date() -%}
-                            <sup class="badge-warning mx-1" title="{{ avisos[2] }}">2</sup>
+                            <span title="{{ empleado.ausencia.nombre }}">{{ empleado.ausencia.codigo }}</span>
                         {%- endif -%}
+                    </td>
+                    <td>
+                        {%- if empleado.situacion -%}
+                            <span title="{{ empleado.situacion.nombre }}">{{ empleado.situacion.codigo }}</span>
+                        {%- endif -%}
+                    </td>
+                    <td>
+                        {%- if date(empleado.vigente) > date() -%}
+                            <sup class="badge-warning mx-1" title="{{ avisos['VF'] }}">VF</sup>
+                        {%- endif %}
+                        {% if plazaEmpleado.unidad|default != plazaEvaluador.unidad|default %}
+                            <sup class="badge-warning mx-1" title="{{ avisos['DU'] }}">DU</sup>
+                        {%- endif %}
                     </td>
                     {%- if evaluador %}
                         <td><span title="{{ plazaEvaluador.unidad.nombre|default }}">{{ plazaEvaluador.unidad.codigo|default }}</span></td>
@@ -111,14 +125,23 @@
                         <td>{{ evaluador.vigente|date('Y-m-d') }}</td>
                         <td>
                             {%- if evaluador.ausencia -%}
-                                <sup class="badge-warning mx-1" title="{{ avisos[1] }}">1</sup>
-                            {%- endif %}
-                            {%- if date(evaluador.vigente) > date() -%}
-                                <sup class="badge-warning mx-1" title="{{ avisos[2] }}">2</sup>
+                                <span title="{{ evaluador.ausencia.nombre }}">{{ evaluador.ausencia.codigo }}</span>
                             {%- endif -%}
+                        </td>
+                        <td>
+                            {%- if evaluador.situacion -%}
+                                <span title="{{ evaluador.situacion.nombre }}">{{ evaluador.situacion.codigo }}</span>
+                            {%- endif -%}
+                        </td>
+                        <td>
+                            {% if date(evaluador.vigente) > date() -%}
+                                <sup class="badge-warning mx-1" title="{{ avisos['VF'] }}">VF</sup>
+                            {%- endif %}
                         </td>
                         <td>{{ evaluacion.origen.nombre|default|capitalize }}</td>
                     {%- else %}
+                        <td></td>
+                        <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -157,7 +180,6 @@
                 {%- for indice, aviso in avisos -%}
                     <span class="me-4"><sup class="badge-warning">{{ indice }}</sup> {{ aviso }}</span>
                 {%- endfor -%}
-                <span class="me-4 px-2 bg-info-subtle rounded">Distinta unidad</span>
             </caption>
         </table>
     {% elseif tipo == tipoNo %}
