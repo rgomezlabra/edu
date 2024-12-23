@@ -4,8 +4,6 @@ namespace App\Entity;
 
 use App\Repository\UsuarioRepository;
 use DateTimeInterface;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Stringable;
@@ -17,7 +15,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
 #[ORM\Entity(repositoryClass: UsuarioRepository::class)]
-#[ORM\Index(columns: ['uvus'], name: 'idx_uvus')]
+#[ORM\Index(columns: ['login'], name: 'idx_login')]
 class Usuario implements UserInterface, Stringable
 {
     #[ORM\Id]
@@ -26,20 +24,15 @@ class Usuario implements UserInterface, Stringable
     private ?int $id = null;
 
     #[ORM\Column(type: Types::STRING, length: 180, unique: true)]
-    private ?string $uvus = null;
+    private ?string $login = null;
 
     #[ORM\Column(type: Types::JSON)]
     private array $roles = [];
 
-    #[ORM\ManyToOne(targetEntity: Origen::class)]
-    private ?Origen $origen = null;
 
-    /** @var Collection<int, Relacion> */
-    #[ORM\ManyToMany(targetEntity: Relacion::class, cascade: ['persist', 'remove'])]
-    private Collection $relaciones;
 
     #[ORM\Column(type: Types::STRING, length: 10, nullable: true)]
-    private ?string $uvus_estado = null;
+    private ?string $login_estado = null;
 
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true)]
     #[Assert\Email]
@@ -55,27 +48,15 @@ class Usuario implements UserInterface, Stringable
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?DateTimeInterface $modificado = null;
 
-    #[ORM\OneToOne(mappedBy: 'usuario', targetEntity: Persona::class, cascade: ['persist', 'remove'])]
-    private ?Persona $persona = null;
+    #[ORM\OneToOne(mappedBy: 'usuario', targetEntity: Empleado::class, cascade: ['persist', 'remove'])]
+    private ?Empleado $empleado = null;
 
-    /** @var Collection<int, Permiso> */
-    #[ORM\OneToMany(mappedBy: 'usuario', targetEntity: Permiso::class, cascade: ['persist', 'remove'])]
-    private Collection $permisos;
 
-    /** @var Collection<int, Notificacion> */
-    #[ORM\OneToMany(mappedBy: 'receptor', targetEntity: Notificacion::class, cascade: ['persist', 'remove'])]
-    private Collection $notas;
 
-    public function __construct()
-    {
-        $this->notas = new ArrayCollection();
-        $this->permisos = new ArrayCollection();
-        $this->relaciones = new ArrayCollection();
-    }
 
     public function __toString(): string
     {
-        return (string) $this->uvus;
+        return (string) $this->login;
     }
 
     public function getId(): ?int
@@ -83,14 +64,14 @@ class Usuario implements UserInterface, Stringable
         return $this->id;
     }
 
-    public function getUvus(): ?string
+    public function getLogin(): ?string
     {
-        return $this->uvus;
+        return $this->login;
     }
 
-    public function setUvus(string $uvus): static
+    public function setLogin(string $login): static
     {
-        $this->uvus = $uvus;
+        $this->login = $login;
 
         return $this;
     }
@@ -102,7 +83,7 @@ class Usuario implements UserInterface, Stringable
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->uvus;
+        return (string) $this->login;
     }
 
     /**
@@ -110,7 +91,7 @@ class Usuario implements UserInterface, Stringable
      */
     public function getUsername(): string
     {
-        return (string) $this->uvus;
+        return (string) $this->login;
     }
 
     /**
@@ -140,60 +121,15 @@ class Usuario implements UserInterface, Stringable
         // $this->plainPassword = null;
     }
 
-    public function getOrigen(): ?Origen
-    {
-        return $this->origen;
-    }
 
-    public function setOrigen(?Origen $origen): static
-    {
-        $this->origen = $origen;
-
-        return $this;
-    }
 
     /**
-     * @return Collection<int, Relacion>
      */
-    public function getRelaciones(): Collection
-    {
-        return $this->relaciones;
-    }
 
-    public function addRelacion(Relacion $relacion): static
-    {
-        if (!$this->relaciones->contains($relacion)) {
-            $this->relaciones[] = $relacion;
-        }
 
-        return $this;
-    }
 
-    public function removeRelacion(Relacion $relacion): static
-    {
-        $this->relaciones->removeElement($relacion);
 
-        return $this;
-    }
 
-    public function clearRelaciones(): static
-    {
-        $this->relaciones->clear();
-
-        return $this;
-    }
-
-    public function getUvusEstado(): ?string
-    {
-        return $this->uvus_estado;
-    }
-
-    public function setUvusEstado(?string $uvus_estado): static
-    {
-        $this->uvus_estado = $uvus_estado;
-
-        return $this;
-    }
 
     public function getCorreo1(): ?string
     {
@@ -243,73 +179,29 @@ class Usuario implements UserInterface, Stringable
         return $this;
     }
 
-    public function getPersona(): ?Persona
+    public function getEmpleado(): ?Empleado
     {
-        return $this->persona;
+        return $this->empleado;
     }
 
-    public function setPersona(Persona $persona): static
+    public function setEmpleado(Empleado $empleado): static
     {
-        if ($persona->getUsuario() !== $this) {
-            $persona->setUsuario($this);
+        if ($empleado->getUsuario() !== $this) {
+            $empleado->setUsuario($this);
         }
 
-        $this->persona = $persona;
+        $this->empleado = $empleado;
 
         return $this;
     }
 
     /**
-     * @return Collection<int, Permiso>
      */
-    public function getPermisos(): Collection
-    {
-        return $this->permisos;
-    }
 
-    public function addPermiso(Permiso $permiso): static
-    {
-        if (!$this->permisos->contains($permiso)) {
-            $this->permisos[] = $permiso;
-            $permiso->setUsuario($this);
-        }
 
-        return $this;
-    }
-
-    public function removePermiso(Permiso $permiso): static
-    {
-        if ($this->permisos->removeElement($permiso) && $permiso->getUsuario() === $this) {
-            $permiso->setUsuario(null);
-        }
-
-        return $this;
-    }
 
     /**
-     * @return Collection<int, Notificacion>
      */
-    public function getNotas(): Collection
-    {
-        return $this->notas;
-    }
 
-    public function addNota(Notificacion $nota): static
-    {
-        if (!$this->notas->contains($nota)) {
-            $this->notas[] = $nota;
-            $nota->setReceptor($this);
-        }
 
-        return $this;
-    }
-
-    public function removeNota(Notificacion $nota): static
-    {
-        if ($this->notas->removeElement($nota) && $nota->getReceptor() === $this) {
-            $nota->setReceptor(null);
-        }
-
-        return $this;
-    }
 }

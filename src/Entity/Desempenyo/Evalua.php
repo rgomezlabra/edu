@@ -5,7 +5,6 @@ namespace App\Entity\Desempenyo;
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Cuestiona\Formulario;
 use App\Entity\Empleado;
-use App\Entity\Origen;
 use App\Entity\Usuario;
 use App\Repository\Desempenyo\EvaluaRepository;
 use DateTimeImmutable;
@@ -24,6 +23,11 @@ use Doctrine\ORM\Mapping as ORM;
 )]
 class Evalua
 {
+    final public const string MANUAL = 'MANUAL';    // Edición manual en el propio sistema
+    final public const string SSO = 'SSO';  // Acceso por SSO
+    final public const string EXTERNO = 'EXTERNO';  // Carga de datos desde sistema externo
+    final public const string FICHERO = 'FICHERO';  // Carga de datos desde fichero
+
     // Tipos de evaluaciones
     public const int NO_EVALUACION = 0; // Solicitud de no evaluación
 
@@ -79,8 +83,8 @@ class Evalua
     #[ORM\Column(type: Types::BOOLEAN, nullable: false, options: ['default' => 0])]
     private bool $habilita = false;
 
-    #[ORM\ManyToOne(targetEntity: Origen::class)]
-    private ?Origen $origen = null;
+    #[ORM\Column(type: Types::STRING, length: 10)]
+    private ?string $origen = null;
 
     public function getId(): ?int
     {
@@ -243,12 +247,12 @@ class Evalua
         return $this;
     }
 
-    public function getOrigen(): ?Origen
+    public function getOrigen(): ?string
     {
         return $this->origen;
     }
 
-    public function setOrigen(?Origen $origen): static
+    public function setOrigen(?string $origen): static
     {
         $this->origen = $origen;
 

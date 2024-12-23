@@ -45,29 +45,29 @@ class UsuarioRepository extends ServiceEntityRepository implements UserLoaderInt
         $this->getEntityManager()->flush();
     }
 
-    /** Realiza búsquedas para paginar la salida de personas. */
+    /** Realiza búsquedas para paginar la salida de empleados. */
     public function findQueryBuilder(string $buscar = '', ?string $orden = null, string $dir = 'ASC'): QueryBuilder
     {
         $qb = $this->createQueryBuilder('usuario')
-            ->addSelect('persona')
-            ->join('usuario.persona', 'persona')
+            ->addSelect('empleado')
+            ->join('usuario.empleado', 'empleado')
         ;
         if ('' !== $buscar) {
             $qb->andWhere(
                 $qb->expr()->orX(
-                    'usuario.uvus LIKE :buscar',
+                    'usuario.login LIKE :buscar',
                     $qb->expr()->orX(
                         'usuario.correo1 LIKE :buscar',
                         $qb->expr()->orX(
-                            'persona.doc_identidad LIKE :buscar',
+                            'empleado.doc_identidad LIKE :buscar',
                             $qb->expr()->like(
                                 $qb->expr()->concat(
-                                    'persona.nombre',
+                                    'empleado.nombre',
                                     $qb->expr()->concat(
                                         $qb->expr()->literal(' '),
                                         $qb->expr()->concat(
-                                            'persona.apellido1',
-                                            $qb->expr()->concat($qb->expr()->literal(' '), 'persona.apellido2')
+                                            'empleado.apellido1',
+                                            $qb->expr()->concat($qb->expr()->literal(' '), 'empleado.apellido2')
                                         )
                                     )
                                 ),
@@ -82,22 +82,20 @@ class UsuarioRepository extends ServiceEntityRepository implements UserLoaderInt
             );
         }
         match ($orden) {
-            'id', 'uvus', 'creado', 'modificado' => $qb->orderBy('usuario.' . $orden, $dir),
+            'id', 'login', 'creado', 'modificado' => $qb->orderBy('usuario.' . $orden, $dir),
             'correo' => $qb->orderBy('usuario.correo1', $dir),
-            'nif' => $qb->orderBy('persona.doc_identidad', $dir),
+            'nif' => $qb->orderBy('empleado.doc_identidad', $dir),
             'nombre' => $qb->orderBy(
                 $qb->expr()->concat(
-                    'persona.nombre',
+                    'empleado.nombre',
                     $qb->expr()->concat(
-                        'persona.apellido1',
-                        'persona.apellido2'
+                        'empleado.apellido1',
+                        'empleado.apellido2'
                     )
                 ),
                 $dir
             ),
-            'apellidos' => $qb->orderBy($qb->expr()->concat('persona.apellido1', 'persona.apellido2'), $dir),
-            'origen' => $qb->leftJoin('usuario.origen', 'origen')
-                ->orderBy('origen.nombre', $dir),
+            'apellidos' => $qb->orderBy($qb->expr()->concat('empleado.apellido1', 'empleado.apellido2'), $dir),
             default => $qb,
         };
 
@@ -105,15 +103,15 @@ class UsuarioRepository extends ServiceEntityRepository implements UserLoaderInt
     }
 
     /**
-     * Cargar usuario por UVUS o por documento de identidad de la persona asociada.
+     * Cargar usuario por UVUS o por documento de identidad de la empleado asociada.
      * @param string $identifier UVUS o documento de identidad
      * @throws NonUniqueResultException
      */
     public function loadUserByIdentifier(string $identifier): ?Usuario
     {
         return $this->createQueryBuilder('usuario')
-            ->join('usuario.persona', 'persona')
-            ->andWhere('usuario.uvus = :val OR persona.doc_identidad = :val')
+            ->join('usuario.empleado', 'empleado')
+            ->andWhere('usuario.login = :val OR empleado.doc_identidad = :val')
             ->setParameter('val', $identifier)
             ->getQuery()
             ->getOneOrNullResult()

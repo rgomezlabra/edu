@@ -2,7 +2,6 @@
 
 namespace App\Entity\Cuestiona;
 
-use App\Entity\Aplicacion;
 use App\Entity\Estado;
 use App\Entity\Usuario;
 use App\Repository\Cuestiona\CuestionarioRepository;
@@ -83,9 +82,6 @@ class Cuestionario implements Stringable
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     private bool $privado = true;
 
-    #[ORM\ManyToOne(targetEntity: Aplicacion::class)]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?Aplicacion $aplicacion = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $fecha_alta = null;
@@ -253,17 +249,7 @@ class Cuestionario implements Stringable
         return $this;
     }
 
-    public function getAplicacion(): ?Aplicacion
-    {
-        return $this->aplicacion;
-    }
 
-    public function setAplicacion(?Aplicacion $aplicacion): static
-    {
-        $this->aplicacion = $aplicacion;
-
-        return $this;
-    }
 
     public function getFechaAlta(): ?DateTimeImmutable
     {

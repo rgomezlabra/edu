@@ -7,7 +7,6 @@ namespace App\Controller\Desempenyo;
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Desempenyo\Evalua;
 use App\Entity\Empleado;
-use App\Entity\Origen;
 use App\Entity\Usuario;
 use App\Form\Desempenyo\CorreccionType;
 use App\Form\Desempenyo\EvaluadorType;
@@ -16,7 +15,6 @@ use App\Form\VolcadoType;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
 use App\Repository\EmpleadoRepository;
-use App\Repository\OrigenRepository;
 use App\Service\Csv;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
@@ -165,7 +163,6 @@ class EvaluadorController extends AbstractController
     public function cargarAutoevaluacion(
         Request            $request,
         EmpleadoRepository $empleadoRepository,
-        OrigenRepository   $origenRepository,
         Cuestionario       $cuestionario,
     ): Response {
         $this->denyAccessUnlessGranted('admin');
@@ -181,7 +178,7 @@ class EvaluadorController extends AbstractController
         }
 
         $inicio = microtime(true);
-        $externo = $origenRepository->findOneBy(['nombre' => Origen::EXTERNO]);
+        $externo = EVALUA::EXTERNO;
         $empleados = $empleadoRepository->findCesados(false);
         $datos = [
             'inicio' => new DateTimeImmutable(),
@@ -256,7 +253,6 @@ class EvaluadorController extends AbstractController
     public function cargarEvaluacion(
         Request            $request,
         EmpleadoRepository $empleadoRepository,
-        OrigenRepository   $origenRepository,
         Cuestionario       $cuestionario,
         string             $tipo,
     ): Response {
@@ -323,7 +319,7 @@ class EvaluadorController extends AbstractController
             ];
 
             // Grabar datos
-            $fichero = $origenRepository->findOneBy(['nombre' => Origen::FICHERO]);
+            $fichero = EVALUA::FICHERO;
             foreach ($lineas as $linea) {
                 ++$datos['actual'];
                 // Guardar solo asignaciones nuevas
@@ -762,7 +758,6 @@ class EvaluadorController extends AbstractController
         Request            $request,
         EmpleadoRepository $empleadoRepository,
         EvaluaRepository   $evaluaRepository,
-        OrigenRepository   $origenRepository,
         Cuestionario       $cuestionario,
         Empleado           $empleado,
         ?int               $tipo = Evalua::EVALUA_RESPONSABLE
@@ -788,7 +783,7 @@ class EvaluadorController extends AbstractController
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $evalua->setOrigen($origenRepository->findOneBy(['nombre' => Origen::MANUAL]));
+            $evalua->setOrigen(EVALUA::MANUAL);
             $evaluaRepository->save($evalua, true);
             $this->generator->logAndFlash('info', 'Evaluador asignado', [
                 'id' => $evalua->getId(),

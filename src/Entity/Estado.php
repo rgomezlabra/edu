@@ -17,6 +17,10 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\Index(columns: ['nombre'], name: 'idx_nombre')]
 class Estado implements Stringable
 {
+    final public const string SISTEMA = 'sistema';
+    final public const string INCIDENCIA = 'incidencia';
+    final public const string SOLICITUD = 'solicitud';
+
     // Nombres de estados que no deben ser modificados en la BD porque se usan en el código.
     final public const string PUBLICADO = 'Publicado';
 
@@ -84,8 +88,8 @@ class Estado implements Stringable
     #[ORM\Column(type: Types::STRING, length: 22, nullable: true)]
     private ?string $color = null;
 
-    #[ORM\ManyToOne(targetEntity: EstadoTipo::class, inversedBy: 'estados')]
-    private ?EstadoTipo $tipo = null;
+    #[ORM\Column(type: Types::STRING, length: 10)]
+    private ?string $tipo = null;
 
     public function __toString(): string
     {
@@ -145,12 +149,12 @@ class Estado implements Stringable
         return $this;
     }
 
-    public function getTipo(): ?EstadoTipo
+    public function getTipo(): ?string
     {
         return $this->tipo;
     }
 
-    public function setTipo(?EstadoTipo $tipo): static
+    public function setTipo(?string $tipo): static
     {
         $this->tipo = $tipo;
 

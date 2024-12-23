@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use App\Entity\Categoria;
 use App\Entity\Grupo;
-use App\Entity\Persona;
+use App\Entity\Usuario;
 use App\Repository\EmpleadoRepository;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
@@ -23,26 +23,18 @@ class Empleado
     #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[ORM\OneToOne(targetEntity: Persona::class)]
-    private ?Persona $persona = null;
+    #[ORM\OneToOne(targetEntity: Usuario::class)]
+    private ?Usuario $usuario = null;
 
-    #[ORM\OneToOne(inversedBy: 'titular', targetEntity: Plaza::class, cascade: ['persist'])]
-    private ?Plaza $plaza_titular = null;
 
-    #[ORM\ManyToOne(targetEntity: Plaza::class, cascade: ['persist'], inversedBy: 'ocupantes')]
-    private ?Plaza $plaza_ocupada = null;
 
     #[ORM\ManyToOne(targetEntity: Categoria::class)]
     private ?Categoria $categoria = null;
 
-    #[ORM\ManyToOne(targetEntity: Regimen::class)]
-    private ?Regimen $regimen = null;
 
     #[ORM\ManyToOne(targetEntity: Situacion::class)]
     private ?Situacion $situacion = null;
 
-    #[ORM\ManyToOne(targetEntity: Jornada::class)]
-    private ?Jornada $jornada = null;
 
     #[ORM\ManyToOne(targetEntity: Grupo::class)]
     private ?Grupo $grupo = null;
@@ -50,11 +42,7 @@ class Empleado
     #[ORM\ManyToOne(targetEntity: Ausencia::class)]
     private ?Ausencia $ausencia = null;
 
-    #[ORM\ManyToOne(targetEntity: Especialidad::class)]
-    private ?Especialidad $especialidad = null;
 
-    #[ORM\ManyToOne(targetEntity: Academico::class)]
-    private ?Academico $academico = null;
 
     #[ORM\Column(type: Types::STRING, length: 50)]
     private ?string $nrp = null;
@@ -86,46 +74,35 @@ class Empleado
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $en_ocupada = null;
 
+    #[ORMColumn(type: Types::STRING, length: 100)]
+    private ?string $nombre = null;
+    #[ORMColumn(type: Types::STRING, length: 100)]
+    private ?string $apellido1 = null;
+    #[ORMColumn(type: Types::STRING, length: 100, nullable: true)]
+    private ?string $apellido2 = null;
+    #[ORMColumn(type: Types::STRING, length: 11, nullable: true)]
+    private ?string $doc_identidad = null;
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getPersona(): ?Persona
+    public function getUsuario(): ?Usuario
     {
-        return $this->persona;
+        return $this->usuario;
     }
 
-    public function setPersona(?Persona $persona): self
+    public function setUsuario(?Usuario $usuario): self
     {
-        $this->persona = $persona;
+        $this->usuario = $usuario;
 
         return $this;
     }
 
-    public function getPlazaTitular(): ?Plaza
-    {
-        return $this->plaza_titular;
-    }
 
-    public function setPlazaTitular(?Plaza $plaza): self
-    {
-        $this->plaza_titular = $plaza;
 
-        return $this;
-    }
 
-    public function getPlazaOcupada(): ?Plaza
-    {
-        return $this->plaza_ocupada;
-    }
-
-    public function setPlazaOcupada(?Plaza $plaza): self
-    {
-        $this->plaza_ocupada = $plaza;
-
-        return $this;
-    }
 
     public function getCategoria(): ?Categoria
     {
@@ -139,17 +116,7 @@ class Empleado
         return $this;
     }
 
-    public function getRegimen(): ?Regimen
-    {
-        return $this->regimen;
-    }
 
-    public function setRegimen(?Regimen $regimen): self
-    {
-        $this->regimen = $regimen;
-
-        return $this;
-    }
 
     public function getSituacion(): ?Situacion
     {
@@ -163,17 +130,7 @@ class Empleado
         return $this;
     }
 
-    public function getJornada(): ?Jornada
-    {
-        return $this->jornada;
-    }
 
-    public function setJornada(?Jornada $jornada): self
-    {
-        $this->jornada = $jornada;
-
-        return $this;
-    }
 
     public function getGrupo(): ?Grupo
     {
@@ -199,29 +156,9 @@ class Empleado
         return $this;
     }
 
-    public function getEspecialidad(): ?Especialidad
-    {
-        return $this->especialidad;
-    }
 
-    public function setEspecialidad(?Especialidad $especialidad): self
-    {
-        $this->especialidad = $especialidad;
 
-        return $this;
-    }
 
-    public function getAcademico(): ?Academico
-    {
-        return $this->academico;
-    }
-
-    public function setAcademico(?Academico $academico): self
-    {
-        $this->academico = $academico;
-
-        return $this;
-    }
 
     public function getNrp(): ?string
     {
@@ -342,4 +279,49 @@ class Empleado
 
         return $this;
     }
+    public function __toString(): string
+    {
+        return trim(sprintf('%s %s %s', $this->nombre ?? '', $this->getApellido1() ?? '', $this->getApellido2() ?? ''));
+    }
+    public function getNombre(): ?string
+    {
+        return $this->nombre;
+    }
+    public function setNombre(string $nombre): static
+    {
+        $this->nombre = $nombre;
+
+        return $this;
+    }
+    public function getApellido1(): ?string
+    {
+        return $this->apellido1;
+    }
+    public function setApellido1(string $apellido1): static
+    {
+        $this->apellido1 = $apellido1;
+
+        return $this;
+    }
+    public function getApellido2(): ?string
+    {
+        return $this->apellido2;
+    }
+    public function setApellido2(?string $apellido2): static
+    {
+        $this->apellido2 = $apellido2;
+
+        return $this;
+    }
+    public function getDocIdentidad(): ?string
+    {
+        return $this->doc_identidad;
+    }
+    public function setDocIdentidad(?string $doc_identidad): static
+    {
+        $this->doc_identidad = $doc_identidad;
+
+        return $this;
+    }
+
 }
