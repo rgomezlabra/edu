@@ -34,15 +34,15 @@
                 <td>{{ incidencia.incidencia.solicitante.persona }}</td>
                 <td>{{ incidencia.incidencia.apuntes.first.fechaInicio ? incidencia.incidencia.apuntes.first.fechaInicio|date('Y-m-d, H:i') }}</td>
                 <td>
-                    {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Sistema\\Estado::FINALIZADO') -%}
+                    {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Estado::FINALIZADO') -%}
                         {{- incidencia.incidencia.apuntes.first.fechaFin ? incidencia.incidencia.apuntes.first.fechaFin|date('Y-m-d, H:i') -}}
                     {%- endif -%}
                 </td>
                 <td>
-                    <a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_show', {id: incidencia.id}) }}">
+                    <a href="{{ path('desempenyo_admin_incidencia_show', {id: incidencia.id}) }}">
                         <em class="mx-1 fas fa-eye" title="Ver apuntes"></em>
                     </a>
-                    <a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_apunte',{'incidencia': incidencia.id}) }}">
+                    <a href="{{ path('desempenyo_admin_incidencia_apunte',{'incidencia': incidencia.id}) }}">
                         <em class="mx-1 fas fa-project-diagram" title="Cambiar estado"></em>
                     </a>
                 </td>
@@ -51,7 +51,7 @@
         </tbody>
         <caption class="mt-4">
             <span class="me-4">Estados</span>
-            {%- for estado in aplicacion.estados|filter(e => e.tipo == constant('App\\Entity\\Sistema\\EstadoTipo::INCIDENCIA') and e.icono is not null) -%}
+            {%- for estado in aplicacion.estados|filter(e => e.tipo == constant('App\\Entity\\EstadoTipo::INCIDENCIA') and e.icono is not null) -%}
                 <span class="me-4 badge {% if estado.color %}text-{{ estado.color }}{% else %}text-black{% endif %}">
                     <em class="fas {{ estado.icono }}"></em> {{ estado.nombre }}</span>
             {%- endfor -%}
@@ -64,7 +64,7 @@
 
 {% block migas %}
     {{ parent() }}
-    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin') }}">Administrador</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('desempenyo_admin') }}">Administrador</a></li>
 {% endblock %}
 
 {% block js %}

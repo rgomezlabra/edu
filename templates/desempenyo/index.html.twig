@@ -4,7 +4,7 @@
 {% block content %}
     {#- Pesos establecidos por defecto #}
     {% set pesos = [34, 56, 10] -%}
-    {% set activos = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO')) -%}
+    {% set activos = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO')) -%}
     <div class="pagina-titulo">
         {{- titulo }}
         {%- if aplicacion.estadoActual and aplicacion.estadoActual.color %}
@@ -305,7 +305,7 @@
                 </li>
             </ul>
         {%- endif %}
-        {% if cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Sistema\\Estado::ARCHIVADO'))|length > 0 -%}
+        {% if cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Estado::ARCHIVADO'))|length > 0 -%}
             <div class="pagina-seccion">Resultados de evaluaciones anteriores</div>
             <ul class="lead my-3">
                 ...
@@ -319,12 +319,12 @@
     {%- for rol in aplicacion.roles|default -%}
         {%- for p in aplicacion.permisos|filter(p => p.usuario == app.user)|filter(r => r.rol == rol) -%}
             {%- if loop.first %}<div class="pagina-seccion">Roles</div>{% endif %}
-            {%- if p.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO') %}
+            {%- if p.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO') %}
                 {%- if p.rol.ruta == 'admin' %}
                     {%- set admin = true -%}
                 {%- endif %}
                 <div class="h5">
-                    <a href="{{ path(aplicacion.ruta ~ '_' ~ rol.ruta) }}">
+                    <a href="{{ path('desempenyo_' ~ rol.ruta) }}">
                         <em class="fas {{ rol.icono }}"></em> {{ rol.nombre }}
                     </a>
                     {% if p.unidad %} <span class="badge rounded-pill">({{ p.unidad.nombre }})</span>{% endif %}
@@ -351,7 +351,7 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path('intranet_usuario_aplicacion') }}"><em class="fas fa-tools"></em> Mis Aplicaciones</a>
+        <a href="{{ path('usuario_aplicacion') }}"><em class="fas fa-tools"></em> Mis Aplicaciones</a>
     </li>
 {% endblock %}
 
@@ -369,7 +369,7 @@
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoHabilita',
         texto: 'Doy mi habilitación para ser evaluado en mi actual puesto desempeñado.',
         cancelar: 'No', aceptar: 'Sí'}) }}
-    {% set activo = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Sistema\\Estado::PUBLICADO'))[0]|default -%}
+    {% set activo = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO'))[0]|default -%}
     {% if activo -%}
         {% set datosProvisional -%}
             <div class="container-fluid py-4 g-4">

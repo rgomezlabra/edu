@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Controller\Intranet;
+namespace App\Controller;
 
 use App\Entity\Cuestiona\Formulario;
 use App\Entity\Cuestiona\Pregunta;
-use App\Entity\Sistema\Estado;
-use App\Entity\Sistema\Usuario;
+use App\Entity\Estado;
+use App\Entity\Usuario;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
 use App\Repository\Desempenyo\TipoIncidenciaRepository;
-use App\Repository\Plantilla\EmpleadoRepository;
-use App\Repository\Sistema\EstadoRepository;
+use App\Repository\EmpleadoRepository;
+use App\Repository\EstadoRepository;
 use App\Service\RutaActual;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(path: 'intranet/desempenyo', name: 'intranet_desempenyo')]
+#[Route(path: 'desempenyo', name: 'desempenyo')]
 class DesempenyoController extends AbstractController
 {
     public function __construct(
@@ -64,7 +64,7 @@ class DesempenyoController extends AbstractController
             }
         }
 
-        return $this->render('intranet/desempenyo/index.html.twig', [
+        return $this->render('desempenyo/index.html.twig', [
             'cuestionarios' => $cuestionarios,
             'evaluados' => $evaluados,
             'evaluaciones' => $evaluaRepository->findBy(['evaluador' => $empleado]),
@@ -93,6 +93,6 @@ class DesempenyoController extends AbstractController
             $this->addFlash('warning', 'No hay cuestionarios de evaluación activos.');
         }
 
-        return $this->render('intranet/desempenyo/admin/index.html.twig');
+        return $this->render('desempenyo/admin/index.html.twig');
     }
 }

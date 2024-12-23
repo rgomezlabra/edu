@@ -4,7 +4,7 @@ namespace App\Repository\Desempenyo;
 
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Desempenyo\Evalua;
-use App\Entity\Plantilla\Empleado;
+use App\Entity\Empleado;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;

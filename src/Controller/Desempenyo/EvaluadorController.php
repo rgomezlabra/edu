@@ -6,17 +6,17 @@ namespace App\Controller\Desempenyo;
 
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Desempenyo\Evalua;
-use App\Entity\Plantilla\Empleado;
-use App\Entity\Sistema\Origen;
-use App\Entity\Sistema\Usuario;
+use App\Entity\Empleado;
+use App\Entity\Origen;
+use App\Entity\Usuario;
 use App\Form\Desempenyo\CorreccionType;
 use App\Form\Desempenyo\EvaluadorType;
 use App\Form\Desempenyo\RegistroType;
-use App\Form\Util\VolcadoType;
+use App\Form\VolcadoType;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
-use App\Repository\Plantilla\EmpleadoRepository;
-use App\Repository\Sistema\OrigenRepository;
+use App\Repository\EmpleadoRepository;
+use App\Repository\OrigenRepository;
 use App\Service\Csv;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
@@ -42,7 +42,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use function Symfony\Component\String\u;
 
-#[Route(path: '/intranet/desempenyo', name: 'intranet_desempenyo_')]
+#[Route(path: '/desempenyo', name: 'desempenyo_')]
 class EvaluadorController extends AbstractController
 {
     /** @var ClientInterface|Redis|RedisArray|RedisCluster $redis */
@@ -63,7 +63,7 @@ class EvaluadorController extends AbstractController
         private readonly string           $redisUrl,
     ) {
         $this->redis = RedisAdapter::createConnection($this->redisUrl);
-        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
+        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'inicio';
         $this->ttl = 60;
     }
 
@@ -115,7 +115,7 @@ class EvaluadorController extends AbstractController
         } catch (Exception) {
         }
 
-        return $this->render('intranet/desempenyo/admin/evaluador/index.html.twig', [
+        return $this->render('desempenyo/admin/evaluador/index.html.twig', [
             'cuestionario' => $cuestionario,
             'evaluaciones' => $evaluaciones,
             'tipo' => $tipo,
@@ -372,7 +372,7 @@ class EvaluadorController extends AbstractController
             ], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('intranet/desempenyo/admin/evaluador/volcado.html.twig', [
+        return $this->render('desempenyo/admin/evaluador/volcado.html.twig', [
             'form' => $form->createView(),
             'cuestionario' => $cuestionario,
             'tipo' => $tipo,
@@ -562,7 +562,7 @@ class EvaluadorController extends AbstractController
             ]);
         }
 
-        return $this->render('intranet/desempenyo/admin/evaluador/_form.html.twig', [
+        return $this->render('desempenyo/admin/evaluador/_form.html.twig', [
             'form' => $form->createView(),
         ]);
     }
@@ -804,7 +804,7 @@ class EvaluadorController extends AbstractController
             ]);
         }
 
-        return $this->render('intranet/desempenyo/admin/evaluador/_form_evaluador.html.twig', [
+        return $this->render('desempenyo/admin/evaluador/_form_evaluador.html.twig', [
             'form' => $form->createView(),
             'empleados' => $empleadoRepository->findCesados(false),
         ]);

@@ -63,10 +63,10 @@
                     <td {% if (media * 6) < 20 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|number_format(2, ',' ) }}</td>
                     <td>{{ 0|number_format(2, ',' ) }}</td>
                     <td>
-                        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
+                        <a href="{{ path('desempenyo_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
                             <em class="mx-1 fas fa-table" title="Matriz de resultados"></em>
                         </a>
-                        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado, detalle: true}) }}">
+                        <a href="{{ path('desempenyo_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado, detalle: true}) }}">
                             <em class="mx-1 fas fa-table-cells" title="Matriz detallada"></em>
                         </a>
                         <em class="mx-1 fas fa-pen-clip" title="Correción tribunal"></em>
@@ -84,7 +84,7 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
+        <a href="{{ path('desempenyo_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
     </li>
 {% endblock %}
 

@@ -76,16 +76,16 @@
 {% endblock %}
 
 {% block botones %}
-    {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Sistema\\Estado::INICIADO') %}
+    {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Estado::INICIADO') %}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_edit', {codigo: incidencia.cuestionario.url|u.afterLast('/'), id: incidencia.id}) }}">
+               href="{{ path('desempenyo_formulario_incidencia_edit', {codigo: incidencia.cuestionario.url|u.afterLast('/'), id: incidencia.id}) }}">
                 <em class="fas fa-edit"></em> Editar
             </a>
         </li>
             <li class="nav-item ms-5 me-2">
                 <form method="post"
-                      action="{{ path(aplicacion.ruta ~ '_formulario_incidencia_delete', {codigo: incidencia.cuestionario.url|u.afterLast('/'), id: incidencia.id}) }}"
+                      action="{{ path('desempenyo_formulario_incidencia_delete', {codigo: incidencia.cuestionario.url|u.afterLast('/'), id: incidencia.id}) }}"
                       onsubmit="return confirm('¿Eliminar la incidencia actual?');">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ incidencia.id) }}">
                     <button class="btn btn-primary"><em class="fas fa-trash"></em> Eliminar</button>
@@ -99,7 +99,7 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_index', {codigo: incidencia.cuestionario.url|u.afterLast('/')}) }}">
+        <a href="{{ path('desempenyo_formulario_incidencia_index', {codigo: incidencia.cuestionario.url|u.afterLast('/')}) }}">
             Incidencias
         </a>
     </li>

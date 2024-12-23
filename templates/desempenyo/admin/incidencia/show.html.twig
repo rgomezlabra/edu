@@ -54,8 +54,8 @@
                         <td>{{ apunte.comentario }}</td>
                         <td>{{ apunte.autor.persona }}</td>
                         <td>
-                            {%- if incidencia.incidencia.apuntes.last.estado.nombre|default != constant('App\\Entity\\Sistema\\Estado::FINALIZADO')  and loop.last %}
-                                <a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_apunte',{'incidencia': incidencia.id, 'apunte': apunte.id}) }}">
+                            {%- if incidencia.incidencia.apuntes.last.estado.nombre|default != constant('App\\Entity\\Estado::FINALIZADO')  and loop.last %}
+                                <a href="{{ path('desempenyo_admin_incidencia_apunte',{'incidencia': incidencia.id, 'apunte': apunte.id}) }}">
                                     <em class="mx-1 fas fa-edit" title="Editar"></em>
                                 </a>
                             {%- endif %}
@@ -85,7 +85,7 @@
 {% block botones %}
     <li class="nav-item me-2">
         <a class="btn btn-primary"
-           href="{{ path(aplicacion.ruta ~ '_admin_incidencia_apunte',{'incidencia': incidencia.id}) }}">
+           href="{{ path('desempenyo_admin_incidencia_apunte',{'incidencia': incidencia.id}) }}">
             <em class="fas fa-project-diagram"></em> Cambiar estado
         </a>
     </li>
@@ -95,7 +95,7 @@
 
 {% block migas %}
     {{ parent() }}
-    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_index') }}">Incidencias</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('desempenyo_admin_incidencia_index') }}">Incidencias</a></li>
 {% endblock %}
 
 {% block js %}

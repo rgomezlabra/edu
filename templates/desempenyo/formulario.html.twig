@@ -104,7 +104,7 @@
                                             <div class="fw-bold" title="{{ pregunta.descripcion|raw }}">{{ pregunta }}</div>
                                         </div>
                                         {%- if editar %}
-                                            {{- include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {
+                                            {{- include('desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {
                                                 etiqueta: 'preg_' ~ pregunta.id, valor: respuestas[pregunta.id]|default(puntos_iniciales)}) }}
                                         {%- else %}
                                             <div class="col-2">{{ respuestas[pregunta.id].valor|default }}</div>
@@ -157,7 +157,7 @@
                                             <div class="fw-bold" title="{{ pregunta.descripcion|raw }}">{{ pregunta }}</div>
                                         </div>
                                         {%- if preguntas is defined and preguntas|length > 0 %}
-                                            {{- include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {
+                                            {{- include('desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {
                                                 etiqueta: 'preg_' ~ pregunta.id, valor: respuestas[pregunta.id]|default(puntos_iniciales)}) }}
                                         {%- else %}
                                             <div class="col-2">{{ respuestas[pregunta.id].valor|default }}</div>
@@ -212,9 +212,9 @@
                         </div>
                     {%- else %}
                         {%- if evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
-                            {%- set url = path(aplicacion.ruta ~ '_formulario_pdf', {codigo: codigo}) -%}
+                            {%- set url = path('desempenyo_formulario_pdf', {codigo: codigo}) -%}
                         {%- else %}
-                            {%- set url = path(aplicacion.ruta ~ '_formulario_pdf', {codigo: codigo, id: evalua.empleado.id}) -%}
+                            {%- set url = path('desempenyo_formulario_pdf', {codigo: codigo, id: evalua.empleado.id}) -%}
                         {%- endif %}
                         <a class="btn btn-primary" title="Descargar PDF de la evaluación" href="{{ url }}">
                             <em class="me-1 fas fa-file-pdf"></em>PDF

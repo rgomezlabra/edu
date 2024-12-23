@@ -62,10 +62,10 @@
 {% endblock %}
 
 {% block botones %}
-    {%- if cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
+    {%- if cuestionario.estado.nombre == constant('App\\Entity\\Estado::BORRADOR') %}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_pregunta_edit', {cuestionario: cuestionario.id, grupo: grupo.id, pregunta: pregunta.id}) }}">
+               href="{{ path('desempenyo_admin_pregunta_edit', {cuestionario: cuestionario.id, grupo: grupo.id, pregunta: pregunta.id}) }}">
                 <em class="fas fa-edit"></em> Editar
             </a>
         </li>
@@ -75,7 +75,7 @@
             <em class="fas fa-video"></em> Simular
         </a>
     </li>
-    {%- if pregunta.grupo.cuestionario.estado.nombre == constant('App\\Entity\\Sistema\\Estado::BORRADOR') %}
+    {%- if pregunta.grupo.cuestionario.estado.nombre == constant('App\\Entity\\Estado::BORRADOR') %}
         <li class="nav-item ms-5 me-2">
             {{ include(path(aplicacion.ruta) ~ '/admin/pregunta/_delete_form.html.twig') }}
         </li>
@@ -85,7 +85,7 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {cuestionario: cuestionario.id, grupo: grupo.id}) }}">Preguntas</a>
+        <a href="{{ path('desempenyo_admin_pregunta_index', {cuestionario: cuestionario.id, grupo: grupo.id}) }}">Preguntas</a>
     </li>
 {% endblock %}
 
@@ -105,7 +105,7 @@
                         </div>
                         <div>{{ pregunta.descripcion|raw }}</div>
                     </div>
-                    {{ include('intranet/desempenyo/admin/pregunta/_pregunta_' ~ tipos[pregunta.tipo].fichero ~ '.html.twig')  }}
+                    {{ include('desempenyo/admin/pregunta/_pregunta_' ~ tipos[pregunta.tipo].fichero ~ '.html.twig')  }}
                 </div>
                 <div>
                     <button id="enviar" class="btn btn-primary float-end">Enviar</button>

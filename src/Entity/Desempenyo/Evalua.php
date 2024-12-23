@@ -4,9 +4,9 @@ namespace App\Entity\Desempenyo;
 
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Cuestiona\Formulario;
-use App\Entity\Plantilla\Empleado;
-use App\Entity\Sistema\Origen;
-use App\Entity\Sistema\Usuario;
+use App\Entity\Empleado;
+use App\Entity\Origen;
+use App\Entity\Usuario;
 use App\Repository\Desempenyo\EvaluaRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;

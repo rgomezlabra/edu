@@ -23,10 +23,10 @@
                 <td>{{ tipo.descripcion }}</td>
                 <td>{{ num_incidencias[tipo.id]|default(0) }}</td>
                 <td>
-                    <a href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_show', {'id': tipo.id}) }}">
+                    <a href="{{ path('desempenyo_admin_tipo_incidencia_show', {'id': tipo.id}) }}">
                         <em class="mx-1 fas fa-eye" title="Ver"></em>
                     </a>
-                    <a href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_edit', {'id': tipo.id}) }}">
+                    <a href="{{ path('desempenyo_admin_tipo_incidencia_edit', {'id': tipo.id}) }}">
                         <em class="mx-1 fas fa-edit" title="Editar"></em>
                     </a>
                 </td>
@@ -38,7 +38,7 @@
 
 {% block botones %}
     <li class="nav-item me-2">
-        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_new') }}">
+        <a class="btn btn-primary" href="{{ path('desempenyo_admin_tipo_incidencia_new') }}">
             <em class="fas fa-plus"></em> Crear tipo
         </a>
     </li>
@@ -46,7 +46,7 @@
 
 {% block migas %}
     {{ parent() }}
-    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin') }}">Administrador</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('desempenyo_admin') }}">Administrador</a></li>
 {% endblock %}
 
 {% block js %}

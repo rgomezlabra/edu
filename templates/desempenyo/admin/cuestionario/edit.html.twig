@@ -12,6 +12,6 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
+        <a href="{{ path('desempenyo_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
     </li>
 {% endblock %}

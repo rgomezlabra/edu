@@ -46,7 +46,7 @@
                     <td>{{ evaluacion.empleado.persona }}</td>
                     <td>
                         <a class="rechazar" href="" data-persona="{{ evaluacion.empleado.persona }}"
-                           data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_rechaza', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
+                           data-url="{{ path('desempenyo_admin_evaluador_rechaza', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                             <em class="mx-1 fas fa-remove" title="Rechazar evaluación"></em>
                         </a>
                     </td>
@@ -153,7 +153,7 @@
                     <td>
                         {%- if evaluacion.formulario.fechaGrabacion is not defined %}
                             <a class="asignar"
-                               data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_asigna', {
+                               data-url="{{ path('desempenyo_admin_evaluador_asigna', {
                                    cuestionario: cuestionario.id,
                                    empleado: empleado.id,
                                    tipo: tipo
@@ -162,7 +162,7 @@
                             </a>
                             {%- if evaluador %}
                                 <form method="post" class="d-inline"
-                                      action="{{ path(aplicacion.ruta ~ '_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion[tipo].id}) }}"
+                                      action="{{ path('desempenyo_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion[tipo].id}) }}"
                                       onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluador.persona }} sobre {{ empleado.persona }}?');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cuestionario.id ~ '-' ~ evaluacion[tipo].id) }}">
                                     <button class="border-0 text-primary">
@@ -209,11 +209,11 @@
                     <td>{{ evaluacion.registrado ? evaluacion.registrado|date('Y-m-d') }}</td>
                     <td>
                         <a class="registrar" href=""
-                           data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_registra', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
+                           data-url="{{ path('desempenyo_admin_evaluador_registra', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                             <em class="fas fa-save" title="Registrar"></em>
                         </a>
                         <a class="recuperar" href="" data-persona="{{ evaluacion.empleado.persona }}"
-                           data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_recupera', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
+                           data-url="{{ path('desempenyo_admin_evaluador_recupera', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                             <em class="mx-1 fas fa-check" title="Recuperar evaluación"></em>
                         </a>
                     </td>
@@ -270,7 +270,7 @@
     {% if tipo in [tipoNo, tipoAuto, tipoResp, tipoOtro] -%}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id}) }}">
+               href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id}) }}">
                 <em class="fas fa-table"></em> Ver todos
             </a>
         </li>
@@ -278,7 +278,7 @@
     {% if tipo != tipoAuto -%}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: tipoAuto}) }}">
+               href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoAuto}) }}">
                 <em class="fas fa-users"></em> Ver empleados
             </a>
         </li>
@@ -286,7 +286,7 @@
     {% if tipo != tipoResp -%}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: tipoResp}) }}">
+               href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoResp}) }}">
                 <em class="fas fa-user-check"></em> Ver responsables
             </a>
         </li>
@@ -294,7 +294,7 @@
     {% if cuestionario.configuracion.peso3|default(0) > 0 and tipo != tipoOtro -%}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: tipoOtro}) }}">
+               href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoOtro}) }}">
                 <em class="fas fa-user-pen"></em> Ver otros
             </a>
         </li>
@@ -302,7 +302,7 @@
     {% if tipo != tipoNo -%}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_index', {id: cuestionario.id, tipo: tipoNo}) }}">
+               href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoNo}) }}">
                 <em class="fas fa-user-times"></em> Ver rechazados
             </a>
         </li>
@@ -310,20 +310,20 @@
     {% if tipo == tipoAuto -%}
         <li class="nav-item ms-5 me-2">
             <button class="btn btn-primary cargar" id="cargarEmpleados"
-                    data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_auto', {id: cuestionario.id}) }}">
+                    data-url="{{ path('desempenyo_admin_evaluador_auto', {id: cuestionario.id}) }}">
                 <em class="fas fa-person-arrow-down-to-line"></em> Cargar empleados
             </button>
         </li>
     {% elseif tipo == tipoResp -%}
         <li class="nav-item ms-5 me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id, tipo: 'evaluador'}) }}">
+               href="{{ path('desempenyo_admin_evaluador_carga', {id: cuestionario.id, tipo: 'evaluador'}) }}">
                 <em class="fas fa-file-upload"></em> Cargar desde CSV
             </a>
         </li>
         <li class="nav-item me-2">
             <button class="btn btn-primary cargar" id="cargarValida"
-                    data-url="{{ path(aplicacion.ruta ~ '_admin_evaluador_volcado', {id: cuestionario.id}) }}">
+                    data-url="{{ path('desempenyo_admin_evaluador_volcado', {id: cuestionario.id}) }}">
                 <em class="fas fa-cloud-upload"></em> Cargar desde Temponet
             </button>
         </li>
@@ -331,7 +331,7 @@
     {% if tipo == tipoOtro -%}
         <li class="nav-item ms-5 me-2">
             <a class="btn btn-primary"
-               href="{{ path(aplicacion.ruta ~ '_admin_evaluador_carga', {id: cuestionario.id, tipo: 'otro'}) }}">
+               href="{{ path('desempenyo_admin_evaluador_carga', {id: cuestionario.id, tipo: 'otro'}) }}">
                 <em class="fas fa-file-upload"></em> Cargar desde CSV
             </a>
     </li>
@@ -341,7 +341,7 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
+        <a href="{{ path('desempenyo_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
     </li>
 {% endblock %}
 

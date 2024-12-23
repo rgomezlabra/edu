@@ -5,8 +5,8 @@ namespace App\Controller\Desempenyo;
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Cuestiona\Grupo;
 use App\Entity\Cuestiona\Pregunta;
-use App\Entity\Sistema\Aplicacion;
-use App\Entity\Sistema\Estado;
+use App\Entity\Aplicacion;
+use App\Entity\Estado;
 use App\Form\Cuestiona\PreguntaType;
 use App\Repository\Cuestiona\PreguntaRepository;
 use App\Service\MessageGenerator;
@@ -41,15 +41,15 @@ class PreguntaController extends AbstractController
         private readonly RutaActual         $actual,
         private readonly PreguntaRepository $preguntaRepository,
     ) {
-        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
+        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'inicio';
     }
 
     #[Route(
         path: [
-            '/intranet/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta',
+            '/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta',
             '/{cuestionario}/pregunta',
         ],
-        name: 'intranet_desempenyo_admin_pregunta_index',
+        name: 'desempenyo_admin_pregunta_index',
         defaults: ['titulo' => 'Preguntas de Desempeño'],
         methods: ['GET']
     )]
@@ -65,7 +65,7 @@ class PreguntaController extends AbstractController
             $cuestionario
         );
 
-        return $this->render('intranet/desempenyo/admin/pregunta/index.html.twig', [
+        return $this->render('desempenyo/admin/pregunta/index.html.twig', [
             'cuestionario' => $cuestionario,
             'grupo' => $grupo,
             'preguntas' => $preguntas,
@@ -74,8 +74,8 @@ class PreguntaController extends AbstractController
     }
 
     #[Route(
-        path: '/intranet/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta/new',
-        name: 'intranet_desempenyo_admin_pregunta_new',
+        path: '/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta/new',
+        name: 'desempenyo_admin_pregunta_new',
         defaults: ['titulo' => 'Nueva Pregunta de Desempeño'],
         methods: ['GET', 'POST']
     )]
@@ -131,7 +131,7 @@ class PreguntaController extends AbstractController
             ], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('intranet/desempenyo/admin/pregunta/new.html.twig', [
+        return $this->render('desempenyo/admin/pregunta/new.html.twig', [
             'cuestionario' => $cuestionario,
             'grupo' => $grupo,
             'pregunta' => $pregunta,
@@ -142,8 +142,8 @@ class PreguntaController extends AbstractController
     }
 
     #[Route(
-        path: '/intranet/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta/{pregunta}/',
-        name: 'intranet_desempenyo_admin_pregunta_show',
+        path: '/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta/{pregunta}/',
+        name: 'desempenyo_admin_pregunta_show',
         defaults: ['titulo' => 'Pregunta de Desempeño'],
         methods: ['GET']
     )]
@@ -155,7 +155,7 @@ class PreguntaController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        return $this->render('intranet/desempenyo/admin/pregunta/show.html.twig', [
+        return $this->render('desempenyo/admin/pregunta/show.html.twig', [
             'cuestionario' => $cuestionario,
             'grupo' => $grupo,
             'pregunta' => $pregunta,
@@ -164,8 +164,8 @@ class PreguntaController extends AbstractController
     }
 
     #[Route(
-        path: '/intranet/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta/{pregunta}/edit',
-        name: 'intranet_desempenyo_admin_pregunta_edit',
+        path: '/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta/{pregunta}/edit',
+        name: 'desempenyo_admin_pregunta_edit',
         defaults: ['titulo' => 'Editar Pregunta de Desempeño'],
         methods: ['GET', 'POST']
     )]
@@ -214,7 +214,7 @@ class PreguntaController extends AbstractController
             );
         }
 
-        return $this->render('intranet/desempenyo/admin/pregunta/edit.html.twig', [
+        return $this->render('desempenyo/admin/pregunta/edit.html.twig', [
             'cuestionario' => $cuestionario,
             'grupo' => $grupo,
             'pregunta' => $pregunta,
@@ -225,8 +225,8 @@ class PreguntaController extends AbstractController
     }
 
     #[Route(
-        path: '/intranet/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta/{pregunta}',
-        name: 'intranet_desempenyo_admin_pregunta_delete',
+        path: '/desempenyo/admin/cuestionario/{cuestionario}/grupo/{grupo}/pregunta/{pregunta}',
+        name: 'desempenyo_admin_pregunta_delete',
         defaults: ['titulo' => 'Eliminar Pregunta de Desempeño'],
         methods: ['POST']
     )]
@@ -252,7 +252,7 @@ class PreguntaController extends AbstractController
             ]);
         }
 
-        return $this->redirectToRoute('intranet_desempenyo_admin_pregunta_index', [
+        return $this->redirectToRoute('desempenyo_admin_pregunta_index', [
             'cuestionario' => $cuestionario->getId(),
             'grupo' => $grupo->getId(),
         ], Response::HTTP_SEE_OTHER);

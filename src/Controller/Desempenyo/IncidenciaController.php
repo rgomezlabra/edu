@@ -6,15 +6,15 @@ use App\Entity\Cirhus\Incidencia as CirhusIncidencia;
 use App\Entity\Cirhus\IncidenciaApunte;
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Desempenyo\Incidencia;
-use App\Entity\Sistema\Estado;
-use App\Entity\Sistema\Usuario;
+use App\Entity\Estado;
+use App\Entity\Usuario;
 use App\Form\Cirhus\IncidenciaApunteType;
 use App\Form\Desempenyo\IncidenciaType;
 use App\Repository\Cirhus\IncidenciaApunteRepository;
 use App\Repository\Cirhus\IncidenciaRepository as CirhusIncidenciaRepository;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\IncidenciaRepository;
-use App\Repository\Sistema\EstadoRepository;
+use App\Repository\EstadoRepository;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
 use DateTimeImmutable;
@@ -28,7 +28,7 @@ use function Symfony\Component\String\u;
  * Controlador para gestionar incidencias de evaluación de desempeño.
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
-#[Route(path: '/intranet/desempenyo', name: 'intranet_desempenyo_')]
+#[Route(path: '/desempenyo', name: 'desempenyo_')]
 class IncidenciaController extends AbstractController
 {
     /** @var string $rutaBase Ruta base de la aplicación actual */
@@ -53,7 +53,7 @@ class IncidenciaController extends AbstractController
     {
         $this->denyAccessUnlessGranted('admin');
 
-        return $this->render('intranet/desempenyo/admin/incidencia/index.html.twig', [
+        return $this->render('desempenyo/admin/incidencia/index.html.twig', [
             'incidencias' => $this->incidenciaRepository->findAll(),
         ]);
     }
@@ -75,7 +75,7 @@ class IncidenciaController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        return $this->render('intranet/desempenyo/incidencia_index.html.twig', [
+        return $this->render('desempenyo/incidencia_index.html.twig', [
             'codigo' => $codigo,
             'incidencias' => $this->incidenciaRepository->findByConectado($cuestionario),
         ]);
@@ -143,7 +143,7 @@ class IncidenciaController extends AbstractController
             );
         }
 
-        return $this->render('intranet/desempenyo/incidencia_edit.html.twig', [
+        return $this->render('desempenyo/incidencia_edit.html.twig', [
             'incidencia' => $incidencia,
             'form' => $form->createView(),
         ]);
@@ -197,7 +197,7 @@ class IncidenciaController extends AbstractController
             );
         }
 
-        return $this->render('intranet/desempenyo/incidencia_edit.html.twig', [
+        return $this->render('desempenyo/incidencia_edit.html.twig', [
             'incidencia' => $incidencia,
             'button_label' => 'Actualizar',
             'form' => $form->createView(),
@@ -214,7 +214,7 @@ class IncidenciaController extends AbstractController
     {
         $this->denyAccessUnlessGranted('admin');
 
-        return $this->render('intranet/desempenyo/admin/incidencia/show.html.twig', [
+        return $this->render('desempenyo/admin/incidencia/show.html.twig', [
             'incidencia' => $incidencia,
         ]);
     }
@@ -240,7 +240,7 @@ class IncidenciaController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        return $this->render('intranet/desempenyo/incidencia_show.html.twig', [
+        return $this->render('desempenyo/incidencia_show.html.twig', [
             'incidencia' => $incidencia,
         ]);
     }
@@ -388,7 +388,7 @@ class IncidenciaController extends AbstractController
             );
         }
 
-        return $this->render('intranet/desempenyo/admin/incidencia/apunte.html.twig', [
+        return $this->render('desempenyo/admin/incidencia/apunte.html.twig', [
             'incidencia' => $incidencia,
             'titulo' => sprintf('%s Apunte de Incidencia para Evaluación de Desempeño', $nuevo ? 'Nuevo' : 'Editar'),
             'button_label' => $nuevo ? '' : 'Actualizar',

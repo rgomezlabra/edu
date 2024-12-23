@@ -6,7 +6,7 @@
     <div class="pagina-seccion">Gestionar cuestionarios de evaluación</div>
     <ul>
         <li>
-            <a href="{{ path(aplicacion.ruta ~ '_admin_cuestionario_index') }}">
+            <a href="{{ path('desempenyo_admin_cuestionario_index') }}">
                 Definir cuestionarios de evaluación y cargar datos de evaluadores
             </a>
         </li>
@@ -14,9 +14,9 @@
 
     <div class="pagina-seccion">Gestionar componentes de la aplicación</div>
     <ul>
-        <li><a href="{{ path(aplicacion.ruta ~ '_admin_incidencia_index') }}">Gestionar incidencias</a></li>
-        <li><a href="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_index') }}">Definir tipos de incidencias</a></li>
-        <li><a href="{{ path(aplicacion.ruta ~ '_admin_log_index') }}">Ver registro de operaciones</a></li>
+        <li><a href="{{ path('desempenyo_admin_incidencia_index') }}">Gestionar incidencias</a></li>
+        <li><a href="{{ path('desempenyo_admin_tipo_incidencia_index') }}">Definir tipos de incidencias</a></li>
+        <li><a href="{{ path('desempenyo_admin_log_index') }}">Ver registro de operaciones</a></li>
     </ul>
 {% endblock %}
 

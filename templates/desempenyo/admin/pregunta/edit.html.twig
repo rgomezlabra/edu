@@ -13,7 +13,7 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta ~ '_admin_pregunta_index', {cuestionario: cuestionario.id, grupo: grupo.id}) }}">Preguntas</a>
+        <a href="{{ path('desempenyo_admin_pregunta_index', {cuestionario: cuestionario.id, grupo: grupo.id}) }}">Preguntas</a>
     </li>
 {% endblock %}
 
@@ -22,9 +22,9 @@
 {% block js %}
     {{ parent() }}
     <script type="module">
-        {{ include('intranet/cuestiona/admin/pregunta/_form.js') }}
+        {{ include('cuestiona/admin/pregunta/_form.js') }}
         {%- if tipos[pregunta.tipo].dinamico %}
-            {{ include('intranet/cuestiona/admin/pregunta/_form_dinamico.js') }}
+            {{ include('cuestiona/admin/pregunta/_form_dinamico.js') }}
         {%- endif %}
     </script>
 {% endblock %}

@@ -1,4 +1,4 @@
-<form method="post" action="{{ path(aplicacion.ruta ~ '_admin_tipo_incidencia_delete', {id: tipo.id}) }}"
+<form method="post" action="{{ path('desempenyo_admin_tipo_incidencia_delete', {id: tipo.id}) }}"
       onsubmit="return confirm('¿Eliminar el tipo de incidencias {{ tipo.nombre }}?');">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ tipo.id) }}">
     <button class="btn btn-primary"><em class="fas fa-trash"></em> Eliminar</button>

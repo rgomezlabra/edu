@@ -7,15 +7,15 @@ use App\Entity\Cuestiona\Formulario;
 use App\Entity\Cuestiona\Pregunta;
 use App\Entity\Cuestiona\Respuesta;
 use App\Entity\Desempenyo\Evalua;
-use App\Entity\Plantilla\Empleado;
-use App\Entity\Sistema\Estado;
-use App\Entity\Sistema\Usuario;
+use App\Entity\Empleado;
+use App\Entity\Estado;
+use App\Entity\Usuario;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Cuestiona\FormularioRepository;
 use App\Repository\Cuestiona\PreguntaRepository;
 use App\Repository\Cuestiona\RespuestaRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
-use App\Repository\Plantilla\EmpleadoRepository;
+use App\Repository\EmpleadoRepository;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
 use App\Service\SirhusLock;
@@ -33,7 +33,7 @@ use function Symfony\Component\String\u;
  * Controlador para gestionar formularios de evaluación del desempeño.
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
-#[Route(path: '/intranet/desempenyo', name: 'intranet_desempenyo_')]
+#[Route(path: '/desempenyo', name: 'desempenyo_')]
 class FormularioController extends AbstractController
 {
     /** @var string $rutaBase Ruta base de la aplicación actual */
@@ -50,7 +50,7 @@ class FormularioController extends AbstractController
         private readonly SirhusLock       $lock,
         private readonly EvaluaRepository $evaluaRepository,
     ) {
-        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
+        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'inicio';
         $this->ttl = 300;
     }
 
@@ -91,7 +91,7 @@ class FormularioController extends AbstractController
             ];
         }
 
-        return $this->render('intranet/desempenyo/admin/cuestionario/resultado.html.twig', [
+        return $this->render('desempenyo/admin/cuestionario/resultado.html.twig', [
             'cuestionario' => $cuestionario,
             'datos' => $datos,
         ]);
@@ -113,7 +113,7 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        return $this->render('intranet/cuestiona/admin/formulario/show.html.twig', [
+        return $this->render('cuestiona/admin/formulario/show.html.twig', [
             'cuestionario' => $formulario->getCuestionario(),
             'evaluacion' => $evalua,
         ]);
@@ -155,7 +155,7 @@ class FormularioController extends AbstractController
             $medias[$formulario->getTipoEvaluador()] = $total / $n;
         }
 
-        return $this->render('intranet/desempenyo/admin/cuestionario/matriz.html.twig', [
+        return $this->render('desempenyo/admin/cuestionario/matriz.html.twig', [
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
             'formularios' => $formularios,
@@ -320,7 +320,7 @@ class FormularioController extends AbstractController
         }
 
         // Generar PDF
-        $html = $this->renderView('intranet/desempenyo/formulario_pdf.html.twig', [
+        $html = $this->renderView('desempenyo/formulario_pdf.html.twig', [
             'codigo' => $codigo,
             'evalua' => $evalua,
             'respuestas' => $respuestas,
@@ -417,7 +417,7 @@ class FormularioController extends AbstractController
                 }
 
                 if ($formulario->getFechaEnvio() instanceof DateTimeImmutable) {
-                    return $this->render('intranet/desempenyo/formulario.html.twig', [
+                    return $this->render('desempenyo/formulario.html.twig', [
                         'evalua' => $evalua,
                         'respuestas' => $respuestas,
                         'codigo' => $codigo,
@@ -425,7 +425,7 @@ class FormularioController extends AbstractController
                 }
             }
 
-            return $this->render('intranet/desempenyo/formulario.html.twig', [
+            return $this->render('desempenyo/formulario.html.twig', [
                 'evalua' => $evalua,
                 'respuestas' => $respuestas,
                 'codigo' => $codigo,
@@ -606,7 +606,7 @@ class FormularioController extends AbstractController
             }
         }
 
-        return $this->render('intranet/desempenyo/formulario_compara.html.twig', [
+        return $this->render('desempenyo/formulario_compara.html.twig', [
             'respuestas' => $respuestas,
             'codigo' => $codigo,
         ]);

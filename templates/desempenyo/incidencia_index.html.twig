@@ -30,12 +30,12 @@
                 <td>{{ incidencia.tipo.nombre }}</td>
                 <td>{{ incidencia.incidencia.apuntes.first.fechaInicio ? incidencia.incidencia.apuntes.first.fechaInicio|date('Y-m-d, H:i') }}</td>
                 <td>
-                    {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Sistema\\Estado::FINALIZADO') -%}
+                    {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Estado::FINALIZADO') -%}
                         {{- incidencia.incidencia.apuntes.first.fechaFin ? incidencia.incidencia.apuntes.first.fechaFin|date('Y-m-d, H:i') -}}
                     {%- endif -%}
                 </td>
                 <td>
-                    <a href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_show', {codigo: codigo, id: incidencia.id}) }}">
+                    <a href="{{ path('desempenyo_formulario_incidencia_show', {codigo: codigo, id: incidencia.id}) }}">
                         <em class="mx-1 fas fa-eye" title="Ver apuntes"></em>
                     </a>
                 </td>
@@ -44,7 +44,7 @@
         </tbody>
         <caption class="mt-4">
             <span class="me-4">Estados</span>
-            {%- for estado in aplicacion.estados|filter(e => e.tipo == constant('App\\Entity\\Sistema\\EstadoTipo::INCIDENCIA') and e.icono is not null) -%}
+            {%- for estado in aplicacion.estados|filter(e => e.tipo == constant('App\\Entity\\EstadoTipo::INCIDENCIA') and e.icono is not null) -%}
                 <span class="me-4 badge {% if estado.color %}text-{{ estado.color }}{% else %}text-black{% endif %}">
                     <em class="fas {{ estado.icono }}"></em> {{ estado.nombre }}</span>
             {%- endfor -%}
@@ -54,7 +54,7 @@
 
 {% block botones %}
     <li class="nav-item me-2">
-        <a class="btn btn-primary" href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_new', {codigo: codigo}) }}">
+        <a class="btn btn-primary" href="{{ path('desempenyo_formulario_incidencia_new', {codigo: codigo}) }}">
             <em class="fas fa-plus"></em> Crear incidencia
         </a>
     </li>

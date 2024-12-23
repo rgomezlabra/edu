@@ -3,13 +3,13 @@
 namespace App\Controller\Desempenyo;
 
 use App\Entity\Cuestiona\Cuestionario;
-use App\Entity\Sistema\Estado;
-use App\Entity\Sistema\Usuario;
+use App\Entity\Estado;
+use App\Entity\Usuario;
 use App\Form\Cuestiona\CuestionarioType;
 use App\Form\Cuestiona\PeriodoValidezType;
 use App\Form\Desempenyo\ConfiguraCuestionarioType;
 use App\Repository\Cuestiona\CuestionarioRepository;
-use App\Repository\Sistema\EstadoRepository;
+use App\Repository\EstadoRepository;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;
 use App\Service\Slug;
@@ -23,7 +23,7 @@ use Symfony\Component\Routing\Attribute\Route;
  * Controlador para gestionar cuestionarios para evaluación de desempeño.
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
-#[Route(path: '/intranet/desempenyo/admin/cuestionario', name: 'intranet_desempenyo_admin_cuestionario_')]
+#[Route(path: '/desempenyo/admin/cuestionario', name: 'desempenyo_admin_cuestionario_')]
 class CuestionarioController extends AbstractController
 {
     /** @var string $rutaBase Ruta base de la aplicación actual */
@@ -34,7 +34,7 @@ class CuestionarioController extends AbstractController
         private readonly RutaActual             $actual,
         private readonly CuestionarioRepository $cuestionarioRepository,
     ) {
-        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
+        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'inicio';
     }
 
     #[Route(
@@ -47,7 +47,7 @@ class CuestionarioController extends AbstractController
     {
         $this->denyAccessUnlessGranted('admin');
 
-        return $this->render('intranet/desempenyo/admin/cuestionario/index.html.twig', [
+        return $this->render('desempenyo/admin/cuestionario/index.html.twig', [
             'cuestionarios' => $this->cuestionarioRepository->findBy(['aplicacion' => $this->actual->getAplicacion()]),
         ]);
     }
@@ -86,7 +86,7 @@ class CuestionarioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase . '_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('intranet/desempenyo/admin/cuestionario/new.html.twig', [
+        return $this->render('desempenyo/admin/cuestionario/new.html.twig', [
             'cuestionario' => $cuestionario,
             'form' => $form->createView(),
         ]);
@@ -107,7 +107,7 @@ class CuestionarioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        return $this->render('intranet/desempenyo/admin/cuestionario/show.html.twig', [
+        return $this->render('desempenyo/admin/cuestionario/show.html.twig', [
             'cuestionario' => $cuestionario,
         ]);
     }
@@ -151,7 +151,7 @@ class CuestionarioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase . '_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('intranet/desempenyo/admin/cuestionario/edit.html.twig', [
+        return $this->render('desempenyo/admin/cuestionario/edit.html.twig', [
             'cuestionario' => $cuestionario,
             'form' => $form->createView(),
         ]);
@@ -220,12 +220,12 @@ class CuestionarioController extends AbstractController
                 'codigo' => $cuestionario->getCodigo(),
             ]);
 
-            return $this->render('intranet/desempenyo/admin/cuestionario/activo.html.twig', [
+            return $this->render('desempenyo/admin/cuestionario/activo.html.twig', [
                 'cuestionario' => $cuestionario,
             ]);
         }
 
-        return $this->render('intranet/desempenyo/admin/cuestionario/edit.html.twig', [
+        return $this->render('desempenyo/admin/cuestionario/edit.html.twig', [
             'cuestionario' => $cuestionario,
             'form' => $form->createView(),
         ]);
@@ -251,7 +251,7 @@ class CuestionarioController extends AbstractController
         $cuestionario->setEstado($borrador);
         $this->cuestionarioRepository->save($cuestionario, true);
 
-        return $this->render('intranet/desempenyo/admin/cuestionario/show.html.twig', [
+        return $this->render('desempenyo/admin/cuestionario/show.html.twig', [
             'cuestionario' => $cuestionario,
         ]);
     }

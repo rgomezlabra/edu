@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
  * Controlador para gestionar tipos de incidencias para evaluación de desempeño.
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
-#[Route(path: '/intranet/desempenyo/admin/tipo_incidencia', name: 'intranet_desempenyo_admin_tipo_incidencia_')]
+#[Route(path: '/desempenyo/admin/tipo_incidencia', name: 'desempenyo_admin_tipo_incidencia_')]
 class TipoIncidenciaController extends AbstractController
 {
     /** @var string $rutaBase Ruta base de la aplicación actual */
@@ -28,7 +28,7 @@ class TipoIncidenciaController extends AbstractController
         private readonly RutaActual               $actual,
         private readonly TipoIncidenciaRepository $tipoRepository,
     ) {
-        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet_inicio';
+        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'inicio';
     }
 
     #[Route(
@@ -46,7 +46,7 @@ class TipoIncidenciaController extends AbstractController
             $numIncidencias[$tipo->getId() ?? 0] = $incidenciaRepository->count(['tipo' => $tipo]);
         }
 
-        return $this->render('intranet/desempenyo/admin/tipo_incidencia/index.html.twig', [
+        return $this->render('desempenyo/admin/tipo_incidencia/index.html.twig', [
             'tipos' => $this->tipoRepository->findAll(),
             'num_incidencias' => $numIncidencias,
         ]);
@@ -75,7 +75,7 @@ class TipoIncidenciaController extends AbstractController
             return $this->redirectToRoute($this->rutaBase . '_admin_tipo_incidencia_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('intranet/desempenyo/admin/tipo_incidencia/new.html.twig', [
+        return $this->render('desempenyo/admin/tipo_incidencia/new.html.twig', [
             'tipo' => $tipo,
             'form' => $form->createView(),
         ]);
@@ -91,7 +91,7 @@ class TipoIncidenciaController extends AbstractController
     {
         $this->denyAccessUnlessGranted('admin');
 
-        return $this->render('intranet/desempenyo/admin/tipo_incidencia/show.html.twig', [
+        return $this->render('desempenyo/admin/tipo_incidencia/show.html.twig', [
             'tipo' => $tipo,
             'num_incidencias' => $incidenciaRepository->count(['tipo' => $tipo]),
         ]);
@@ -120,7 +120,7 @@ class TipoIncidenciaController extends AbstractController
             return $this->redirectToRoute($this->rutaBase . '_admin_tipo_incidencia_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('intranet/desempenyo/admin/tipo_incidencia/edit.html.twig', [
+        return $this->render('desempenyo/admin/tipo_incidencia/edit.html.twig', [
             'tipo' => $tipo,
             'form' => $form->createView(),
         ]);
