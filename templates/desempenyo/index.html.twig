@@ -410,9 +410,9 @@
                     <div class="fila-campo col-sm-6">Resultado</div>
                     <div class="fila-valor col-sm-6 fw-bold">
                         {%- if media < 6 -%}
-                            {{ ux_icon('fa-solid:times', {class: 'icon-primary'}) }} NO SUPERADO
+                            <em class="fas fa-times text-danger"></em> NO SUPERADO
                         {%- else -%}
-                            {{ ux_icon('fa-solid:check', {class: 'icon-success'}) }} SUPERADO
+                            <em class="fas fa-check text-success"></em> SUPERADO
                         {%- endif -%}
                     </div>
                 </div>

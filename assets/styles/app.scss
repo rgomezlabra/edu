@@ -1,0 +1,345 @@
+// Colores corporativos de la Universidad de Sevilla
+$pantone-123: #ffc72c;
+$pantone-155: #f3c78e;
+$pantone-201: #9c1f2e;
+$pantone-306: #00b5e2;
+$pantone-326: #00b2a9;
+$pantone-877: #a3a2a0;
+$pantone-872: #8e774d;
+$theme-colors: (
+  'primary': $pantone-201,
+  'secondary': $pantone-123,
+  'tertiary': $pantone-877,
+  'warning': $pantone-155,
+  'info': $pantone-306,
+  'success': $pantone-326,
+  'light': #e9e9e9,
+  'danger': #dc3545,
+);
+$link-color: map-get($theme-colors, 'primary');
+$link-color-dark: $link-color;
+$navbar-nav-link-color: $link-color;
+$link-hover-color: darken($link-color, 15%);
+$link-decoration: none;
+a.list-group-item {
+  color: $link-color;
+}
+
+// Fondo pestaña activa
+$nav-pills-link-active-bg: map-get($theme-colors, 'primary');
+
+a:hover.list-group-item {
+  color: $link-hover-color;
+}
+
+// Otros colores
+@import '../../vendor/twbs/bootstrap/scss/bootstrap';
+$utilities: (
+  "background": (
+    property: background,
+    responsive: true,
+    class: bg,
+    values: (
+      blue: linear-gradient($blue, darken($blue, 15%)),
+      cyan: linear-gradient($cyan, darken($cyan, 15%)),
+      gray: linear-gradient($gray-500, darken($gray-500, 15%)),
+      fuchsia: linear-gradient(fuchsia, deeppink),
+      green: linear-gradient($green, darken($green, 15%)),
+      indigo: linear-gradient($indigo, darken($indigo, 15%)),
+      lime: linear-gradient(lime, limegreen),
+      maroon: linear-gradient(darkred, maroon),
+      navy: linear-gradient(navy, midnightblue),
+      olive: linear-gradient(olive, darkolivegreen),
+      orange: linear-gradient($orange, darken($orange, 15%)),
+      pink: linear-gradient($pink, darken($pink, 15%)),
+      purple: linear-gradient($purple, darken($purple, 15%)),
+      red: linear-gradient($red, darken($red, 15%)),
+      yellow: linear-gradient($yellow, darken($yellow, 15%))
+    )
+  ),
+  "color": (
+    property: color,
+    class: text,
+    values: (
+      black: $black,
+      blue: $blue,
+      green: $green,
+      red: $red,
+      yellow: $yellow,
+      cyan: $cyan,
+      gray: $gray-500,
+      fuchsia: fuchsia,
+      indigo: $indigo,
+      lime: lime,
+      maroon: maroon,
+      navy: navy,
+      olive: olive,
+      orange: $orange,
+      pink: $pink,
+      purple: $purple,
+      tertiary: map-get($theme-colors, 'tertiary'),
+      white: white,
+    )
+  ),
+);
+@import '../../vendor/twbs/bootstrap/scss/bootstrap';
+.form-select {
+  width: auto;
+}
+
+// Clases propias
+.imagen-principal {
+  height: 250px;
+  object-fit: none;
+  object-position: 50% 10%;
+}
+
+.imagen-menu {
+  height: 100px;
+  object-fit: cover;
+}
+
+.padding-025 {
+  padding: 0.25rem;
+}
+
+/* Aviso de cookies */
+.cookie-banner {
+  position: fixed;
+  bottom: 1em;
+  z-index: 2147483645;
+  padding: 1em 5em 1em 10em;
+  color: white;
+  background-color: map-get($theme-colors, 'primary');
+  width: 100%;
+}
+
+.cookie-txt {
+  width: 75%;
+}
+
+.cookie-txt a {
+  text-decoration: underline;
+  color: white;
+}
+
+.cookie-txt a:hover {
+  color: white;
+}
+
+.cookie-btn {
+  width: 10%;
+}
+
+// Menú multiniveles
+@media screen and (max-width: 576px) {
+  .dropdown:hover > .dropdown-menu,
+  .dropend:hover > .dropdown-menu {
+    display: block;
+    margin-top: 0;
+    margin-left: 0;
+    border-right-width: 0;
+    border-left-width: 0;
+  }
+  .dropdown-menu {
+    border-width: 0;
+  }
+  ul.dropdown-menu.sirhus-sm {
+    background-color: #e9e9e9;
+    border-radius: 0;
+  }
+
+  ul.dropdown-menu.sirhus-sm > li > a.dropdown-item {
+    padding-left: 50px;
+  }
+  .sirhus-sm {
+    //margin-left: ($spacer * 2) !important;
+    margin-left: 0;
+  }
+  .dropdown-item::before {
+    transform: rotate(-90deg);
+  }
+}
+
+// Menús con fondo de color
+.dropdown-item-sirhus {
+  color: #fff;
+}
+
+// Menú izquierda
+.btn-toggle:hover,
+.btn-toggle:focus {
+  color: rgba(var(--bs-emphasis-color-rgb), .85);
+  background-color: var(--bs-tertiary-bg);
+}
+
+/*.btn-toggle::after {
+  position:relative;
+  line-height: 0;
+  color: #9c1f2e;
+  //padding-right: 10px;
+  width: 20%;
+  content: "▼";
+  border:1px solid;
+  background: #0a53be;
+}
+
+.btn-toggle[aria-expanded="true"] {
+  color: rgba(var(--bs-emphasis-color-rgb), .85);
+}
+.btn-toggle[aria-expanded="true"]::after {
+  transition: transform .35s ease;
+  transform-origin: .5em 50%;
+  transform: rotateX(180deg);
+}
+*/
+
+.btn-toggle-nav a {
+  padding: .1875rem .5rem;
+  margin-top: .125rem;
+  margin-left: 1.25rem;
+}
+
+.btn-toggle-nav a:hover,
+.btn-toggle-nav a:focus {
+  background-color: var(--bs-tertiary-bg);
+}
+
+// Anchos personalizado
+.w-15 {
+  width: 15% !important;
+}
+
+.w-p-icono {
+  width: 20px !important;
+}
+
+// TABs vertical izquierda
+.navBold {
+  --bs-nav-link-font-weight: bold;
+}
+
+.tabs-left {
+  padding-right: 0;
+  --bs-nav-tabs-border-width: var(--bs-border-width);
+  --bs-nav-tabs-border-color: var(--bs-border-color);
+  --bs-nav-tabs-border-radius: var(--bs-border-radius);
+  --bs-nav-tabs-link-hover-border-color: var(--bs-secondary-bg) var(--bs-secondary-bg) var(--bs-border-color);
+  --bs-nav-tabs-link-active-color: var(--bs-emphasis-color);
+  --bs-nav-tabs-link-active-bg: var(--bs-body-bg);
+  --bs-nav-tabs-link-active-border-color: var(--bs-border-color) var(--bs-border-color) var(--bs-body-bg);
+  border-right: var(--bs-nav-tabs-border-width) solid var(--bs-nav-tabs-border-color);
+}
+
+.tabs-left > li {
+  margin-right: -1px;
+}
+
+.tabs-left .nav-item.show .nav-link,
+.tabs-left .nav-link.active {
+  color: var(--bs-nav-tabs-link-active-color);
+  background-color: var(--bs-nav-tabs-link-active-bg);
+  border-color: var(--bs-nav-tabs-link-active-border-color);
+  border-bottom: 1px solid var(--bs-secondary-bg);
+  border-right: 1px solid transparent;
+}
+
+.tabs-left .nav-link {
+  margin-bottom: calc(-1 * var(--bs-nav-tabs-border-width));
+  border: var(--bs-nav-tabs-border-width) solid transparent;
+  border-top-left-radius: var(--bs-nav-tabs-border-radius);
+  border-bottom-left-radius: var(--bs-nav-tabs-border-radius);
+  border-top-right-radius: 0;
+}
+
+// Personalización de breadcrumb en color y símbolo
+.breadcrumb-item + .breadcrumb-item::before {
+  //color:var(--bs-secondary-color,red);
+  color: $pantone-201;
+  content: var(--bs-breadcrumb-divider, ">");
+}
+
+// Personalización paginación datatables
+.page-link.active,
+.active > .page-link {
+  color: $pantone-877;
+  background-color: #f5f5f5;
+  border-color: var(--bs-border-color);
+}
+
+.pagination {
+  --bs-pagination-active-border-color: #fff;
+  --bs-pagination-disabled-color: var(--bs-border-color);
+  --bs-pagination-disabled-bg: #fff;
+}
+
+.table-1.dataTable thead th {
+  color: $pantone-201;
+}
+
+// Clases combinadas
+
+// Cabeceras
+.pagina-titulo {
+  @extend #{'.h3', '.my-4', '.ps-3', '.py-2', '.border-start', '.border-4', '.border-tertiary', '.bg-tertiary', '.bg-opacity-50'};
+}
+.pagina-seccion {
+  @extend #{'.h4', '.my-3', '.ps-3', '.py-2', '.g-0', '.border-start', '.border-4', '.border-secondary', '.bg-secondary', '.bg-opacity-25'};
+}
+
+// Mostrar datos
+.fila-campo {
+  @extend #{'.col-sm-2', '.py-2', '.pe-sm-2', '.text-sm-end', '.fw-bold'};
+}
+.fila-valor {
+  @extend #{'.col-sm-6', '.py-2', '.border-start', '.border-4', '.border-secondary'};
+}
+
+// Badges
+@each $color, $valor in $theme-colors {
+  .badge-#{$color} {
+    @extend #{'.badge', '.bg-#{$color}', '.text-bg-#{$color}'};
+  }
+  .badge-#{$color}-opacity-25 {
+    @extend #{'.badge', '.bg-#{$color}', '.bg-opacity-25', '.text-black'};
+  }
+}
+
+// Bloque de código
+.bloque-codigo {
+  @extend #{'.d-block', '.bg-light', '.p-2', '.ms-4', '.my-3'};
+  border: var(--bs-gray-500) solid 1px;
+  color: var(--bs-code-color);
+  font-family: monospace;
+}
+
+// Tabla condensada
+.tabla-condensada {
+  @extend #{'.table', '.table-sm', '.table-borderless', '.table-striped', '.table-hover', '.w-100'};
+}
+.cabecera-condensada {
+  @extend #{'.table-dark', '.opacity-50'};
+}
+
+// Línea sobre botones
+.linea-botones {
+  @extend #{'.border-top', '.border-primary', '.border-4', '.my-3', '.py-3'};
+}
+
+// Iconos
+.icon {
+  height: 1em;
+  width: 1em;
+}
+.icon-2x {
+  height: 2em;
+  width: 2em;
+}
+@each $color, $valor in $theme-colors {
+  .icon-#{$color} {
+    @extend #{'.icon', '.text-#{$color}'};
+  }
+  .icon-2x-#{$color} {
+    @extend #{'.icon-2x', '.text-#{$color}'};
+  }
+}
