@@ -5,8 +5,18 @@ La aplicación web para la **Evaluación del Desempeño Universitario (EDU)** es
 ## Requisitos
 
 EDU está desarrollada sobre el entorno de programación Symfony 6.4 y se necesitan los siguientes requisitos de instalación:
-* PHP 8.3
 * Servidor web (Apache, Nginx)
-* Gestor de bases de datos (MySQL, MariaDB, PoostgreSQL)
-* Servidor Redis para registro de sesiones
+* Gestor de bases de datos (MySQL, MariaDB, PostgreSQL)
+* Servidor Redis para registro de sesiones (¿?)
+* PHP 8.3
+* Composer (https://getcomposer.com)
 
+## Instalación
+
+*(redactar adecuadamente)*
+
+    git clone https://github.com/rgomezlabra/edu.git
+    cd edu
+    composer install
+    php bin/console doctrine:fixtures:load
+    ...
