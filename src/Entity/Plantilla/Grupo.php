@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Plantilla;
 
-use App\Repository\GrupoRepository;
+use App\Repository\Plantilla\GrupoRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Override;
@@ -14,7 +14,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
 #[ORM\Entity(repositoryClass: GrupoRepository::class)]
-#[ORM\Table(name: 'rpt_grupo')]
+#[ORM\Table(name: 'plantilla_grupo')]
 #[UniqueEntity('nombre')]
 class Grupo implements Stringable
 {

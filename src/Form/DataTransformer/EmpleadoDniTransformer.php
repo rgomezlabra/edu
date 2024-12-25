@@ -2,8 +2,8 @@
 
 namespace App\Form\DataTransformer;
 
-use App\Entity\Empleado;
-use App\Repository\EmpleadoRepository;
+use App\Entity\Plantilla\Empleado;
+use App\Repository\Plantilla\EmpleadoRepository;
 use Symfony\Component\Form\DataTransformerInterface;
 
 /**

@@ -6,7 +6,7 @@ namespace App\Controller\Desempenyo;
 
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Desempenyo\Evalua;
-use App\Entity\Empleado;
+use App\Entity\Plantilla\Empleado;
 use App\Entity\Usuario;
 use App\Form\Desempenyo\CorreccionType;
 use App\Form\Desempenyo\EvaluadorType;
@@ -14,7 +14,7 @@ use App\Form\Desempenyo\RegistroType;
 use App\Form\VolcadoType;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
-use App\Repository\EmpleadoRepository;
+use App\Repository\Plantilla\EmpleadoRepository;
 use App\Service\Csv;
 use App\Service\MessageGenerator;
 use App\Service\RutaActual;

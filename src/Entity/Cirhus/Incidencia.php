@@ -2,7 +2,6 @@
 
 namespace App\Entity\Cirhus;
 
-use App\Entity\Aplicacion;
 use App\Entity\Archivo;
 use App\Entity\Usuario;
 use App\Repository\Cirhus\IncidenciaRepository;
@@ -19,10 +18,6 @@ class Incidencia
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
-    #[ORM\ManyToOne(targetEntity: Aplicacion::class)]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?Aplicacion $aplicacion = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: false)]
     private ?string $descripcion = null;
@@ -54,18 +49,6 @@ class Incidencia
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getAplicacion(): ?Aplicacion
-    {
-        return $this->aplicacion;
-    }
-
-    public function setAplicacion(?Aplicacion $aplicacion): static
-    {
-        $this->aplicacion = $aplicacion;
-
-        return $this;
     }
 
     public function getDescripcion(): ?string

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Plantilla\Empleado;
 use App\Repository\UsuarioRepository;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;

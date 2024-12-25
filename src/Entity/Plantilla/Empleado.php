@@ -1,17 +1,15 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Plantilla;
 
-use App\Entity\Categoria;
-use App\Entity\Grupo;
 use App\Entity\Usuario;
-use App\Repository\EmpleadoRepository;
+use App\Repository\Plantilla\EmpleadoRepository;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Entidad que define los datos de los empleados de la plantilla actual de la US.
+ * Entidad que define los datos de los empleados de la plantilla actual de la Universidad.
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
 #[ORM\Entity(repositoryClass: EmpleadoRepository::class)]
@@ -25,12 +23,6 @@ class Empleado
 
     #[ORM\OneToOne(targetEntity: Usuario::class)]
     private ?Usuario $usuario = null;
-
-
-
-    #[ORM\ManyToOne(targetEntity: Categoria::class)]
-    private ?Categoria $categoria = null;
-
 
     #[ORM\ManyToOne(targetEntity: Situacion::class)]
     private ?Situacion $situacion = null;
@@ -74,13 +66,13 @@ class Empleado
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $en_ocupada = null;
 
-    #[ORMColumn(type: Types::STRING, length: 100)]
+    #[ORM\Column(type: Types::STRING, length: 100)]
     private ?string $nombre = null;
-    #[ORMColumn(type: Types::STRING, length: 100)]
+    #[ORM\Column(type: Types::STRING, length: 100)]
     private ?string $apellido1 = null;
-    #[ORMColumn(type: Types::STRING, length: 100, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 100, nullable: true)]
     private ?string $apellido2 = null;
-    #[ORMColumn(type: Types::STRING, length: 11, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 11, nullable: true)]
     private ?string $doc_identidad = null;
 
     public function getId(): ?int
@@ -100,24 +92,6 @@ class Empleado
         return $this;
     }
 
-
-
-
-
-    public function getCategoria(): ?Categoria
-    {
-        return $this->categoria;
-    }
-
-    public function setCategoria(?Categoria $categoria): self
-    {
-        $this->categoria = $categoria;
-
-        return $this;
-    }
-
-
-
     public function getSituacion(): ?Situacion
     {
         return $this->situacion;
@@ -129,8 +103,6 @@ class Empleado
 
         return $this;
     }
-
-
 
     public function getGrupo(): ?Grupo
     {
@@ -155,10 +127,6 @@ class Empleado
 
         return $this;
     }
-
-
-
-
 
     public function getNrp(): ?string
     {
@@ -323,5 +291,4 @@ class Empleado
 
         return $this;
     }
-
 }

@@ -4,7 +4,7 @@ namespace App\Entity\Desempenyo;
 
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Cuestiona\Formulario;
-use App\Entity\Empleado;
+use App\Entity\Plantilla\Empleado;
 use App\Entity\Usuario;
 use App\Repository\Desempenyo\EvaluaRepository;
 use DateTimeImmutable;

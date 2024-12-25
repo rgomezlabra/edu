@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\Plantilla;
 
 use App\Entity\Edificio;
-use App\Entity\Empleado;
+use App\Entity\Plantilla\Empleado;
 use App\Entity\Subunidad;
-use App\Entity\Usuario;
 use App\Entity\Unidades\Unidad;
+use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;

@@ -3,7 +3,7 @@
 namespace App\Entity\Cirhus;
 
 use App\Entity\Estado;
-use App\Entity\Persona;
+use App\Entity\Plantilla\Empleado;
 use App\Entity\Usuario;
 use App\Repository\Cirhus\IncidenciaApunteRepository;
 use DateTimeImmutable;
@@ -40,8 +40,8 @@ class IncidenciaApunte
     #[ORM\ManyToOne(targetEntity: Usuario::class)]
     private ?Usuario $autor = null;
 
-    #[ORM\ManyToOne(targetEntity: Persona::class)]
-    private ?Persona $persona = null;
+    #[ORM\ManyToOne(targetEntity: Empleado::class)]
+    private ?Empleado $empleado = null;
 
     public function getId(): ?int
     {
@@ -132,14 +132,14 @@ class IncidenciaApunte
         return $this;
     }
 
-    public function getPersona(): ?Persona
+    public function getEmpleado(): ?Empleado
     {
-        return $this->persona;
+        return $this->empleado;
     }
 
-    public function setPersona(?Persona $persona): static
+    public function setEmpleado(?Empleado $empleado): static
     {
-        $this->persona = $persona;
+        $this->empleado = $empleado;
 
         return $this;
     }
