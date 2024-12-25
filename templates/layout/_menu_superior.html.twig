@@ -1,0 +1,45 @@
+<div class="container-fluid">
+    {#
+    <a class="navbar-brand" href="{{ path('intranet') }}" title="Intranet de Recursos Humanos de la Universidad de Sevilla">
+        <img class="pe-2" style="margin-top: -15px" src="{{ asset('images/logo-us-negativo.png') }}" height="30"
+             alt="Universidad de Sevilla"> Intranet</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+            aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0 ps-3">
+            <li class="nav-item px-1">
+                <a class="nav-link text-light" href="#" title="Planificación del PTGAS">Planificación</a>
+            </li>
+            <li class="nav-item px-1">
+                <a class="nav-link text-light" href="#" title="Gestión del PTGAS">Gestión</a>
+            </li>
+            <li class="nav-item px-1">
+                <a class="nav-link text-light" href="#" title="Formación del PTGAS">Formación</a>
+            </li>
+            <li class="nav-item px-1">
+                <a class="nav-link text-light" href="#" title="Acción Social">Acción Social</a>
+            </li>
+            <li class="nav-item px-1">
+                <a class="nav-link text-light" href="{{ path('intranet_prevencion_inicio')}}" title="Servicio de Prevención de Riesgos Laborales">Prevención</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav mb-2 mb-md-0 ps-3">
+            <li class="nav-item px-1">
+                <a class="nav-link text-light" href="{{ path('intranet_usuario_aplicacion')}}" title="Aplicaciones del usuario">
+                    {{ ux_icon('fa-solid:tools') }} Mis aplicaciones</a></li>
+            <li class="nav-item px-1">
+                <a class="nav-link text-light" href="https://recursoshumanos.us.es/comun/directorio" title="Directorio de Recursos Humanos">
+                    {{ ux_icon('fa-solid:users') }} Directorio</a></li>
+            <li class="nav-item px-1">
+                <a class="nav-link text-light" href="https://recursoshumanos.us.es/index.php?page=comun/buscador" title="Buscador de Recursos Humanos">
+                    {{ ux_icon('fa-solid:search') }} Buscar</a></li>
+            <li class="nav-item px-1">
+                <a class="nav-link text-light" href="{{ path('inicio') }}" title="Portal de Recursos Humanos">
+                    {{ ux_icon('fa-solid:globe') }} Portal</a></li>
+        </ul>
+        {{ render_esi(path('intranet_usuario_menu')) }}
+    </div>
+    #}
+</div>
