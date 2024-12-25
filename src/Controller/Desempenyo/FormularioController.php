@@ -50,7 +50,7 @@ class FormularioController extends AbstractController
         private readonly SirhusLock       $lock,
         private readonly EvaluaRepository $evaluaRepository,
     ) {
-        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'inicio';
+        $this->rutaBase = $this->actual->getRuta() ?? 'inicio';
         $this->ttl = 300;
     }
 
@@ -113,7 +113,7 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        return $this->render('cuestiona/admin/formulario/show.html.twig', [
+        return $this->render('desempenyo/admin/formulario/show.html.twig', [
             'cuestionario' => $formulario->getCuestionario(),
             'evaluacion' => $evalua,
         ]);
@@ -193,18 +193,15 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        return $this->render(
-            sprintf('%s/evaluador.html.twig', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? ''),
-            [
-                'evaluaciones' => $this->evaluaRepository->findByEvaluacion([
-                    'cuestionario' => $cuestionario,
-                    'empleado' => $empleado,
-                    'tipo' => [Evalua::EVALUA_RESPONSABLE, Evalua::EVALUA_OTRO],
-                ]),
+        return $this->render('desempenyo/evaluador.html.twig', [
+            'evaluaciones' => $this->evaluaRepository->findByEvaluacion([
                 'cuestionario' => $cuestionario,
                 'empleado' => $empleado,
-            ]
-        );
+                'tipo' => [Evalua::EVALUA_RESPONSABLE, Evalua::EVALUA_OTRO],
+            ]),
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+        ]);
     }
 
     #[Route(
@@ -250,14 +247,11 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
-        return $this->render(
-            sprintf('%s/empleado.html.twig', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? ''),
-            [
-                'evaluaciones' => $evaluaciones,
-                'cuestionario' => $cuestionario,
-                'evaluador' => $evaluador,
-            ]
-        );
+        return $this->render('desempenyo/empleado.html.twig', [
+            'evaluaciones' => $evaluaciones,
+            'cuestionario' => $cuestionario,
+            'evaluador' => $evaluador,
+        ]);
     }
 
     /** Generar PDF de formulario. */
@@ -277,7 +271,7 @@ class FormularioController extends AbstractController
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
         $cuestionario = $cuestionarioRepository->findOneBy([
-            'url' => sprintf('/%s/formulario/%s', $this->actual->getAplicacion()?->rutaToTemplateDir() ?? '', $codigo),
+            'url' => sprintf('/desempenyo/formulario/%s', $codigo),
         ]);
         if (null === $id) {
             $empleado = $empleadoRepository->findOneByUsuario($usuario);
@@ -526,8 +520,8 @@ class FormularioController extends AbstractController
             $this->lock->release();
             $this->generator->logAndFlash('info', 'Formulario enviado', [
                 'codigo' => $codigo,
-                'empleado' => $evalua->getEmpleado()?->getPersona()->getDocIdentidad(),
-                'evaluador' => $evalua->getEvaluador()?->getPersona()->getDocIdentidad(),
+                'empleado' => $evalua->getEmpleado()?->getDocIdentidad(),
+                'evaluador' => $evalua->getEvaluador()?->getDocIdentidad(),
                 'tipo' => $evalua->getTipoEvaluador(),
             ]);
 

@@ -28,7 +28,7 @@ class TipoIncidenciaController extends AbstractController
         private readonly RutaActual               $actual,
         private readonly TipoIncidenciaRepository $tipoRepository,
     ) {
-        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'inicio';
+        $this->rutaBase = $this->actual->getRuta() ?? 'inicio';
     }
 
     #[Route(

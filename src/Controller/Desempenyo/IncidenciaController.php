@@ -40,7 +40,7 @@ class IncidenciaController extends AbstractController
         private readonly IncidenciaRepository   $incidenciaRepository,
         private readonly RutaActual             $actual,
     ) {
-        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'intranet';
+        $this->rutaBase = $this->actual->getRuta();
     }
 
     #[Route(
@@ -90,7 +90,6 @@ class IncidenciaController extends AbstractController
     )]
     public function newUsuario(
         Request                    $request,
-        RutaActual                 $actual,
         CirhusIncidenciaRepository $cirhusRepository,
         EstadoRepository           $estadoRepository,
         string                     $codigo,
@@ -106,10 +105,7 @@ class IncidenciaController extends AbstractController
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
         $cirhus = new CirhusIncidencia();
-        $cirhus
-            ->setAplicacion($actual->getAplicacion())
-            ->setSolicitante($usuario)
-        ;
+        $cirhus->setSolicitante($usuario);
         $incidencia = new Incidencia();
         $incidencia
             ->setCuestionario($cuestionario)
@@ -289,7 +285,7 @@ class IncidenciaController extends AbstractController
             $this->generator->logAndFlash('info', 'Incidencia de desempeño eliminada', [
                 'id' => $id,
                 'cuestionario' => $codigo,
-                'solicitante' => $cirhus->getSolicitante()?->getUvus(),
+                'solicitante' => $cirhus->getSolicitante()?->getLogin(),
             ]);
         }
 

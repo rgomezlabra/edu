@@ -61,7 +61,7 @@ class EvaluadorController extends AbstractController
         private readonly string           $redisUrl,
     ) {
         $this->redis = RedisAdapter::createConnection($this->redisUrl);
-        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'inicio';
+        $this->rutaBase = $this->actual->getRuta() ?? 'inicio';
         $this->ttl = 60;
     }
 
@@ -142,8 +142,8 @@ class EvaluadorController extends AbstractController
             $this->generator->logAndFlash('info', 'Evaluación eliminada correctamente', [
                 'id' => $id,
                 'codigo' => $cuestionario->getCodigo(),
-                'empleado' => $evalua->getEmpleado()?->getPersona()->getDocIdentidad(),
-                'evaluador' => $evalua->getEvaluador()?->getPersona()->getDocIdentidad(),
+                'empleado' => $evalua->getEmpleado()?->getDocIdentidad(),
+                'evaluador' => $evalua->getEvaluador()?->getDocIdentidad(),
                 'tipo_evaluador' => $evalua->getTipoEvaluador(),
             ]);
         }
@@ -167,11 +167,7 @@ class EvaluadorController extends AbstractController
     ): Response {
         $this->denyAccessUnlessGranted('admin');
         $claveRedis = sprintf('evaluacion-%d', Evalua::AUTOEVALUACION);
-        if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
-            $this->addFlash('warning', 'Sin acceso al cuestionario.');
-
-            return $this->redirectToRoute($this->rutaBase);
-        } elseif (null === $this->lock->acquire($this->ttl)) {
+        if (null === $this->lock->acquire($this->ttl)) {
             $this->addFlash('warning', 'Recurso bloqueado por otra operación de carga.');
 
             return $this->redirectToRoute($request->attributes->getString('_route'));
@@ -262,11 +258,7 @@ class EvaluadorController extends AbstractController
             'otro' => Evalua::EVALUA_OTRO,
             default => null,
         };
-        if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
-            $this->addFlash('warning', 'Sin acceso al cuestionario.');
-
-            return $this->redirectToRoute($this->rutaBase);
-        } elseif (null === $tipo) {
+        if (null === $tipo) {
             $this->addFlash('warning', 'Tipo de evaluador desconocido.');
 
             return $this->redirectToRoute($this->rutaBase);
@@ -389,11 +381,7 @@ class EvaluadorController extends AbstractController
         Cuestionario    $cuestionario,
     ): Response {
         $this->denyAccessUnlessGranted('admin');
-        if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
-            $this->addFlash('warning', 'Sin acceso al cuestionario.');
-
-            return $this->redirectToRoute($this->rutaBase);
-        } elseif (null === $this->lock->acquire($this->ttl)) {
+        if (null === $this->lock->acquire($this->ttl)) {
             $this->addFlash('warning', 'Recurso bloqueado por otra operación de carga.');
 
             return $this->redirectToRoute($request->attributes->getString('_route'));
@@ -461,7 +449,7 @@ class EvaluadorController extends AbstractController
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'Empleado marcado como no evaluable', [
             'cuestionario' => $cuestionario->getCodigo(),
-            'empleado' => $empleado->getPersona()?->getDocIdentidad(),
+            'empleado' => $empleado->getDocIdentidad(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', ['id' => $cuestionario->getId()]);
@@ -507,8 +495,8 @@ class EvaluadorController extends AbstractController
         ;
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'Empleado solicita no ser evaluable', [
-            'cuestionario' => $cuestionario?->getCodigo(),
-            'empleado' => $usuario->getPersona()?->getDocIdentidad(),
+            'cuestionario' => $cuestionario->getCodigo(),
+            'empleado' => $empleado->getDocIdentidad(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase);
@@ -549,7 +537,7 @@ class EvaluadorController extends AbstractController
             $this->evaluaRepository->save($evalua, true);
             $this->generator->logAndFlash('info', 'Registro general validado', [
                 'cuestionario' => $cuestionario->getCodigo(),
-                'empleado' => $empleado->getPersona()?->getDocIdentidad(),
+                'empleado' => $empleado->getDocIdentidad(),
             ]);
 
             return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', [
@@ -597,7 +585,7 @@ class EvaluadorController extends AbstractController
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'Empleado vuelve a ser evaluable', [
             'cuestionario' => $cuestionario->getCodigo(),
-            'empleado' => $empleado?->getPersona()?->getDocIdentidad(),
+            'empleado' => $empleado->getDocIdentidad(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', [
@@ -644,8 +632,8 @@ class EvaluadorController extends AbstractController
         ;
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'Empleado solicita ser evaluable', [
-            'cuestionario' => $cuestionario?->getCodigo(),
-            'empleado' => $usuario->getPersona()?->getDocIdentidad(),
+            'cuestionario' => $cuestionario->getCodigo(),
+            'empleado' => $empleado->getDocIdentidad(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase);
@@ -684,8 +672,8 @@ class EvaluadorController extends AbstractController
             $this->generator->logAndFlash('info', 'Evaluación corregida', [
                 'id' => $evalua->getId(),
                 'cuestionario' => $cuestionario->getCodigo(),
-                'empleado' => $evalua->getEmpleado()?->getPersona()->getDocIdentidad(),
-                'evaluador' => $evalua->getEvaluador()?->getPersona()->getDocIdentidad(),
+                'empleado' => $evalua->getEmpleado()?->getDocIdentidad(),
+                'evaluador' => $evalua->getEvaluador()?->getDocIdentidad(),
                 'tipo' => $evalua->getTipoEvaluador(),
             ]);
 
@@ -741,8 +729,8 @@ class EvaluadorController extends AbstractController
         $evalua->setHabilita();
         $this->evaluaRepository->save($evalua, true);
         $this->generator->logAndFlash('info', 'Empleado habilita su evaluación', [
-            'cuestionario' => $cuestionario?->getCodigo(),
-            'empleado' => $usuario->getPersona()?->getDocIdentidad(),
+            'cuestionario' => $cuestionario->getCodigo(),
+            'empleado' => $empleado->getDocIdentidad(),
         ]);
 
         return $this->redirectToRoute($this->rutaBase);
@@ -788,8 +776,8 @@ class EvaluadorController extends AbstractController
             $this->generator->logAndFlash('info', 'Evaluador asignado', [
                 'id' => $evalua->getId(),
                 'cuestionario' => $cuestionario->getCodigo(),
-                'empleado' => $evalua->getEmpleado()?->getPersona()?->getDocIdentidad(),
-                'evaluador' => $evalua->getEvaluador()?->getPersona()?->getDocIdentidad(),
+                'empleado' => $evalua->getEmpleado()?->getDocIdentidad(),
+                'evaluador' => $evalua->getEvaluador()?->getDocIdentidad(),
                 'tipo' => $evalua->getTipoEvaluador(),
             ]);
 

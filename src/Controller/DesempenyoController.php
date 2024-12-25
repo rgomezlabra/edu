@@ -31,18 +31,17 @@ class DesempenyoController extends AbstractController
     public function inicio(
         CuestionarioRepository $cuestionarioRepository,
         EmpleadoRepository     $empleadoRepository,
+        EstadoRepository       $estadoRepository,
         EvaluaRepository       $evaluaRepository,
     ): Response {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
         $empleado = $empleadoRepository->findOneByUsuario($usuario);
-        $cuestionarios = $cuestionarioRepository->findBy(['aplicacion' => $this->actual->getAplicacion()]);
+        $publicado = $estadoRepository->findOneBy(['nombre' => Estado::PUBLICADO]);
+        $cuestionarios = $cuestionarioRepository->findBy(['estado' => $publicado]);
         $evaluados = $evaluaRepository->findBy([
-            'cuestionario' => array_filter(
-                $cuestionarios,
-                static fn ($cuestionario) => Estado::PUBLICADO === $cuestionario->getEstado()?->getNombre()
-            ),
+            'cuestionario' => $cuestionarios,
             'empleado' => $empleado,
         ]);
         // Calcular las medias de los formularios enviados para mostrar resultados finales del usuario
@@ -87,7 +86,6 @@ class DesempenyoController extends AbstractController
         if (0 === $tipoIncidenciaRepository->count([])) {
             $this->addFlash('warning', 'No hay definido ningún tipo de incidencias.');
         } elseif (0 === $cuestionarioRepository->count([
-                'aplicacion' => $this->actual->getAplicacion(),
                 'estado' => $estadoRepository->findOneBy(['nombre' => Estado::PUBLICADO]),
             ])) {
             $this->addFlash('warning', 'No hay cuestionarios de evaluación activos.');

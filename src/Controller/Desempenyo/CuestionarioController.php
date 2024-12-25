@@ -34,7 +34,7 @@ class CuestionarioController extends AbstractController
         private readonly RutaActual             $actual,
         private readonly CuestionarioRepository $cuestionarioRepository,
     ) {
-        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'inicio';
+        $this->rutaBase = $this->actual->getRuta();
     }
 
     #[Route(
@@ -66,7 +66,6 @@ class CuestionarioController extends AbstractController
         $cuestionario = new Cuestionario();
         $cuestionario
             ->setEstado($estadoRepository->findOneBy(['nombre' => 'Borrador']))
-            ->setAplicacion($this->actual->getAplicacion())
             ->setAutor($autor)
         ;
         $form = $this->createForm(CuestionarioType::class, $cuestionario, [
@@ -101,11 +100,6 @@ class CuestionarioController extends AbstractController
     public function show(Cuestionario $cuestionario): Response
     {
         $this->denyAccessUnlessGranted('admin');
-        if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
-            $this->addFlash('warning', 'Sin acceso al cuestionario.');
-
-            return $this->redirectToRoute($this->rutaBase);
-        }
 
         return $this->render('desempenyo/admin/cuestionario/show.html.twig', [
             'cuestionario' => $cuestionario,
@@ -121,11 +115,7 @@ class CuestionarioController extends AbstractController
     public function edit(Request $request, Cuestionario $cuestionario): Response
     {
         $this->denyAccessUnlessGranted('admin');
-        if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
-            $this->addFlash('warning', 'Sin acceso al cuestionario.');
-
-            return $this->redirectToRoute($this->rutaBase);
-        } elseif (Estado::BORRADOR !== $cuestionario->getEstado()?->getNombre()) {
+        if (Estado::BORRADOR !== $cuestionario->getEstado()?->getNombre()) {
             $this->addFlash('warning', 'El cuestionario no puede ser editado porque no es un borrador.');
 
             return $this->redirectToRoute($this->rutaBase);
@@ -167,11 +157,7 @@ class CuestionarioController extends AbstractController
     public function activar(Request $request, EstadoRepository $estadoRepository, Cuestionario $cuestionario): Response
     {
         $this->denyAccessUnlessGranted('admin');
-        if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
-            $this->addFlash('warning', 'Sin acceso al cuestionario.');
-
-            return $this->redirectToRoute($this->rutaBase);
-        } elseif (0 === count($cuestionario->getGrupos())) {
+        if (0 === count($cuestionario->getGrupos())) {
             $this->addFlash('warning', 'El cuestionario no tiene preguntas definidas.');
 
             return $this->redirectToRoute($this->rutaBase . '_admin_cuestionario_show', ['id' => $cuestionario->getId()]);
@@ -207,8 +193,7 @@ class CuestionarioController extends AbstractController
                 ->setEstado($publicado)
                 ->setUrl(
                     sprintf(
-                        '/%s/formulario/%s-%s',
-                        $this->actual->getAplicacion()?->rutaToTemplateDir() ?? '',
+                        '/desempenyo/formulario/%s-%s',
                         (new Slug())((string) $cuestionario->getCodigo()),
                         uniqid()
                     )
@@ -241,14 +226,7 @@ class CuestionarioController extends AbstractController
     public function desactivar(EstadoRepository $estadoRepository, Cuestionario $cuestionario): Response
     {
         $this->denyAccessUnlessGranted('admin');
-        $borrador = $estadoRepository->findOneBy(['nombre' => Estado::BORRADOR]);
-        if ($cuestionario->getAplicacion() !== $this->actual->getAplicacion()) {
-            $this->addFlash('warning', 'Sin acceso al cuestionario.');
-
-            return $this->redirectToRoute($this->rutaBase);
-        }
-
-        $cuestionario->setEstado($borrador);
+        $cuestionario->setEstado($estadoRepository->findOneBy(['nombre' => Estado::BORRADOR]));
         $this->cuestionarioRepository->save($cuestionario, true);
 
         return $this->render('desempenyo/admin/cuestionario/show.html.twig', [

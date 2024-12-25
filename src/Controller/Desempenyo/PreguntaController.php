@@ -5,7 +5,6 @@ namespace App\Controller\Desempenyo;
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Cuestiona\Grupo;
 use App\Entity\Cuestiona\Pregunta;
-use App\Entity\Aplicacion;
 use App\Entity\Estado;
 use App\Form\Cuestiona\PreguntaType;
 use App\Repository\Cuestiona\PreguntaRepository;
@@ -41,7 +40,7 @@ class PreguntaController extends AbstractController
         private readonly RutaActual         $actual,
         private readonly PreguntaRepository $preguntaRepository,
     ) {
-        $this->rutaBase = $this->actual->getAplicacion()?->getRuta() ?? 'inicio';
+        $this->rutaBase = $this->actual->getRuta() ?? 'inicio';
     }
 
     #[Route(
@@ -261,12 +260,7 @@ class PreguntaController extends AbstractController
     /** Comprobar si los parámetros son correctos para acceder al controlador. */
     private function checkAcceso(Cuestionario $cuestionario, ?Grupo $grupo = null, ?Pregunta $pregunta = null): bool
     {
-        $aplic = $this->actual->getAplicacion();
-        if (!$aplic instanceof Aplicacion && $cuestionario->getAplicacion() !== $aplic) {
-            $this->addFlash('warning', 'Sin acceso al cuestionario.');
-
-            return false;
-        } elseif ($grupo instanceof Grupo && $grupo->getCuestionario() !== $cuestionario) {
+        if ($grupo instanceof Grupo && $grupo->getCuestionario() !== $cuestionario) {
             $this->addFlash('warning', 'El grupo no corresponde al cuestionario especificado.');
 
             return false;
