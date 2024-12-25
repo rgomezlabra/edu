@@ -1,0 +1,13 @@
+{% set id = id|default('modalForm') %}
+<dialog id="{{ id }}"
+        class="flex position-absolute top-0 bg-dark text-bg-dark rounded-3 shadow-lg z-1 {{ ancho|default('w-75') }}">
+    <div class="flex-grow-0 p-2">
+        <div class="float-end" title="Cerrar" onclick="document.querySelector('#{{ id }}').close();">
+            {{ ux_icon('fa-solid:times') }}
+        </div>
+        <div id="{{ id ~ 'Titulo' }}" class="h3">{{ titulo|default }}</div>
+        <div class="border-top border-light pt-3 ">
+            <div id="{{ id ~ 'Form' }}"></div>
+        </div>
+    </div>
+</dialog>

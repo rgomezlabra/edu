@@ -1,10 +1,10 @@
-{% extends path(aplicacion.ruta) ~ '/admin/cuestionario/show.html.twig' %}
+{% extends 'desempenyo/admin/cuestionario/show.html.twig' %}
 
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
 
     <div class="pagina-seccion">Cuestionario {{ cuestionario.codigo }}</div>
-    {{ include(path(aplicacion.ruta) ~ '/admin/cuestionario/_form.html.twig', {button_label: 'Actualizar'}) }}
+    {{ include('desempenyo/admin/cuestionario/_form.html.twig', {button_label: 'Actualizar'}) }}
 {% endblock %}
 
 {% block botones %}{% endblock %}

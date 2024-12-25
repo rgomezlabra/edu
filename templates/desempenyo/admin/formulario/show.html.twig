@@ -1,0 +1,50 @@
+{% extends 'desempenyo/admin/index.html.twig' %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <div class="container-fluid py-4 g-4">
+        <div class="row py-2">
+            <div class="fila-campo">Cuestionario</div>
+            <div class="fila-valor">{{ formulario.cuestionario.codigo }}: {{ formulario.cuestionario.titulo }}</div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Descripción</div>
+            <div class="fila-valor">{{ formulario.cuestionario.descripcion|raw }}</div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Usuario</div>
+            <div class="fila-valor">{{ formulario.usuario.persona|default('desconocido') }}</div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Fecha de entrega</div>
+            <div class="fila-valor">{{ formulario.enviado|date('d/m/Y') }}</div>
+        </div>
+        <div class="row py-2">
+            <div class="fila-campo">Respuestas</div>
+            <div class="fila-valor list-group">
+                {%- for respuesta in formulario.respuestas %}
+                    <div class="list-group-item">
+                        <div>
+                            <span class="fw-bold me-2">{{ respuesta.pregunta.titulo }}:</span> {{ respuesta.valor.valor }}
+                        </div>
+                        {%- if respuesta.valor.observa is defined %}
+                            <div class="ms-4">
+                                <span class="fw-bold me-2">Observaciones:</span> {{ respuesta.valor.observa }}
+                            </div>
+                        {%- endif %}
+                    </div>
+                {%- endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block botones %}{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item">
+        <a href="{{ path('desempenyo_admin_formulario_index', {'cuestionario': cuestionario.id}) }}">Formularios</a>
+    </li>
+{% endblock %}

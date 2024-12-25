@@ -1,4 +1,4 @@
-{% extends path(aplicacion.ruta) ~ '/admin/tipo_incidencia/index.html.twig' %}
+{% extends 'desempenyo/admin/tipo_incidencia/index.html.twig' %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
@@ -33,7 +33,7 @@
     </li>
     {% if num_incidencias == 0 %}
         <li class="nav-item ms-5 me-2">
-            {{ include(path(aplicacion.ruta) ~ '/admin/tipo_incidencia/_delete_form.html.twig', {id: tipo.id}) }}
+            {{ include('desempenyo/admin/tipo_incidencia/_delete_form.html.twig', {id: tipo.id}) }}
         </li>
     {% endif %}
 {% endblock %}

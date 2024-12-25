@@ -1,4 +1,4 @@
-{% extends path(aplicacion.ruta) ~ '/index.html.twig' %}
+{% extends 'desempenyo/index.html.twig' %}
 
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
@@ -16,16 +16,13 @@
     <ul>
         <li><a href="{{ path('desempenyo_admin_incidencia_index') }}">Gestionar incidencias</a></li>
         <li><a href="{{ path('desempenyo_admin_tipo_incidencia_index') }}">Definir tipos de incidencias</a></li>
-        <li><a href="{{ path('desempenyo_admin_log_index') }}">Ver registro de operaciones</a></li>
     </ul>
 {% endblock %}
 
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta) }}">
-            <em class="me-1 fas {{ aplicacion.icono }}"></em>{{ aplicacion.nombreCorto }}
-        </a>
+        <a href="{{ path('desempenyo') }}"><em class="me-1 fas fa-user-check"></em>Desempeño</a>
     </li>
 {% endblock %}
 

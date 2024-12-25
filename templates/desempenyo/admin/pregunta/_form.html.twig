@@ -3,7 +3,7 @@
     <div class="ejemplos visually-hidden">
         {%- for id, tipo in tipos %}
             <div id="ejemplo-{{ id }}" data-tipo="{{ id }}">
-                {{- include(path(aplicacion.ruta) ~ '/admin/pregunta/_pregunta_' ~ tipo.fichero|default ~ '.html.twig', {ejemplo: true}, ignore_missing = true) }}
+                {{- include('desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero|default ~ '.html.twig', {ejemplo: true}, ignore_missing = true) }}
             </div>
         {%- endfor %}
     </div>

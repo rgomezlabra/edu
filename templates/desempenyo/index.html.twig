@@ -1,19 +1,11 @@
 {% extends '/layout/base.html.twig' %}
-{% set titulo = titulo|default(aplicacion.nombre) %}
 
 {% block content %}
     {#- Pesos establecidos por defecto #}
     {% set pesos = [34, 56, 10] -%}
     {% set activos = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO')) -%}
-    <div class="pagina-titulo">
-        {{- titulo }}
-        {%- if aplicacion.estadoActual and aplicacion.estadoActual.color %}
-            <sup class="badge bg-{{ aplicacion.estadoActual.color }}">
-                <em class="fas fa-sm {{ aplicacion.estadoActual.icono }}"></em> {{ aplicacion.estadoActual }}
-            </sup>
-        {%- endif %}
-    </div>
-    <p class="">{{ aplicacion.descripcion }}</p>
+    <div class="pagina-titulo">Evaluación del Desempeño Universitario</div>
+    <p class=""><em>(descripción de la aplicación)</em></p>
 
     {#- Acciones comunes #}
     <div class="my-4">
@@ -315,44 +307,16 @@
     <div class="linea-botones"></div>
 
     {#- Mostrar roles de la aplicación con permiso para el usuario. #}
-    {%- set admin = false -%}
-    {%- for rol in aplicacion.roles|default -%}
-        {%- for p in aplicacion.permisos|filter(p => p.usuario == app.user)|filter(r => r.rol == rol) -%}
-            {%- if loop.first %}<div class="pagina-seccion">Roles</div>{% endif %}
-            {%- if p.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO') %}
-                {%- if p.rol.ruta == 'admin' %}
-                    {%- set admin = true -%}
-                {%- endif %}
-                <div class="h5">
-                    <a href="{{ path('desempenyo_' ~ rol.ruta) }}">
-                        <em class="fas {{ rol.icono }}"></em> {{ rol.nombre }}
-                    </a>
-                    {% if p.unidad %} <span class="badge rounded-pill">({{ p.unidad.nombre }})</span>{% endif %}
-                </div>
-                <p>{{ rol.descripcion }}</p>
-            {%- else %}
-                <div class="h5">
-                    <em class="fas {{ rol.icono }}"></em> {{ rol.nombre }}
-                    <sup class="bg-{{ p.estado.color|default }}">({{ p.estado.nombre }})</sup>
-                </div>
-            {%- endif %}
-        {%- endfor -%}
-    {%- endfor -%}
-
-    {#- Si el usuario tiene acceso, se muestran las aplicaciones relacionadas (excepto "Sistema"). -#}
-    {%- if admin %}
-        {%- for aplic in aplicacion.dependientes|merge(aplicacion.dependencias)|filter(a => a.nombreCorto != 'Sistema') %}
-            {%- if loop.first %}<div class="pagina-seccion">Aplicaciones relacionadas</div>{% endif %}
-            <h5 class="ms-4"><a href="{{ path(aplic.ruta) }}">{{ aplic.nombre }}</a></h5>
-        {%- endfor %}
+    {% if 'ROLE_ADMIN' in app.user.roles -%}
+        <div class="h5">
+            <a href="{{ path('desempenyo_admin' ) }}"><em class="fas fa-cog"></em> Administrador</a>
+        </div>
+        <p>Gestión de los recursos de la aplicación.</p>
     {%- endif %}
 {% endblock %}
 
 {% block migas %}
     {{ parent() }}
-    <li class="breadcrumb-item">
-        <a href="{{ path('usuario_aplicacion') }}"><em class="fas fa-tools"></em> Mis Aplicaciones</a>
-    </li>
 {% endblock %}
 
 {% block modal %}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <style>
+        {% block css %}
+            @page {
+                margin-top: 2cm;
+                margin-bottom: 2cm;
+            }
+            header {
+                position: fixed;
+                height: 2cm;
+                text-align: center;
+                line-height: 35px;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                font-weight: 500;
+                line-height: 1.2;
+                margin-top: 0;
+                margin-bottom: 0.5rem;
+            }
+            h1 {
+                font-size: 2.5rem;
+            }
+            h2 {
+                font-size: 2rem;
+            }
+            h3 {
+                font-size: 1.5rem;
+            }
+            h4 {
+                text-align: center;
+            }
+            .tabla {
+                width: 100%;
+            }
+            .pagina {
+                margin-top: 2cm;
+            }
+            .salto-pagina {
+                page-break-before: always;
+            }
+            .plazas {
+                font-size: 8pt;
+            }
+            .plazas td {
+                padding-top: 0.2cm;
+                padding-bottom: 0.2cm;
+            }
+            .plazas th {
+                background-color: lightgreen;
+            }
+            .gradient-blue {
+                color: blue;
+            }
+            .gradient-green {
+                color: green;
+            }
+            .gradient-navy {
+                color: navy;
+            }
+            .gradient-maroon {
+                color: maroon;
+            }
+            .gradient-orange {
+                color: orange;
+            }
+            .gradient-red {
+                color: red;
+            }
+            .gradient-yellow {
+                color: darkgoldenrod;
+            }
+            .text-end {
+                text-align: right;
+            }
+        {% endblock %}
+    </style>
+    <title>{% block title %}PDF{% endblock %}</title>
+</head>
+<body>
+
+<header>
+    {% block cabecera %}
+    {% endblock %}
+</header>
+<footer>
+    {% block footer %}
+    {% endblock %}
+</footer>
+<main>
+    {% block content %}
+    {% endblock %}
+</main>
+</body>
+</html>

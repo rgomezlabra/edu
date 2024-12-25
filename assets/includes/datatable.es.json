@@ -1,0 +1,18 @@
+{
+  "decimal": ",",
+  "emptyTable": "Sin datos",
+  "info": "Mostrando de _START_ a _END_ de un total de _TOTAL_",
+  "infoEmpty": "No se muestran datos",
+  "infoFiltered": "(total: _MAX_)",
+  "infoThousands": ".",
+  "lengthMenu": "_MENU_ entradas por página",
+  "loadingRecords": "Cargando...",
+  "paginate": {
+    "next": " →",
+    "previous": "← "
+  },
+  "processing": "Procesando...",
+  "search": "Buscar:",
+  "thousands": ".",
+  "zeroRecords": "No se encuentran datos"
+}

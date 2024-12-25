@@ -1,7 +1,7 @@
-{% extends path(aplicacion.ruta) ~ '/index.html.twig' %}
+{% extends 'desempenyo/index.html.twig' %}
 
 {% block content %}
-    <div class="badge-primary rounded-pill float-end">{{ app.user.persona }}</div>
+    <div class="badge-primary rounded-pill float-end">{{ app.user.empleado }}</div>
     <div class="pagina-titulo">{{ titulo }}</div>
 
     <table class="tabla-condensada" id="datosTipos">
@@ -44,7 +44,7 @@
         </tbody>
         <caption class="mt-4">
             <span class="me-4">Estados</span>
-            {%- for estado in aplicacion.estados|filter(e => e.tipo == constant('App\\Entity\\EstadoTipo::INCIDENCIA') and e.icono is not null) -%}
+            {%- for estado in estados|filter(e => e.tipo == constant('App\\Entity\\EstadoTipo::INCIDENCIA') and e.icono is not null) -%}
                 <span class="me-4 badge {% if estado.color %}text-{{ estado.color }}{% else %}text-black{% endif %}">
                     <em class="fas {{ estado.icono }}"></em> {{ estado.nombre }}</span>
             {%- endfor -%}
@@ -63,9 +63,7 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta) }}">
-            <em class="me-1 fas {{ aplicacion.icono }}"></em>{{ aplicacion.nombreCorto }}
-        </a>
+        <a href="{{ path('desempenyo') }}"><em class="me-1 fas fa-user-check"></em>Desempeño</a>
     </li>
 {% endblock %}
 

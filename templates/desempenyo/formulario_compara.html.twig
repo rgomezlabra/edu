@@ -1,7 +1,7 @@
-{% extends path(aplicacion.ruta) ~ '/index.html.twig' %}
+{% extends 'desempenyo/index.html.twig' %}
 
 {% block content %}
-    <div class="badge-primary rounded-pill float-end">{{ app.user.persona }}</div>
+    <div class="badge-primary rounded-pill float-end">{{ app.user.empleado }}</div>
     <div class="pagina-titulo">{{ titulo }}</div>
     <div>
         Valoraciones con una diferencia de más de {{ constant('App\\Controller\\Desempenyo\\FormularioController::RANGO_COMPARA') }}
@@ -32,9 +32,7 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta) }}">
-            <em class="me-1 fas {{ aplicacion.icono }}"></em>{{ aplicacion.nombreCorto }}
-        </a>
+        <a href="{{ path('desempenyo') }}"><em class="me-1 fas fa-user-check"></em>Desempeño</a>
     </li>
 {% endblock %}
 

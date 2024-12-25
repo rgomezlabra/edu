@@ -1,4 +1,4 @@
-{% extends path(aplicacion.ruta) ~ '/index.html.twig' %}
+{% extends 'desempenyo/index.html.twig' %}
 
 {% block content %}
     {%- set puntos_iniciales = 6 -%}
@@ -8,7 +8,7 @@
     {%- set grupos = evalua.cuestionario.grupos|filter(g => g.activa)|sort((a, b) => a.orden <=> b.orden) -%}
     {%- set editar = evalua.formulario == null or evalua.formulario.fechaEnvio == null -%}
 
-    <div class="badge-primary rounded-pill float-end">{{ app.user.persona }}</div>
+    <div class="badge-primary rounded-pill float-end">{{ app.user.empleado }}</div>
     <div class="pagina-titulo">{{ evalua.cuestionario.titulo }}</div>
     <div class="m-3">{{ evalua.cuestionario.descripcion|raw }}</div>
 
@@ -17,9 +17,9 @@
             Autoevaluación {{ evalua.formulario and evalua.formulario.fechaEnvio ? ('enviada el ' ~ evalua.formulario.fechaEnvio|date('d/m/Y')) }}
         </div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
-        <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte del agente principal</div>
+        <div class="pagina-seccion">Evaluación de {{ evalua.empleado }} por parte del agente principal</div>
     {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
-        <div class="pagina-seccion">Evaluación de {{ evalua.empleado.persona }} por parte del agente colaborador</div>
+        <div class="pagina-seccion">Evaluación de {{ evalua.empleado }} por parte del agente colaborador</div>
     {%- endif %}
 
     {#- Solo se muestra el formulario cuando no hay fecha de envío #}
@@ -245,9 +245,7 @@
 {% block migas %}
     {{ parent() }}
     <li class="breadcrumb-item">
-        <a href="{{ path(aplicacion.ruta) }}">
-            <em class="me-1 fas {{ aplicacion.icono }}"></em>{{ aplicacion.nombreCorto }}
-        </a>
+        <a href="{{ path('desempenyo') }}"><em class="me-1 fas fa-user-check"></em>Desempeño</a>
     </li>
 {% endblock %}
 

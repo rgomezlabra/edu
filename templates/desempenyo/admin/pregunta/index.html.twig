@@ -1,4 +1,4 @@
-{% extends path(aplicacion.ruta) ~ '/admin/grupo/index.html.twig' %}
+{% extends 'desempenyo/admin/grupo/index.html.twig' %}
 {%- set tipos %}
     {{- render(controller('App\\Controller\\Cuestiona\\PreguntaController::getTipos')) }}
 {%- endset %}

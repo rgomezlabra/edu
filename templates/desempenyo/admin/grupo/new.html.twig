@@ -1,9 +1,9 @@
-{% extends path(aplicacion.ruta) ~ '/admin/cuestionario/index.html.twig' %}
+{% extends 'desempenyo/admin/cuestionario/index.html.twig' %}
 
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
 
-    {{ include(path(aplicacion.ruta) ~ '/admin/cuestionario/_form.html.twig') }}
+    {{ include('desempenyo/admin/cuestionario/_form.html.twig') }}
 {% endblock %}
 
 {% block migas %}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es" class="h-100">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" type="image/png" href="{{ absolute_url(asset('images/US-favicon-64x64.png')) }}"/>
+    {% block css %}{% endblock %}
+    {% block js %}{% block importmap %}{{ importmap('app') }}{% endblock %}{% endblock %}
+    <title>SIRHUS: {{ titulo }}</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+{% block menu_superior %}
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary mb-4 border-bottom border-secondary border-3">
+        {% include 'layout/_menu_superior.html.twig' %}
+        {#        {{ render_esi(path('intranet_usuario_menu')) }} #}
+    </nav>
+{% endblock %}
+
+<main class="container-fluid">
+    {% block modal %}{% endblock %}
+    {%- if block('usuario') is not empty %}
+        <div class="badge-primary float-end">
+            {% block usuario %}{% endblock %}
+        </div>
+    {%- endif %}
+    {%- if block('migas') is not empty %}
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                {%- block migas %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ path('intranet') }}">{{ ux_icon('fa-solid:home') }} Intranet</a>
+                    </li>
+                {%- endblock %}
+            </ol>
+        </nav>
+    {%- endif %}
+    {% include 'layout/_flash_messages.html.twig' %}
+    {% block content %}{% endblock %}
+    {%- if block('botones') is not empty %}
+    <ul class="nav linea-botones">
+        {% block botones %}{% endblock %}
+    </ul>
+    {%- endif %}
+</main>
+<footer class="footer mt-auto py-3 bg-primary border-top border-secondary border-3">
+    {% include'layout/_pie.html.twig' %}
+</footer>
+</body>
+</html>
+
+

@@ -1,11 +1,11 @@
-{% extends path(aplicacion.ruta) ~ '/admin/tipo_incidencia/index.html.twig' %}
+{% extends 'desempenyo/admin/tipo_incidencia/index.html.twig' %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
 
-    {{ include(path(aplicacion.ruta) ~ '/admin/tipo_incidencia/_form.html.twig', {button_label: 'Actualizar'}) }}
+    {{ include('desempenyo/admin/tipo_incidencia/_form.html.twig', {button_label: 'Actualizar'}) }}
 {% endblock %}
 
 {% block botones %}{% endblock %}

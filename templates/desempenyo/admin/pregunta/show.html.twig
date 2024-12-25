@@ -1,4 +1,4 @@
-{% extends path(aplicacion.ruta) ~ '/admin/pregunta/index.html.twig' %}
+{% extends 'desempenyo/admin/pregunta/index.html.twig' %}
 
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
@@ -77,7 +77,7 @@
     </li>
     {%- if pregunta.grupo.cuestionario.estado.nombre == constant('App\\Entity\\Estado::BORRADOR') %}
         <li class="nav-item ms-5 me-2">
-            {{ include(path(aplicacion.ruta) ~ '/admin/pregunta/_delete_form.html.twig') }}
+            {{ include('desempenyo/admin/pregunta/_delete_form.html.twig') }}
         </li>
     {%- endif %}
 {% endblock %}

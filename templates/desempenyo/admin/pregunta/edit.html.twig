@@ -1,4 +1,4 @@
-{% extends path(aplicacion.ruta) ~ '/admin/pregunta/index.html.twig' %}
+{% extends 'desempenyo/admin/pregunta/index.html.twig' %}
 
 {% block content %}
     <div class="pagina-titulo">{{ titulo }}</div>
@@ -7,7 +7,7 @@
         <em class="fas fa-info-circle"></em>
         Si se desea modificar el tipo de pregunta, ésta debe ser eliminada y creada de nuevo con el tipo adecuado.
     </div>
-    {{ include(path(aplicacion.ruta) ~ '/admin/pregunta/_form.html.twig', {button_label: 'Actualizar'}) }}
+    {{ include('desempenyo/admin/pregunta/_form.html.twig', {button_label: 'Actualizar'}) }}
 {% endblock %}
 
 {% block migas %}
