@@ -33,7 +33,8 @@ class LoginController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $passwordEncoder,
         EntityManagerInterface $entityManager,
-    ): Response {
+    ): Response
+    {
         /** @var Usuario $user */
         $user = $this->getUser();
         if (!$user) {
@@ -48,5 +49,11 @@ class LoginController extends AbstractController
         }
 
         return $this->render('login/password.html.twig');
+    }
+
+    #[Route('/menu', name: 'usuario_menu')]
+    public function menuUsuario(): Response
+    {
+        return $this->render('layout/_menu_superior_usuario.html.twig');
     }
 }

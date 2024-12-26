@@ -14,6 +14,7 @@ class AppVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
-        return true;
+        $roles = $token->getRoleNames();
+        return [] === $roles || in_array('ROLE_' . strtoupper($attribute), $roles);
     }
 }

@@ -41,6 +41,25 @@ class UsuarioFixtures extends Fixture
             ->setModificado($now);
         ;
         $manager->persist($usuario);
+
+        $empleado = new Empleado();
+        $empleado->setNombre('Currante')
+            ->setApellido1('Total')
+            ->setDocIdentidad('22222222R')
+            ->setNrp('22222222R')
+        ;
+        $manager->persist($empleado);
+        $manager->flush();
+        $usuario = new Usuario();
+        $clave = $this->hasher->hashPassword($usuario, 'muy-curry');
+        $usuario->setLogin('curry')
+            ->setPassword($clave)
+            ->setCorreo('curry@localhost')
+            ->setEmpleado($empleado)
+            ->setCreado($now)
+            ->setModificado($now);
+        ;
+        $manager->persist($usuario);
         $manager->flush();
     }
 }

@@ -1,46 +1,12 @@
-{# Menú opciones del usuario alineado a la derecha #}
-<ul class="navbar-nav mb-2 mb-md-0 ps-3">
-    {# Notificaciones. #}
-    {#
-    <li class="nav-item px-1">
-
-        <a class="nav-link nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notificaciones del Usuario">
-            <span class="badge border border-2 bg-primary border-secondary rounded-pill {{ notas|length > 0 ? 'bg-danger' : 'bg-dark'}}" >
-                {{ ux_icon('fa-solid:bell') }} {{ notas|length }}</span>
-        </a>
-        {% if notas|length > 0 %}
-            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg">
-                <li class="dropdown-header text-center fw-bold">Hay {{ notas|length }} notificaciones sin leer</li>
-                {%- for nota in notas %}
-                    <li>
-                        <a class="dropdown-item" href="#">
-                            {{ ux_icon('fa-solid:info-circle', {class: 'icon-info'}) }} {{ (nota.aplicacion ~ ': ' ~ nota.nota)[0:30] }}
-                        </a>
-                    </li>
-                {%- endfor %}
-            </ul>
-        {% else %}
-            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg">
-                <li class="dropdown-header text-center fw-bold">No hay nuevas notificaciones</li>
-            </ul>
-        {% endif %}
-    </li>
-    #}
-    {# Datos del usuario. #}
-    <li class="nav-item">
-        <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Datos del Usuario">
-            {{ ux_icon('fa-solid:user-circle', {class: 'icon-light'}) }}
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end">
-            <li class="dropdown-header text-center fw-bold">{{ app.user.login ?? 'anónimo' }}</li>
-            <li>
-                <em class="fas fa-user"></em> {{ app.user.empleado|default('Anónimo') }}
-            </li>
-            <li>
-{#                <a class="dropdown-item" href="{{ path('logout') }}" title="Cerrar sesión del Usuario">#}
+{% if app.user %}
+    <ul class="navbar-nav mb-2 mb-md-0 ps-3 text-light">
+        <li class="nav-item">
+            <em class="fas fa-user-circle"></em> {{ app.user.login }}
+        </li>
+        <li>
+            <a class="dropdown-item" href="{{ path('app_logout') }}" title="Cerrar sesión del Usuario">
                 <em class="fas fa-lock"></em> Salir de la sesión
-{#                </a>#}
-            </li>
-        </ul>
-    </li>
-</ul>
+            </a>
+        </li>
+    </ul>
+{% endif %}
