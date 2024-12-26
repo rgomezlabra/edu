@@ -49,6 +49,7 @@
         "symfony/mailer": "6.4.*",
         "symfony/mime": "6.4.*",
         "symfony/monolog-bundle": "^3.8",
+        "symfony/password-hasher": "6.4.*",
         "symfony/property-access": "6.4.*",
         "symfony/property-info": "6.4.*",
         "symfony/proxy-manager-bridge": "6.4.*",
@@ -60,7 +61,6 @@
         "symfony/string": "6.4.*",
         "symfony/translation": "6.4.*",
         "symfony/twig-bundle": "6.4.*",
-        "symfony/ux-icons": "^2.21",
         "symfony/validator": "6.4.*",
         "symfony/web-link": "6.4.*",
         "symfony/yaml": "6.4.*",
@@ -110,7 +110,6 @@
             "requirements-checker": "script",
             "importmap:install": "symfony-cmd",
             "sass:build": "symfony-cmd",
-            "ux:icons:lock": "symfony-cmd",
             "ckeditor:install": "symfony-cmd"
         },
         "post-install-cmd": [

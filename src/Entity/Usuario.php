@@ -8,6 +8,7 @@ use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Stringable;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -16,8 +17,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
 #[ORM\Entity(repositoryClass: UsuarioRepository::class)]
-#[ORM\Index(columns: ['login'], name: 'idx_login')]
-class Usuario implements UserInterface, Stringable
+#[ORM\Index(columns: ['login'], name: 'idx_usuario_login')]
+class Usuario implements UserInterface, PasswordAuthenticatedUserInterface, Stringable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -27,21 +28,15 @@ class Usuario implements UserInterface, Stringable
     #[ORM\Column(type: Types::STRING, length: 180, unique: true)]
     private ?string $login = null;
 
+    #[ORM\Column(type: Types::STRING, length: 100)]
+    private ?string $password = null;
+
     #[ORM\Column(type: Types::JSON)]
     private array $roles = [];
 
-
-
-    #[ORM\Column(type: Types::STRING, length: 10, nullable: true)]
-    private ?string $login_estado = null;
-
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true)]
     #[Assert\Email]
-    private ?string $correo1 = null;
-
-    #[ORM\Column(type: Types::STRING, length: 100, nullable: true)]
-    #[Assert\Email]
-    private ?string $correo2 = null;
+    private ?string $correo = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?DateTimeInterface $creado = null;
@@ -51,9 +46,6 @@ class Usuario implements UserInterface, Stringable
 
     #[ORM\OneToOne(mappedBy: 'usuario', targetEntity: Empleado::class, cascade: ['persist', 'remove'])]
     private ?Empleado $empleado = null;
-
-
-
 
     public function __toString(): string
     {
@@ -78,8 +70,6 @@ class Usuario implements UserInterface, Stringable
     }
 
     /**
-     * A visual identifier that represents this user.
-     *
      * @see UserInterface
      */
     public function getUserIdentifier(): string
@@ -93,6 +83,21 @@ class Usuario implements UserInterface, Stringable
     public function getUsername(): string
     {
         return (string) $this->login;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(?string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
     }
 
     /**
@@ -122,36 +127,14 @@ class Usuario implements UserInterface, Stringable
         // $this->plainPassword = null;
     }
 
-
-
-    /**
-     */
-
-
-
-
-
-
-    public function getCorreo1(): ?string
+    public function getCorreo(): ?string
     {
-        return $this->correo1;
+        return $this->correo;
     }
 
-    public function setCorreo1(?string $correo1): static
+    public function setCorreo(?string $correo): static
     {
-        $this->correo1 = $correo1;
-
-        return $this;
-    }
-
-    public function getCorreo2(): ?string
-    {
-        return $this->correo2;
-    }
-
-    public function setCorreo2(?string $correo2): static
-    {
-        $this->correo2 = $correo2;
+        $this->correo = $correo;
 
         return $this;
     }
@@ -195,14 +178,4 @@ class Usuario implements UserInterface, Stringable
 
         return $this;
     }
-
-    /**
-     */
-
-
-
-    /**
-     */
-
-
 }

@@ -6,10 +6,15 @@ use App\Entity\Estado;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
-class AppFixtures extends Fixture
+/**
+ * Cargar estados básicos de recursos.
+ * @author Ramón M. Gómez <ramongomez@us.es>
+ */
+class EstadoFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
+        // Estados
         $estado = new Estado();
         $estado->setNombre(Estado::PUBLICADO)
             ->setTipo(Estado::SISTEMA)
@@ -17,6 +22,7 @@ class AppFixtures extends Fixture
             ->setIcono('fa-square-check')
         ;
         $manager->persist($estado);
+        $estado = new Estado();
         $estado->setNombre(Estado::BORRADOR)
             ->setTipo(Estado::SISTEMA)
             ->setDescripcion('Recurso accesible solo por administrador/editor')
@@ -24,6 +30,7 @@ class AppFixtures extends Fixture
             ->setColor('gray')
         ;
         $manager->persist($estado);
+        $estado = new Estado();
         $estado->setNombre(Estado::ARCHIVADO)
             ->setTipo(Estado::SISTEMA)
             ->setDescripcion('Recurso archivado o caducado')
@@ -31,6 +38,7 @@ class AppFixtures extends Fixture
             ->setColor('cyan')
         ;
         $manager->persist($estado);
+        $estado = new Estado();
         $estado->setNombre(Estado::ELIMINADO)
             ->setTipo(Estado::SISTEMA)
             ->setDescripcion('Recurso marcado para su eliminación, es recuperable')

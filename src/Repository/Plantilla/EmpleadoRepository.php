@@ -2,14 +2,11 @@
 
 namespace App\Repository\Plantilla;
 
-use App\Entity\Edificio;
 use App\Entity\Plantilla\Empleado;
-use App\Entity\Subunidad;
-use App\Entity\Unidades\Unidad;
+use App\Entity\Plantilla\Unidad;
 use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -77,8 +74,7 @@ class EmpleadoRepository extends ServiceEntityRepository
     {
         try {
             $qb = $this->createQueryBuilder('empleado')
-                ->join('empleado.persona', 'persona')
-                ->andWhere('persona.doc_identidad = :doc')
+                ->andWhere('empleado.doc_identidad = :doc')
                 ->setParameter('doc', $documento)
             ;
             if ($soloActivo) {
@@ -99,8 +95,7 @@ class EmpleadoRepository extends ServiceEntityRepository
     {
         try {
             return $this->createQueryBuilder('empleado')
-                ->join('empleado.persona', 'persona')
-                ->andWhere('persona.usuario = :usuario')
+                ->andWhere('empleado.usuario = :usuario')
                 ->andWhere('empleado.cesado IS NULL')
                 ->setParameter('usuario', $usuario)
                 ->getQuery()
@@ -145,12 +140,8 @@ class EmpleadoRepository extends ServiceEntityRepository
     public function findCesados(bool $cese = true): array
     {
         return $this->createQueryBuilder('empleado')
-            ->addSelect('persona', 'plaza_titular', 'plaza_ocupada', 'unidad_titular', 'unidad_ocupada')
-            ->leftJoin('empleado.persona', 'persona')
-            ->leftJoin('empleado.plaza_titular', 'plaza_titular')
-            ->leftJoin('empleado.plaza_ocupada', 'plaza_ocupada')
-            ->leftJoin('plaza_titular.unidad', 'unidad_titular')
-            ->leftJoin('plaza_ocupada.unidad', 'unidad_ocupada')
+            ->addSelect('unidad')
+            ->leftJoin('empleado.unidad', 'unidad')
             ->andWhere($cese ? 'empleado.cesado IS NOT NULL' : 'empleado.cesado IS NULL')
             ->getQuery()
             ->getResult()
@@ -172,68 +163,6 @@ class EmpleadoRepository extends ServiceEntityRepository
             ->andWhere('empleado.cesado IS NULL')
             ->andWhere('unidad_ocupada.id = :id OR (unidad_titular.id = :id AND unidad_ocupada IS NULL)')
             ->setParameter('id', $unidad->getId())
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /**
-     * Buscar los empleados que actualmente trabajan en una subunidad.
-     * @return Empleado[]
-     */
-    public function findBySubunidad(Subunidad $subunidad): array
-    {
-        return $this->createQueryBuilder('empleado')
-            ->distinct()
-            ->leftJoin('empleado.plaza_titular', 'plaza_titular')
-            ->leftJoin('plaza_titular.subunidad', 'subunidad_titular')
-            ->leftJoin('empleado.plaza_ocupada', 'plaza_ocupada')
-            ->leftJoin('plaza_ocupada.subunidad', 'subunidad_ocupada')
-            ->andWhere('empleado.cesado IS NULL')
-            ->andWhere('subunidad_ocupada.id = :id OR (subunidad_titular.id = :id AND subunidad_ocupada IS NULL)')
-            ->setParameter('id', $subunidad->getId())
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    public function countBySubunidad(Subunidad $subunidad): int
-    {
-        try {
-            return $this->createQueryBuilder('empleado')
-                ->select('COUNT(empleado.id)')
-                ->leftJoin('empleado.plaza_titular', 'plaza_titular')
-                ->leftJoin('plaza_titular.subunidad', 'subunidad_titular')
-                ->leftJoin('empleado.plaza_ocupada', 'plaza_ocupada')
-                ->leftJoin('plaza_ocupada.subunidad', 'subunidad_ocupada')
-                ->andWhere('empleado.cesado IS NULL')
-                ->andWhere('subunidad_ocupada.id = :id OR (subunidad_titular.id = :id AND subunidad_ocupada IS NULL)')
-                ->setParameter('id', $subunidad->getId())
-                ->getQuery()
-                ->getSingleScalarResult()
-            ;
-        } catch (NoResultException|NonUniqueResultException) {
-            return 0;
-        }
-    }
-
-    /**
-     * Buscar los empleados que actualmente trabajan en un edificio.
-     * @return Empleado[]
-     */
-    public function findByEdificio(Edificio $edificio): array
-    {
-        return $this->createQueryBuilder('empleado')
-            ->distinct()
-            ->leftJoin('empleado.plaza_titular', 'plaza_titular')
-            ->leftJoin('plaza_titular.subunidad', 'subunidad_titular')
-            ->leftJoin('subunidad_titular.edificio', 'edificio_titular')
-            ->leftJoin('empleado.plaza_ocupada', 'plaza_ocupada')
-            ->leftJoin('plaza_ocupada.subunidad', 'subunidad_ocupada')
-            ->leftJoin('subunidad_ocupada.edificio', 'edificio_ocupada')
-            ->andWhere('empleado.cesado IS NULL')
-            ->andWhere('edificio_ocupada.id = :id OR (edificio_titular.id = :id AND edificio_ocupada IS NULL)')
-            ->setParameter('id', $edificio->getId())
             ->getQuery()
             ->getResult()
         ;

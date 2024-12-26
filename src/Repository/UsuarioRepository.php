@@ -8,6 +8,8 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 
 /**
  * @extends ServiceEntityRepository<Usuario>
@@ -17,7 +19,7 @@ use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
  * @method Usuario[]    findAll()
  * @method Usuario[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class UsuarioRepository extends ServiceEntityRepository implements UserLoaderInterface
+class UsuarioRepository extends ServiceEntityRepository implements UserLoaderInterface, PasswordUpgraderInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -43,6 +45,13 @@ class UsuarioRepository extends ServiceEntityRepository implements UserLoaderInt
     public function flush(): void
     {
         $this->getEntityManager()->flush();
+    }
+
+    function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
+    {
+        $user->setPassword($newHashedPassword);
+
+        $this->flush();
     }
 
     /** Realiza búsquedas para paginar la salida de empleados. */

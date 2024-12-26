@@ -14,12 +14,12 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 #[ORM\Entity(repositoryClass: EstadoRepository::class)]
 #[UniqueEntity('nombre')]
-#[ORM\Index(columns: ['nombre'], name: 'idx_nombre')]
+#[ORM\Index(columns: ['nombre'], name: 'idx_estado_nombre')]
 class Estado implements Stringable
 {
+    // Tipos de estados
     final public const string SISTEMA = 'sistema';
     final public const string INCIDENCIA = 'incidencia';
-    final public const string SOLICITUD = 'solicitud';
 
     // Nombres de estados que no deben ser modificados en la BD porque se usan en el código.
     final public const string PUBLICADO = 'Publicado';

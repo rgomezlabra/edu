@@ -15,7 +15,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\Entity(repositoryClass: SituacionRepository::class)]
 #[ORM\Table(name: 'plantilla_situacion')]
 #[UniqueEntity('codigo')]
-#[UniqueEntity('nombre')]
 class Situacion implements Stringable
 {
     #[ORM\Id]
@@ -23,7 +22,7 @@ class Situacion implements Stringable
     #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::STRING, length: 50)]
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: false)]
     private ?string $codigo = null;
 
     #[ORM\Column(type: Types::STRING, length: 255)]
@@ -44,7 +43,7 @@ class Situacion implements Stringable
         return $this->codigo;
     }
 
-    public function setCodigo(?string $codigo): self
+    public function setCodigo(?string $codigo): static
     {
         $this->codigo = $codigo;
 
@@ -56,7 +55,7 @@ class Situacion implements Stringable
         return $this->nombre;
     }
 
-    public function setNombre(?string $nombre): self
+    public function setNombre(?string $nombre): string
     {
         $this->nombre = $nombre;
 

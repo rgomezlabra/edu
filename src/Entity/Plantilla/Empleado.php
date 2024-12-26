@@ -21,7 +21,7 @@ class Empleado
     #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[ORM\OneToOne(targetEntity: Usuario::class)]
+    #[ORM\OneToOne(inversedBy: 'empleado', targetEntity: Usuario::class)]
     private ?Usuario $usuario = null;
 
     #[ORM\ManyToOne(targetEntity: Situacion::class)]

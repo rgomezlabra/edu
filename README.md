@@ -18,5 +18,6 @@ EDU está desarrollada sobre el entorno de programación Symfony 6.4 y se necesi
     git clone https://github.com/rgomezlabra/edu.git
     cd edu
     composer install
+    php bin/console doctrine:migrations:migrate
     php bin/console doctrine:fixtures:load
     ...

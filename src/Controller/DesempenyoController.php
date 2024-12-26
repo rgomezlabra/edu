@@ -16,7 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(path: 'desempenyo', name: 'desempenyo')]
+#[Route(path: '/', name: 'desempenyo')]
 class DesempenyoController extends AbstractController
 {
     public function __construct(
@@ -34,9 +34,11 @@ class DesempenyoController extends AbstractController
         EstadoRepository       $estadoRepository,
         EvaluaRepository       $evaluaRepository,
     ): Response {
-        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
+        if (!$usuario instanceof Usuario) {
+            return $this->redirectToRoute('app_login');
+        }
         $empleado = $empleadoRepository->findOneByUsuario($usuario);
         $publicado = $estadoRepository->findOneBy(['nombre' => Estado::PUBLICADO]);
         $cuestionarios = $cuestionarioRepository->findBy(['estado' => $publicado]);

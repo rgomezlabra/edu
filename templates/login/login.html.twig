@@ -4,14 +4,15 @@
 
 {% block content %}
     <div class="pagina-titulo">Autenticación del Usuario</div>
-
+    {% if error %}
+        <div>{{ error.messageKey }}</div>
+    {% endif %}
     <form method="post">
         <label for="username">Usuario</label>
         <input type="text" id="username" name="_username" required>
-
         <label for="password">Contraseña</label>
         <input type="password" id="password" name="_password" required>
-
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
         <button type="submit">Aceptar</button>
     </form>
 {% endblock %}
