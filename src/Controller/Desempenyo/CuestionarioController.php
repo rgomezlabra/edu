@@ -49,7 +49,7 @@ class CuestionarioController extends AbstractController
 
         return $this->render('desempenyo/admin/cuestionario/index.html.twig', [
             'cuestionarios' => $this->cuestionarioRepository->findAll(),
-            'estados' => $estadoRepository->findAll(),
+            'estados' => $estadoRepository->findBy(['tipo' => Estado::SISTEMA]),
         ]);
     }
 

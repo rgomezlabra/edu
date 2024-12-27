@@ -30,27 +30,15 @@ class Estado implements Stringable
 
     final public const string ELIMINADO = 'Eliminado';
 
-    final public const string SOLICITADO = 'Solicitado';
-
-    final public const string APROBADO = 'Aprobado';
-
-    final public const string RECHAZADO = 'Rechazado';
-
-    final public const string NUEVO = 'Nuevo';
-
-    final public const string CLONADO = 'Clonado';
-
-    final public const string MODIFICADO = 'Modificado';
-
-    final public const string TRANSFORMADO = 'Transformado';
-
-    final public const string EXTINGUIR = 'Extinguir';
-
     final public const string INICIADO = 'Iniciado';
 
-    final public const string FINALIZADO = 'Finalizado';
+    final public const string PROCESANDO = 'Procesando';
 
-    final public const string REABIERTO = 'Reabierto';
+    final public const string INTERNO = 'Interno';
+
+    final public const string EXTERNO = 'Externo';
+
+    final public const string FINALIZADO = 'Finalizado';
 
     /** @var string[] */
     final public const array ESTADOS_FIJOS = [

@@ -37,6 +37,7 @@ class IncidenciaController extends AbstractController
     public function __construct(
         private readonly MessageGenerator       $generator,
         private readonly CuestionarioRepository $cuestionarioRepository,
+        private readonly EstadoRepository       $estadoRepository,
         private readonly IncidenciaRepository   $incidenciaRepository,
         private readonly RutaActual             $actual,
     ) {
@@ -55,6 +56,7 @@ class IncidenciaController extends AbstractController
 
         return $this->render('desempenyo/admin/incidencia/index.html.twig', [
             'incidencias' => $this->incidenciaRepository->findAll(),
+            'estados' => $this->estadoRepository->findBy(['tipo' => Estado::INCIDENCIA]),
         ]);
     }
 
@@ -78,6 +80,7 @@ class IncidenciaController extends AbstractController
         return $this->render('desempenyo/incidencia_index.html.twig', [
             'codigo' => $codigo,
             'incidencias' => $this->incidenciaRepository->findByConectado($cuestionario),
+            'estados' => $this->estadoRepository->findBy(['tipo' => Estado::INCIDENCIA]),
         ]);
     }
 
@@ -91,7 +94,6 @@ class IncidenciaController extends AbstractController
     public function newUsuario(
         Request                    $request,
         CirhusIncidenciaRepository $cirhusRepository,
-        EstadoRepository           $estadoRepository,
         string                     $codigo,
     ): Response {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
@@ -115,7 +117,7 @@ class IncidenciaController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $iniciado = $estadoRepository->findOneBy(['nombre' => Estado::INICIADO]);
+            $iniciado = $this->estadoRepository->findOneBy(['nombre' => Estado::INICIADO]);
             $apunte = new IncidenciaApunte();
             $apunte
                 ->setIncidencia($cirhus)
@@ -152,15 +154,11 @@ class IncidenciaController extends AbstractController
         defaults: ['titulo' => 'Editar Incidencia de Evaluación de Desempeño'],
         methods: ['GET', 'POST']
     )]
-    public function editUsuario(
-        Request          $request,
-        EstadoRepository $estadoRepository,
-        string           $codigo,
-        Incidencia       $incidencia
-    ): Response {
+    public function editUsuario(Request $request, string $codigo, Incidencia $incidencia): Response
+    {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         $cuestionario = $this->cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
-        $iniciado = $estadoRepository->findOneBy(['nombre' => Estado::INICIADO]);
+        $iniciado = $this->estadoRepository->findOneBy(['nombre' => Estado::INICIADO]);
         $ultimo = $incidencia->getIncidencia()?->getApuntes()->last();
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'El cuestionario solicitado no existe o no está disponible.');
@@ -250,14 +248,13 @@ class IncidenciaController extends AbstractController
     public function deleteUsuario(
         Request                    $request,
         CirhusIncidenciaRepository $cirhusRepository,
-        EstadoRepository           $estadoRepository,
         IncidenciaApunteRepository $apunteRepository,
         string                     $codigo,
         Incidencia                 $incidencia,
     ): Response {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         $cuestionario = $this->cuestionarioRepository->findOneBy(['codigo' => u($codigo)->beforeLast('-')]);
-        $iniciado = $estadoRepository->findOneBy(['nombre' => Estado::INICIADO]);
+        $iniciado = $this->estadoRepository->findOneBy(['nombre' => Estado::INICIADO]);
         $cirhus = $incidencia->getIncidencia();
         $ultimo = $cirhus?->getApuntes()->last();
         if ($incidencia->getCuestionario() !== $cuestionario) {
@@ -304,7 +301,6 @@ class IncidenciaController extends AbstractController
     public function apunte(
         Request                    $request,
         CirhusIncidenciaRepository $cirhusRepository,
-        EstadoRepository           $estadoRepository,
         IncidenciaApunteRepository $apunteRepository,
         IncidenciaRepository       $incidenciaRepository,
         Incidencia                 $incidencia,
@@ -314,8 +310,8 @@ class IncidenciaController extends AbstractController
         $nuevo = false;
         /** @var Usuario $autor */
         $autor = $this->getUser();
-        $iniciado = $estadoRepository->findOneBy(['nombre' => Estado::INICIADO]);
-        $finalizado = $estadoRepository->findOneBy(['nombre' => Estado::FINALIZADO]);
+        $iniciado = $this->estadoRepository->findOneBy(['nombre' => Estado::INICIADO]);
+        $finalizado = $this->estadoRepository->findOneBy(['nombre' => Estado::FINALIZADO]);
         $cirhus = $incidencia->getIncidencia();
         $ultimo = $cirhus?->getApuntes()->last();
 

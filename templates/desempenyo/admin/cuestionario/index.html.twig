@@ -63,7 +63,7 @@
             {#- Leyenda de estados para cuestionarios. #}
             <caption class="mt-4">
                 <span class="me-4">Estados</span>
-                {%- for estado in estados|filter(e => e.tipo == constant('App\\Entity\\Estado::SISTEMA') and e => e.icono is not null) -%}
+                {%- for estado in estados|filter(e => e => e.icono is not null) -%}
                     <span class="me-4 badge {% if estado.color %}text-{{ estado.color }}{% else %}text-black{% endif %}">
                         <em class="fas {{ estado.icono }}"></em> {{ estado.nombre }}</span>
                 {%- endfor -%}

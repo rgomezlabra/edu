@@ -109,8 +109,7 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
             "requirements-checker": "script",
             "importmap:install": "symfony-cmd",
-            "sass:build": "symfony-cmd",
-            "ckeditor:install": "symfony-cmd"
+            "sass:build": "symfony-cmd"
         },
         "post-install-cmd": [
             "@auto-scripts"

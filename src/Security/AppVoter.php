@@ -12,7 +12,7 @@ class AppVoter extends Voter
     #[Override]
     protected function supports(?string $attribute, mixed $subject): bool
     {
-        return null === $attribute;
+        return null !== $attribute;
     }
 
     #[Override]
