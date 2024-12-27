@@ -34,8 +34,6 @@ class Empleado
     #[ORM\ManyToOne(targetEntity: Ausencia::class)]
     private ?Ausencia $ausencia = null;
 
-
-
     #[ORM\Column(type: Types::STRING, length: 50)]
     private ?string $nrp = null;
 
@@ -68,12 +66,20 @@ class Empleado
 
     #[ORM\Column(type: Types::STRING, length: 100)]
     private ?string $nombre = null;
+
     #[ORM\Column(type: Types::STRING, length: 100)]
     private ?string $apellido1 = null;
+
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true)]
     private ?string $apellido2 = null;
+
     #[ORM\Column(type: Types::STRING, length: 11, nullable: true)]
     private ?string $doc_identidad = null;
+
+    public function __toString(): string
+    {
+        return trim(sprintf('%s %s %s', $this->nombre ?? '', $this->getApellido1() ?? '', $this->getApellido2() ?? ''));
+    }
 
     public function getId(): ?int
     {
@@ -247,44 +253,48 @@ class Empleado
 
         return $this;
     }
-    public function __toString(): string
-    {
-        return trim(sprintf('%s %s %s', $this->nombre ?? '', $this->getApellido1() ?? '', $this->getApellido2() ?? ''));
-    }
+
     public function getNombre(): ?string
     {
         return $this->nombre;
     }
+
     public function setNombre(string $nombre): static
     {
         $this->nombre = $nombre;
 
         return $this;
     }
+
     public function getApellido1(): ?string
     {
         return $this->apellido1;
     }
+
     public function setApellido1(string $apellido1): static
     {
         $this->apellido1 = $apellido1;
 
         return $this;
     }
+
     public function getApellido2(): ?string
     {
         return $this->apellido2;
     }
+
     public function setApellido2(?string $apellido2): static
     {
         $this->apellido2 = $apellido2;
 
         return $this;
     }
+
     public function getDocIdentidad(): ?string
     {
         return $this->doc_identidad;
     }
+
     public function setDocIdentidad(?string $doc_identidad): static
     {
         $this->doc_identidad = $doc_identidad;

@@ -51,7 +51,7 @@ class UsuarioFixtures extends Fixture
         $manager->persist($empleado);
         $manager->flush();
         $usuario = new Usuario();
-        $clave = $this->hasher->hashPassword($usuario, 'muy-curry');
+        $clave = $this->hasher->hashPassword($usuario, 'edu-curry');
         $usuario->setLogin('curry')
             ->setPassword($clave)
             ->setCorreo('curry@localhost')
