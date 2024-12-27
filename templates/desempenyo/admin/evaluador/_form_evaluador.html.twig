@@ -16,9 +16,9 @@
             </thead>
             <tbody>
             {%- for empleado in empleados %}
-                <tr id="{{ empleado.persona.docIdentidad }}">
-                    <td>{{ empleado.persona.docIdentidad }}</td>
-                    <td>{{ empleado.persona }}</td>
+                <tr id="{{ empleado.docIdentidad }}">
+                    <td>{{ empleado.docIdentidad }}</td>
+                    <td>{{ empleado }}</td>
                 </tr>
             {%- endfor %}
             </tbody>

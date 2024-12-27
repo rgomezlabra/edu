@@ -27,9 +27,11 @@ class Empleado
     #[ORM\ManyToOne(targetEntity: Situacion::class)]
     private ?Situacion $situacion = null;
 
-
     #[ORM\ManyToOne(targetEntity: Grupo::class)]
     private ?Grupo $grupo = null;
+
+    #[ORM\ManyToOne(targetEntity: Unidad::class)]
+    private ?Unidad $unidad = null;
 
     #[ORM\ManyToOne(targetEntity: Ausencia::class)]
     private ?Ausencia $ausencia = null;
@@ -120,6 +122,16 @@ class Empleado
         $this->grupo = $grupo;
 
         return $this;
+    }
+
+    public function getUnidad(): ?Unidad
+    {
+        return $this->unidad;
+    }
+
+    public function setUnidad(?Unidad $unidad): void
+    {
+        $this->unidad = $unidad;
     }
 
     public function getAusencia(): ?Ausencia

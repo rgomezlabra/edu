@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20241226113726 extends AbstractMigration
+final class Version20241227112621 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -36,7 +36,7 @@ final class Version20241226113726 extends AbstractMigration
         $this->addSql('CREATE TABLE desempenyo_tipo_incidencia (id INT AUTO_INCREMENT NOT NULL, nombre VARCHAR(50) NOT NULL, descripcion LONGTEXT NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE estado (id INT AUTO_INCREMENT NOT NULL, nombre VARCHAR(50) NOT NULL, descripcion LONGTEXT NOT NULL, icono VARCHAR(50) DEFAULT NULL, color VARCHAR(22) DEFAULT NULL, tipo VARCHAR(10) NOT NULL, INDEX idx_estado_nombre (nombre), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE plantilla_ausencia (id INT AUTO_INCREMENT NOT NULL, codigo VARCHAR(50) NOT NULL, nombre VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-        $this->addSql('CREATE TABLE plantilla_empleado (id INT AUTO_INCREMENT NOT NULL, usuario_id INT DEFAULT NULL, situacion_id INT DEFAULT NULL, grupo_id INT DEFAULT NULL, ausencia_id INT DEFAULT NULL, validador_id INT DEFAULT NULL, nrp VARCHAR(50) NOT NULL, nivel SMALLINT DEFAULT NULL, vigente DATE DEFAULT NULL COMMENT \'(DC2Type:date_immutable)\', cesado DATE DEFAULT NULL COMMENT \'(DC2Type:date_immutable)\', consolidado SMALLINT DEFAULT NULL, consolidacion DATE DEFAULT NULL COMMENT \'(DC2Type:date_immutable)\', antiguedad SMALLINT DEFAULT NULL, en_titular SMALLINT DEFAULT NULL, en_ocupada SMALLINT DEFAULT NULL, nombre VARCHAR(100) NOT NULL, apellido1 VARCHAR(100) NOT NULL, apellido2 VARCHAR(100) DEFAULT NULL, doc_identidad VARCHAR(11) DEFAULT NULL, UNIQUE INDEX UNIQ_52EC6D96DB38439E (usuario_id), INDEX IDX_52EC6D9696714AEF (situacion_id), INDEX IDX_52EC6D969C833003 (grupo_id), INDEX IDX_52EC6D9660C93433 (ausencia_id), INDEX IDX_52EC6D96B3B24877 (validador_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE plantilla_empleado (id INT AUTO_INCREMENT NOT NULL, usuario_id INT DEFAULT NULL, situacion_id INT DEFAULT NULL, grupo_id INT DEFAULT NULL, unidad_id INT DEFAULT NULL, ausencia_id INT DEFAULT NULL, validador_id INT DEFAULT NULL, nrp VARCHAR(50) NOT NULL, nivel SMALLINT DEFAULT NULL, vigente DATE DEFAULT NULL COMMENT \'(DC2Type:date_immutable)\', cesado DATE DEFAULT NULL COMMENT \'(DC2Type:date_immutable)\', consolidado SMALLINT DEFAULT NULL, consolidacion DATE DEFAULT NULL COMMENT \'(DC2Type:date_immutable)\', antiguedad SMALLINT DEFAULT NULL, en_titular SMALLINT DEFAULT NULL, en_ocupada SMALLINT DEFAULT NULL, nombre VARCHAR(100) NOT NULL, apellido1 VARCHAR(100) NOT NULL, apellido2 VARCHAR(100) DEFAULT NULL, doc_identidad VARCHAR(11) DEFAULT NULL, UNIQUE INDEX UNIQ_52EC6D96DB38439E (usuario_id), INDEX IDX_52EC6D9696714AEF (situacion_id), INDEX IDX_52EC6D969C833003 (grupo_id), INDEX IDX_52EC6D969D01464C (unidad_id), INDEX IDX_52EC6D9660C93433 (ausencia_id), INDEX IDX_52EC6D96B3B24877 (validador_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE plantilla_grupo (id INT AUTO_INCREMENT NOT NULL, nombre VARCHAR(50) NOT NULL, adscripcion VARCHAR(1) NOT NULL, nivel_minimo SMALLINT DEFAULT NULL, nivel_maximo SMALLINT DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE plantilla_situacion (id INT AUTO_INCREMENT NOT NULL, codigo VARCHAR(50) NOT NULL, nombre VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE plantilla_unidad (id INT AUTO_INCREMENT NOT NULL, codigo VARCHAR(50) NOT NULL, nombre VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
@@ -72,6 +72,7 @@ final class Version20241226113726 extends AbstractMigration
         $this->addSql('ALTER TABLE plantilla_empleado ADD CONSTRAINT FK_52EC6D96DB38439E FOREIGN KEY (usuario_id) REFERENCES usuario (id)');
         $this->addSql('ALTER TABLE plantilla_empleado ADD CONSTRAINT FK_52EC6D9696714AEF FOREIGN KEY (situacion_id) REFERENCES plantilla_situacion (id)');
         $this->addSql('ALTER TABLE plantilla_empleado ADD CONSTRAINT FK_52EC6D969C833003 FOREIGN KEY (grupo_id) REFERENCES plantilla_grupo (id)');
+        $this->addSql('ALTER TABLE plantilla_empleado ADD CONSTRAINT FK_52EC6D969D01464C FOREIGN KEY (unidad_id) REFERENCES plantilla_unidad (id)');
         $this->addSql('ALTER TABLE plantilla_empleado ADD CONSTRAINT FK_52EC6D9660C93433 FOREIGN KEY (ausencia_id) REFERENCES plantilla_ausencia (id)');
         $this->addSql('ALTER TABLE plantilla_empleado ADD CONSTRAINT FK_52EC6D96B3B24877 FOREIGN KEY (validador_id) REFERENCES plantilla_empleado (id)');
     }
@@ -110,6 +111,7 @@ final class Version20241226113726 extends AbstractMigration
         $this->addSql('ALTER TABLE plantilla_empleado DROP FOREIGN KEY FK_52EC6D96DB38439E');
         $this->addSql('ALTER TABLE plantilla_empleado DROP FOREIGN KEY FK_52EC6D9696714AEF');
         $this->addSql('ALTER TABLE plantilla_empleado DROP FOREIGN KEY FK_52EC6D969C833003');
+        $this->addSql('ALTER TABLE plantilla_empleado DROP FOREIGN KEY FK_52EC6D969D01464C');
         $this->addSql('ALTER TABLE plantilla_empleado DROP FOREIGN KEY FK_52EC6D9660C93433');
         $this->addSql('ALTER TABLE plantilla_empleado DROP FOREIGN KEY FK_52EC6D96B3B24877');
         $this->addSql('DROP TABLE archivo');

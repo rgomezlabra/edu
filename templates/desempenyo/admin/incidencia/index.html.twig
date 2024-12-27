@@ -31,7 +31,7 @@
                     {%- endif -%}
                 <td>{{ incidencia.cuestionario }}</td>
                 <td>{{ incidencia.tipo.nombre }}</td>
-                <td>{{ incidencia.incidencia.solicitante.persona }}</td>
+                <td>{{ incidencia.incidencia.solicitante.empleado }}</td>
                 <td>{{ incidencia.incidencia.apuntes.first.fechaInicio ? incidencia.incidencia.apuntes.first.fechaInicio|date('Y-m-d, H:i') }}</td>
                 <td>
                     {%- if incidencia.incidencia.apuntes.last.estado.nombre == constant('App\\Entity\\Estado::FINALIZADO') -%}

@@ -22,7 +22,7 @@
     </div>
     <div class="row py-2">
         <div class="fila-campo">Solicitante</div>
-        <div class="fila-valor">{{ incidencia.incidencia.solicitante.persona }}</div>
+        <div class="fila-valor">{{ incidencia.incidencia.solicitante.empleado }}</div>
     </div>
 
     <div class="row py-2">
@@ -52,7 +52,7 @@
                         <td>{{ apunte.fechaInicio ? apunte.fechaInicio | date('d/m/Y, H:i') }}</td>
                         <td>{{ apunte.fechaFin ? apunte.fechaFin | date('d/m/Y, H:i') }}</td>
                         <td>{{ apunte.comentario }}</td>
-                        <td>{{ apunte.autor.persona }}</td>
+                        <td>{{ apunte.autor.empleado }}</td>
                         <td>
                             {%- if incidencia.incidencia.apuntes.last.estado.nombre|default != constant('App\\Entity\\Estado::FINALIZADO')  and loop.last %}
                                 <a href="{{ path('desempenyo_admin_incidencia_apunte',{'incidencia': incidencia.id, 'apunte': apunte.id}) }}">

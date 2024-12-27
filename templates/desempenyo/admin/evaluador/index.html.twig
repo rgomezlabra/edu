@@ -42,10 +42,10 @@
                         {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
                             : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
                     </td>
-                    <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
-                    <td>{{ evaluacion.empleado.persona }}</td>
+                    <td>{{ evaluacion.empleado.docIdentidad }}</td>
+                    <td>{{ evaluacion.empleado }}</td>
                     <td>
-                        <a class="rechazar" href="" data-persona="{{ evaluacion.empleado.persona }}"
+                        <a class="rechazar" href="" data-persona="{{ evaluacion.empleado }}"
                            data-url="{{ path('desempenyo_admin_evaluador_rechaza', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                             <em class="mx-1 fas fa-remove" title="Rechazar evaluación"></em>
                         </a>
@@ -95,7 +95,7 @@
                     <td>
                         <span title="{{ plazaEmpleado.unidad.nombre|default }}">{{ plazaEmpleado.unidad.codigo|default }}</span>
                     </td>
-                    <td>{{ empleado.persona }}</td>
+                    <td>{{ empleado }}</td>
                     <td>{{ empleado.grupo.nombre ~ (empleado.nivel > 0 ? '/' ~ empleado.nivel) }}</td>
                     <td>{{ empleado.antiguedad|default }}</td>
                     <td>{{ empleado.vigente|date('Y-m-d') }}</td>
@@ -119,7 +119,7 @@
                     </td>
                     {%- if evaluador %}
                         <td><span title="{{ plazaEvaluador.unidad.nombre|default }}">{{ plazaEvaluador.unidad.codigo|default }}</span></td>
-                        <td>{{ evaluador.persona }}</td>
+                        <td>{{ evaluador }}</td>
                         <td>{{ evaluador.grupo.nombre ~ (evaluador.nivel > 0 ? '/' ~ evaluador.nivel) }}</td>
                         <td>{{ evaluador.antiguedad|default }}</td>
                         <td>{{ evaluador.vigente|date('Y-m-d') }}</td>
@@ -163,7 +163,7 @@
                             {%- if evaluador %}
                                 <form method="post" class="d-inline"
                                       action="{{ path('desempenyo_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion[tipo].id}) }}"
-                                      onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluador.persona }} sobre {{ empleado.persona }}?');">
+                                      onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluador }} sobre {{ empleado }}?');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cuestionario.id ~ '-' ~ evaluacion[tipo].id) }}">
                                     <button class="border-0 text-primary">
                                         <em class="mx-1 fas fa-trash" title="Desasignar"></em>
@@ -203,8 +203,8 @@
                         {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
                         : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
                     </td>
-                    <td>{{ evaluacion.empleado.persona.docIdentidad }}</td>
-                    <td>{{ evaluacion.empleado.persona }}</td>
+                    <td>{{ evaluacion.empleado.docIdentidad }}</td>
+                    <td>{{ evaluacion.empleado }}</td>
                     <td>{{ evaluacion.rechazado ? evaluacion.rechazado|date('Y-m-d') }}</td>
                     <td>{{ evaluacion.registrado ? evaluacion.registrado|date('Y-m-d') }}</td>
                     <td>
@@ -212,7 +212,7 @@
                            data-url="{{ path('desempenyo_admin_evaluador_registra', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                             <em class="fas fa-save" title="Registrar"></em>
                         </a>
-                        <a class="recuperar" href="" data-persona="{{ evaluacion.empleado.persona }}"
+                        <a class="recuperar" href="" data-persona="{{ evaluacion.empleado }}"
                            data-url="{{ path('desempenyo_admin_evaluador_recupera', {cuestionario: cuestionario.id, empleado: evaluacion.empleado.id}) }}">
                             <em class="mx-1 fas fa-check" title="Recuperar evaluación"></em>
                         </a>
@@ -243,17 +243,17 @@
             <tbody>
             {% for evalua in evaluaciones -%}
             <tr>
-                <td>{{ (evalua|first).empleado.persona.docIdentidad }}</td>
-                <td>{{ (evalua|first).empleado.persona }}</td>
+                <td>{{ (evalua|first).empleado.docIdentidad }}</td>
+                <td>{{ (evalua|first).empleado }}</td>
                 <td>
                     {% if evalua[tipoNo] is defined %}
                         <sup class="badge-warning">{{ evalua[tipoNo].registrado ? 'VR' : 'R' }}</sup>
                     {% endif %}
                 </td>
-                <td>{{ evalua[tipoResp].evaluador.persona.docIdentidad|default }}</td>
-                <td>{{ evalua[tipoResp].evaluador.persona|default }}</td>
-                <td>{{ evalua[tipoOtro].evaluador.persona.docIdentidad|default }}</td>
-                <td>{{ evalua[tipoOtro].evaluador.persona|default }}</td>
+                <td>{{ evalua[tipoResp].evaluador.docIdentidad|default }}</td>
+                <td>{{ evalua[tipoResp].evaluador|default }}</td>
+                <td>{{ evalua[tipoOtro].evaluador.docIdentidad|default }}</td>
+                <td>{{ evalua[tipoOtro].evaluador|default }}</td>
             </tr>
             {% endfor %}
             </tbody>
