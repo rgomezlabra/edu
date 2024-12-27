@@ -21,6 +21,12 @@ class Estado implements Stringable
     final public const string SISTEMA = 'sistema';
     final public const string INCIDENCIA = 'incidencia';
 
+    /** @var string[] */
+    final public const array TIPOS_FIJOS = [
+        self::SISTEMA,
+        self::INCIDENCIA,
+    ];
+
     // Nombres de estados que no deben ser modificados en la BD porque se usan en el código.
     final public const string PUBLICADO = 'Publicado';
 
@@ -46,17 +52,11 @@ class Estado implements Stringable
         self::BORRADOR,
         self::ARCHIVADO,
         self::ELIMINADO,
-        self::SOLICITADO,
-        self::RECHAZADO,
-        self::APROBADO,
-        self::NUEVO,
-        self::CLONADO,
-        self::MODIFICADO,
-        self::TRANSFORMADO,
-        self::EXTINGUIR,
         self::INICIADO,
+        self::PROCESANDO,
+        self::INTERNO,
+        self::EXTERNO,
         self::FINALIZADO,
-        self::REABIERTO,
     ];
 
     #[ORM\Id]
