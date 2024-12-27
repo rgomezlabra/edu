@@ -117,7 +117,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {%- for id, tipo in tipos|filter((t, i) => opciones is defined and i in opciones|keys) %}
+                        {% for id, tipo in tipos|filter((t, i) => opciones is defined and i in opciones|keys) -%}
                             <tr>
                                 <td>
                                     <a href="{{ path('desempenyo_admin_pregunta_new', {cuestionario: cuestionario.id, grupo: grupo.id, tipo: id, opciones: opciones[id]|json_encode}) }}">
@@ -125,7 +125,7 @@
                                     </a>
                                 </td>
                                 <td>
-                                    {{- include('cuestiona/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {ejemplo: true}, ignore_missing = true) }}
+                                    {{- include('desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {ejemplo: true}, ignore_missing = true) }}
                                 </td>
                             </tr>
                         {%- endfor %}

@@ -18,9 +18,6 @@
 {% block js %}
     {{ parent() }}
     <script type="module">
-        {{ include('cuestiona/admin/pregunta/_form.js') }}
-        {%- if tipos[pregunta.tipo].dinamico %}
-            {{ include('cuestiona/admin/pregunta/_form_dinamico.js') }}
-        {%- endif %}
+        {{ include('desempenyo/admin/pregunta/_form.js') }}
     </script>
 {% endblock %}
