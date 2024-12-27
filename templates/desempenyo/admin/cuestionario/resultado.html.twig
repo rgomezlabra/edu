@@ -34,7 +34,7 @@
             <tbody>
             {%- for idEmpleado, dato in datos %}
                 <tr>
-                    <td>{{ (dato|first).formulario.empleado.persona }}</td>
+                    <td>{{ (dato|first).formulario.empleado }}</td>
                     {%- if (dato|first).formulario.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION' )%}
                         <td>0</td>
                         <td>{{ (dato|first).formulario.rechazado ? (dato|first).formulario.rechazado|date('Y-m-d') }}</td>

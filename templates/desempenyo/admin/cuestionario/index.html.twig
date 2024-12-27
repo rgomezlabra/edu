@@ -29,7 +29,7 @@
                     <td>{{ cuestionario.titulo }}</td>
                     <td>{{ cuestionario.fechaAlta ? cuestionario.fechaAlta|date('Y-m-d') }}</td>
                     <td>{{ cuestionario.fechaBaja ? cuestionario.fechaBaja|date('Y-m-d') }}</td>
-                    <td>{{ cuestionario.autor.persona }}</td>
+                    <td>{{ cuestionario.autor.empleado }}</td>
                     <td>
                         <a href="{{ path('desempenyo_admin_cuestionario_show', {id: cuestionario.id}) }}">
                             <em class="mx-1 fas fa-eye" title="Ver"></em>
@@ -63,7 +63,7 @@
             {#- Leyenda de estados para cuestionarios. #}
             <caption class="mt-4">
                 <span class="me-4">Estados</span>
-                {%- for estado in estados|filter(e => e.tipo == constant('App\\Entity\\EstadoTipo::SISTEMA') and e => e.icono is not null) -%}
+                {%- for estado in estados|filter(e => e.tipo == constant('App\\Entity\\Estado::SISTEMA') and e => e.icono is not null) -%}
                     <span class="me-4 badge {% if estado.color %}text-{{ estado.color }}{% else %}text-black{% endif %}">
                         <em class="fas {{ estado.icono }}"></em> {{ estado.nombre }}</span>
                 {%- endfor -%}

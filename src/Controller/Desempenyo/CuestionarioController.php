@@ -43,12 +43,13 @@ class CuestionarioController extends AbstractController
         defaults: ['titulo' => 'Cuestionarios de Evaluación de Desempeño'],
         methods: ['GET']
     )]
-    public function index(): Response
+    public function index(EstadoRepository $estadoRepository): Response
     {
         $this->denyAccessUnlessGranted('admin');
 
         return $this->render('desempenyo/admin/cuestionario/index.html.twig', [
-            'cuestionarios' => $this->cuestionarioRepository->findBy(['aplicacion' => $this->actual->getAplicacion()]),
+            'cuestionarios' => $this->cuestionarioRepository->findAll(),
+            'estados' => $estadoRepository->findAll(),
         ]);
     }
 
@@ -65,7 +66,7 @@ class CuestionarioController extends AbstractController
         $autor = $this->getUser();
         $cuestionario = new Cuestionario();
         $cuestionario
-            ->setEstado($estadoRepository->findOneBy(['nombre' => 'Borrador']))
+            ->setEstado($estadoRepository->findOneBy(['nombre' => Estado::BORRADOR]))
             ->setAutor($autor)
         ;
         $form = $this->createForm(CuestionarioType::class, $cuestionario, [

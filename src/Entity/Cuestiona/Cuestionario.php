@@ -25,21 +25,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity('codigo')]
 class Cuestionario implements Stringable
 {
-    // URL base para formularios públicos y privados
-    public const string URL_BASE_PUBLICO = '/cuestiona';
-
-    public const string URL_BASE_PRIVADO = '/cuestiona/formulario';
-
-    // Tipos de presentación del formulario
-    // - formulario en una sola página
-    public const int COMPLETO = 1;
-
-    // - una página por grupo de preguntas
-    public const int POR_GRUPO = 2;
-
-    // - una página por pregunta
-    public const int POR_PREGUNTA = 3;
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
@@ -82,7 +67,6 @@ class Cuestionario implements Stringable
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     private bool $privado = true;
 
-
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $fecha_alta = null;
 
@@ -92,8 +76,6 @@ class Cuestionario implements Stringable
     /** @var array<array-key, mixed> */
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $configuracion = null;
-
-    // TODO añadir permisos de edición/relleno del formulario
 
     public function __construct()
     {
@@ -249,8 +231,6 @@ class Cuestionario implements Stringable
         return $this;
     }
 
-
-
     public function getFechaAlta(): ?DateTimeImmutable
     {
         return $this->fecha_alta;
@@ -275,7 +255,7 @@ class Cuestionario implements Stringable
         return $this;
     }
 
-    /** @return  array<array-key, mixed> */
+    /** @return array<array-key, mixed> */
     public function getConfiguracion(): ?array
     {
         return $this->configuracion;
