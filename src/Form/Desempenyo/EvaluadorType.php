@@ -33,7 +33,7 @@ class EvaluadorType extends AbstractType
         $builder
             ->add('empleado', TextType::class, [
                 'attr' => ['readonly' => true],
-                'data' => $evalua->getEmpleado()?->getPersona(),
+                'data' => $evalua->getEmpleado(),
                 'mapped' => false,
             ])
             ->add('tipoEvaluador', ChoiceType::class, [

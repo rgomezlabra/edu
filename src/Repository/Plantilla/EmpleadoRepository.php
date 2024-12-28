@@ -52,20 +52,6 @@ class EmpleadoRepository extends ServiceEntityRepository
     }
 
     /**
-     * Devuelve todos los empleados que tienen plaza.
-     * @return Empleado[]
-     */
-    public function findWithPlaza(): array
-    {
-        return $this->createQueryBuilder('empleado')
-            ->andWhere('empleado.plaza_ocupada IS NOT NULL OR empleado.plaza_titular IS NOT NULL')
-            ->andWhere('empleado.cesado IS NULL')
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /**
      * Devuelve el empleado que tiene un documento de identidad determinado.
      * @param string $documento Documento de identidad a buscar
      * @param bool $soloActivo Buscar solo empleado activo (por defecto) o buscar también entre empleados cesados.
@@ -156,47 +142,10 @@ class EmpleadoRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('empleado')
             ->distinct()
-            ->leftJoin('empleado.plaza_titular', 'plaza_titular')
-            ->leftJoin('plaza_titular.unidad', 'unidad_titular')
-            ->leftJoin('empleado.plaza_ocupada', 'plaza_ocupada')
-            ->leftJoin('plaza_ocupada.unidad', 'unidad_ocupada')
+            ->leftJoin('empleado.unidad', 'unidad')
             ->andWhere('empleado.cesado IS NULL')
-            ->andWhere('unidad_ocupada.id = :id OR (unidad_titular.id = :id AND unidad_ocupada IS NULL)')
+            ->andWhere('unidad.id = :id')
             ->setParameter('id', $unidad->getId())
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /**
-     * Buscar empleados fijos sin plaza titular asignada.
-     * @return Empleado[]
-     */
-    public function findFijosSinTitular(): array
-    {
-        return $this->createQueryBuilder('empleado')
-            ->join('empleado.regimen', 'regimen')
-            ->andWhere('regimen.codigo IN (:regimenes)')
-            ->andWhere('empleado.plaza_titular IS NULL')
-            ->andWhere('empleado.cesado IS NULL')
-            ->setParameter('regimenes', $this::REGIMENES_FIJOS)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /**
-     * Buscar empleados temporales (no fijos) con plaza titular asignada.
-     * @return Empleado[]
-     */
-    public function findTemporalesConTitular(): array
-    {
-        return $this->createQueryBuilder('empleado')
-            ->join('empleado.regimen', 'regimen')
-            ->andWhere('regimen.codigo NOT IN (:regimenes)')
-            ->andWhere('empleado.plaza_titular IS NOT NULL')
-            ->andWhere('empleado.cesado IS NULL')
-            ->setParameter('regimenes', $this::REGIMENES_FIJOS)
             ->getQuery()
             ->getResult()
         ;

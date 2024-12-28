@@ -1,7 +1,7 @@
 {% extends 'desempenyo/incidencia_index.html.twig' %}
 
 {% block content %}
-    <div class="badge-primary rounded-pill float-end">{{ app.user.persona }}</div>
+    <div class="badge-primary rounded-pill float-end">{{ app.user.empleado }}</div>
     <div class="pagina-titulo">{{ titulo }}</div>
 
     <div class="row py-2">
@@ -23,7 +23,7 @@
     </div>
     <div class="row py-2">
         <div class="fila-campo">Solicitante</div>
-        <div class="fila-valor">{{ incidencia.incidencia.solicitante.persona }}</div>
+        <div class="fila-valor">{{ incidencia.incidencia.solicitante }}</div>
     </div>
 
     <div class="row py-2">
@@ -52,7 +52,7 @@
                         <td>{{ apunte.fechaInicio ? apunte.fechaInicio | date('d/m/Y, H:i') }}</td>
                         <td>{{ apunte.fechaFin ? apunte.fechaFin | date('d/m/Y, H:i') }}</td>
                         <td>{{ apunte.comentario }}</td>
-                        <td>{{ apunte.autor.persona }}</td>
+                        <td>{{ apunte.autor.empleado }}</td>
                     </tr>
                     {% if loop.first %}{% set inicio = apunte.fechaInicio | date('U') %}{% endif -%}
                     {% if loop.last %}{% set fin = apunte.fechaFin ? apunte.fechaFin|date('U') : 0 %}{% endif -%}

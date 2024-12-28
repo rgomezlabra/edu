@@ -24,7 +24,7 @@ class RegistroType extends AbstractType
         $builder
             ->add('Solicitante', TextType::class, [
                 'attr' => ['readonly' => true],
-                'data' => $evalua->getEmpleado()?->getPersona(),
+                'data' => $evalua->getEmpleado(),
                 'mapped' => false,
             ])
             ->add('rechazo_texto', null, [

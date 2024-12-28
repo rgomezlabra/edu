@@ -38,10 +38,7 @@
             <tbody>
             {% for evaluacion in evaluaciones -%}
                 <tr>
-                    <td>
-                        {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
-                            : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
-                    </td>
+                    <td>{{ evaluacion.empleado.unidad.nombre) }}</td>
                     <td>{{ evaluacion.empleado.docIdentidad }}</td>
                     <td>{{ evaluacion.empleado }}</td>
                     <td>
@@ -89,12 +86,8 @@
             {% for evaluacion in evaluaciones -%}
                 {%- set empleado = evaluacion[tipoAuto] is defined ? evaluacion[tipoAuto].empleado : evaluacion[tipoNo].empleado %}
                 {%- set evaluador = evaluacion[tipo].evaluador|default(null) %}
-                {%- set plazaEmpleado = empleado.plazaOcupada ?: empleado.plazaTitular %}
-                {%- set plazaEvaluador = evaluador.plazaOcupada|default ?: evaluador.plazaTitular|default %}
-                <tr {% if plazaEmpleado.unidad|default != plazaEvaluador.unidad|default %}class="table-info" {% endif %}>
-                    <td>
-                        <span title="{{ plazaEmpleado.unidad.nombre|default }}">{{ plazaEmpleado.unidad.codigo|default }}</span>
-                    </td>
+                <tr {% if empleado.unidad|default != evaluador.unidad|default %}class="table-info" {% endif %}>
+                    <td><span title="{{ empleado.unidad.nombre|default }}">{{ empleado.unidad }}</span></td>
                     <td>{{ empleado }}</td>
                     <td>{{ empleado.grupo.nombre ~ (empleado.nivel > 0 ? '/' ~ empleado.nivel) }}</td>
                     <td>{{ empleado.antiguedad|default }}</td>
@@ -113,12 +106,12 @@
                         {%- if date(empleado.vigente) > date() -%}
                             <sup class="badge-warning mx-1" title="{{ avisos['VF'] }}">VF</sup>
                         {%- endif %}
-                        {% if plazaEmpleado.unidad|default != plazaEvaluador.unidad|default %}
+                        {% if empleado.unidad|default != evaluador.unidad|default %}
                             <sup class="badge-warning mx-1" title="{{ avisos['DU'] }}">DU</sup>
                         {%- endif %}
                     </td>
                     {%- if evaluador %}
-                        <td><span title="{{ plazaEvaluador.unidad.nombre|default }}">{{ plazaEvaluador.unidad.codigo|default }}</span></td>
+                        <td><span title="{{ evaluador.unidad.nombre|default }}">{{ evaluador.unidad }}</span></td>
                         <td>{{ evaluador }}</td>
                         <td>{{ evaluador.grupo.nombre ~ (evaluador.nivel > 0 ? '/' ~ evaluador.nivel) }}</td>
                         <td>{{ evaluador.antiguedad|default }}</td>
@@ -199,10 +192,7 @@
             <tbody>
             {% for evaluacion in evaluaciones -%}
                 <tr>
-                    <td>
-                        {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
-                        : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
-                    </td>
+                    <td>{{ evaluacion.empleado.unidad.nombre) }}</td>
                     <td>{{ evaluacion.empleado.docIdentidad }}</td>
                     <td>{{ evaluacion.empleado }}</td>
                     <td>{{ evaluacion.rechazado ? evaluacion.rechazado|date('Y-m-d') }}</td>

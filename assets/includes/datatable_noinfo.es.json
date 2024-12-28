@@ -1,0 +1,11 @@
+{
+  "emptyTable": "Sin datos",
+  "lengthMenu": "",
+  "loadingRecords": "Cargando...",
+  "paginate": {
+    "next": ">",
+    "previous": "<"
+  },
+  "search": "Buscar:",
+  "zeroRecords": "No se encuentran datos"
+}

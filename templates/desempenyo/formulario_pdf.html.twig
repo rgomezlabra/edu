@@ -10,11 +10,11 @@
         <h2>{{ evalua.cuestionario.titulo }}</h2>
         <div>{{ evalua.cuestionario.descripcion|raw }}</div>
         {%- if evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION') %}
-            <h3>Autoevaluación de {{ app.user.persona }}</h3>
+            <h3>Autoevaluación de {{ app.user.empleado }}</h3>
         {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
-            <h3>Evaluación de {{ evalua.empleado.persona }} por parte de agente principal {{ app.user.persona }}</h3>
+            <h3>Evaluación de {{ evalua.empleado }} por parte de agente principal {{ app.user.empleado }}</h3>
         {%- elseif evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
-            <h3>Evaluación de {{ evalua.empleado.persona }} por parte de tercer agente {{ app.user.persona }}</h3>
+            <h3>Evaluación de {{ evalua.empleado }} por parte de tercer agente {{ app.user.empleado }}</h3>
         {%- endif %}
         <div>Fecha de entrega: {{ evalua.formulario.fechaEnvio|date('d/m/Y') }}</div>
     </div>

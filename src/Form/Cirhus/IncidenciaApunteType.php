@@ -27,10 +27,8 @@ class IncidenciaApunteType extends AbstractType
         $estados = $this->estadoRepository->createQueryBuilder('estado')
             ->join('estado.tipo', 'tipo')
             ->andWhere('estado.nombre <> :iniciado')
-            ->andWhere('estado.nombre <> :reabierto')
             ->andWhere('tipo.nombre = :incidencia')
             ->setParameter('iniciado', Estado::INICIADO)
-            ->setParameter('reabierto', Estado::REABIERTO)
             ->setParameter('incidencia', Estado::INCIDENCIA)
             ->getQuery()
             ->getResult();
@@ -61,14 +59,14 @@ EOT;
                     'label' => 'Servicio',
                     'required' => true,
                 ])
-                ->add('persona', TextType::class, [
+                ->add('empleado', TextType::class, [
                     'attr' => [
                         'class' => 'w-50',
                         'readonly' => true,
                     ],
                 ]);
             // Convertir datos personales en documento de identidad para poder elegir usando una "datatable".
-            $builder->get('persona')->addModelTransformer($this->empleadoDniTransformer);
+            $builder->get('empleado')->addModelTransformer($this->empleadoDniTransformer);
         }
     }
 

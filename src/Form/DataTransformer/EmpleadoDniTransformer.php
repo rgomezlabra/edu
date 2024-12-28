@@ -23,7 +23,7 @@ class EmpleadoDniTransformer implements DataTransformerInterface
      */
     public function transform($value): string
     {
-        return $value instanceof Empleado ? (string) $value->getPersona()?->getDocIdentidad() : '';
+        return $value instanceof Empleado ? (string) $value->getDocIdentidad() : '';
     }
 
     /**

@@ -19,11 +19,8 @@
             <tbody>
             {%- for evaluacion in evaluaciones %}
                 <tr>
-                    <td>
-                        {{- evaluacion.empleado.plazaOcupada ? evaluacion.empleado.plazaOcupada.unidad.nombre
-                        : (evaluacion.empleado.plazaTitular ? evaluacion.empleado.plazaTitular.unidad.nombre) -}}
-                    </td>
-                    <td>{{ evaluacion.empleado.persona }}</td>
+                    <td>{{ evaluacion.empleado.unidad.nombre) }}</td>
+                    <td>{{ evaluacion.empleado }}</td>
                     <td>
                         {%- if evaluacion.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') -%}
                             Responsable/Principal
