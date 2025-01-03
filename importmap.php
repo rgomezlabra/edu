@@ -22,9 +22,6 @@ return [
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
     ],
-    'chart.js/auto' => [
-        'version' => '4.4.7',
-    ],
     'bootstrap' => [
         'version' => '5.3.3',
     ],
@@ -129,5 +126,8 @@ return [
     ],
     '@fortawesome/free-brands-svg-icons' => [
         'version' => '6.7.1',
+    ],
+    '@ckeditor/ckeditor5-build-classic' => [
+        'version' => '44.1.0',
     ],
 ];

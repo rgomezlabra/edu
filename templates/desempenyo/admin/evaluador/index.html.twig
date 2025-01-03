@@ -38,7 +38,7 @@
             <tbody>
             {% for evaluacion in evaluaciones -%}
                 <tr>
-                    <td>{{ evaluacion.empleado.unidad.nombre) }}</td>
+                    <td>{{ evaluacion.empleado.unidad.nombre }}</td>
                     <td>{{ evaluacion.empleado.docIdentidad }}</td>
                     <td>{{ evaluacion.empleado }}</td>
                     <td>
@@ -192,7 +192,7 @@
             <tbody>
             {% for evaluacion in evaluaciones -%}
                 <tr>
-                    <td>{{ evaluacion.empleado.unidad.nombre) }}</td>
+                    <td>{{ evaluacion.empleado.unidad.nombre }}</td>
                     <td>{{ evaluacion.empleado.docIdentidad }}</td>
                     <td>{{ evaluacion.empleado }}</td>
                     <td>{{ evaluacion.rechazado ? evaluacion.rechazado|date('Y-m-d') }}</td>

@@ -30,14 +30,17 @@ import 'datatables.net-rowreorder-bs5';
 import 'datatables.net-rowreorder-bs5/css/rowReorder.bootstrap5.min.css';
 import './datatables-accents.js';
 // Font Awesome 6
-import {fab} from '@fortawesome/free-brands-svg-icons';
-import {far} from '@fortawesome/free-regular-svg-icons';
-import {fas} from '@fortawesome/free-solid-svg-icons';
-import {library} from '@fortawesome/fontawesome-svg-core';
+import { fab } from '@fortawesome/free-brands-svg-icons';
+import { far } from '@fortawesome/free-regular-svg-icons';
+import { fas } from '@fortawesome/free-solid-svg-icons';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-free';
 library.add(fab, far, fas);
 import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
 import '@fortawesome/fontawesome-svg-core/styles.min.css';
+//
+import ClassicEditor from  '@ckeditor/ckeditor5-build-classic';
+window.ClassicEditor = ClassicEditor;
 // Funciones propias
 // import './cookies.js';
 // import './funciones.js';

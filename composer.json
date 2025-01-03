@@ -27,7 +27,6 @@
         "doctrine/doctrine-migrations-bundle": "^3.2.4",
         "doctrine/orm": "^2.15.3",
         "dompdf/dompdf": "^2.0.3",
-        "friendsofsymfony/ckeditor-bundle": "^2.5",
         "gedmo/doctrine-extensions": "^3.15",
         "liip/imagine-bundle": "^2.12",
         "pagerfanta/doctrine-orm-adapter": "^4.3",
@@ -105,7 +104,6 @@
     "scripts": {
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
-            "ckeditor:install --clear=drop --tag=4.22.1": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
             "requirements-checker": "script",
             "importmap:install": "symfony-cmd",

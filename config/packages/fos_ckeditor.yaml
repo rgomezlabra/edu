@@ -1,8 +1,0 @@
-fos_ck_editor:
-    configs:
-        config:
-            versionCheck: false
-
-twig:
-    form_themes:
-        - '@FOSCKEditor/Form/ckeditor_widget.html.twig'

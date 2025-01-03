@@ -4,7 +4,7 @@ namespace App\Form\Cuestiona;
 
 use App\Entity\Cuestiona\Cuestionario;
 use App\Form\DataTransformer\JsonTransformer;
-use FOS\CKEditorBundle\Form\Type\CKEditorType;
+use App\Form\Type\TextEditorType;
 use Override;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -46,14 +46,14 @@ class CuestionarioType extends AbstractType
             ->add('titulo', null, [
                 'label' => 'Título',
             ])
-            ->add('descripcion', CKEditorType::class, [
+            ->add('descripcion', TextEditorType::class, [
                 'label' => 'Descripción',
             ])
-            ->add('bienvenida', CKEditorType::class, [
+            ->add('bienvenida', TextEditorType::class, [
                 'help' => 'Dejar vacío para no mostrar ningún mensaje.',
                 'label' => 'Mensaje de bienvenida',
             ])
-            ->add('despedida', CKEditorType::class, [
+            ->add('despedida', TextEditorType::class, [
                 'help' => 'Dejar vacío para no mostrar ningún mensaje.',
                 'label' => 'Mensaje de salida',
             ])
