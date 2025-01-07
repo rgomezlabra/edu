@@ -1,0 +1,49 @@
+{% extends path(aplicacion.ruta) ~ '/admin/index.html.twig' %}
+
+{% block content %}
+    {%- set titulo = 'Volcado de Datos' %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <div class="pagina-seccion my-4">Volcado de la plantilla</div>
+    <ul>
+        <li>Incorporados:
+            {%- if nuevos is iterable %}
+                <ul>
+                    {%- for tipo, numero in nuevos %}
+                        <li>{{ tipo }}: {{ numero }}</li>
+                    {%- endfor %}
+                </ul>
+            {%- else %}
+                {{ nuevos }}
+            {%- endif %}
+        </li>
+        {%- if descartados is defined %}
+            <details>
+                <summary>Descartados: {{ descartados|length }}</summary>
+                {%- for dato in descartados %}
+                    <div class="row">
+                        <div class="col-2">{{ dato.codigo }}</div>
+                        <div class="col">{{ dato.motivo }}</div>
+                    </div>
+                {%- endfor %}
+            </details>
+        {%- endif %}
+        {%- if inactivos is defined %}
+            <details>
+                <summary>Inactivos: {{ inactivos|length }}</summary>
+                {%- for dato in inactivos %}
+                    <div class="row">
+                        <div class="col-2">{{ dato.codigo }}</div>
+                        <div class="col">{{ dato.motivo }}</div>
+                    </div>
+                {%- endfor %}
+            </details>
+        {%- endif %}
+        <li>Duración del proceso: {{ "%.2f"|format(duracion) }} s.</li>
+    </ul>
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin') }}">Administrador</a></li>
+{% endblock %}

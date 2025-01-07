@@ -311,12 +311,6 @@
                 <em class="fas fa-file-upload"></em> Cargar desde CSV
             </a>
         </li>
-        <li class="nav-item me-2">
-            <button class="btn btn-primary cargar" id="cargarValida"
-                    data-url="{{ path('desempenyo_admin_evaluador_volcado', {id: cuestionario.id}) }}">
-                <em class="fas fa-cloud-upload"></em> Cargar desde Temponet
-            </button>
-        </li>
     {%- endif %}
     {% if tipo == tipoOtro -%}
         <li class="nav-item ms-5 me-2">
@@ -342,11 +336,6 @@
         pregunta: '¿Cargar datos de empleados para su autoevaluación?'
     }) }}
     {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoEmpleados', mensaje: 'Cargando empleados', progreso: false}) }}
-    {{- include('layout/_dialogo_confirmar.html.twig', {
-        id: 'confirmarValida',
-        texto: 'La carga online de validaciones desde Temponet puede tardar bastante tiempo.',
-        pregunta: '¿Continuar con la carga de validaciones?'
-    }) }}
     {{- include('layout/_dialogo_cargar.html.twig', {id: 'cargandoValida', mensaje: 'Cargando validaciones', progreso: false}) }}
     {{- include('layout/_dialogo_form.html.twig', {id: 'modal', titulo: 'Registrar solicitud de rechazo'}) }}
     {{- include('layout/_dialogo_form.html.twig', {id: 'asignar', titulo: 'Asignar evaluador'}) }}

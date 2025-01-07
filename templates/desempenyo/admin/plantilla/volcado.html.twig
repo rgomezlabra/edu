@@ -1,0 +1,101 @@
+{% extends '/desempenyo/admin/index.html.twig' %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    {%- if ultimo %}
+        <div class="pagina-seccion">Último volcado de la plantilla</div>
+        <div class="table-sm my-4">
+            <div class="row">
+                <div class="col-2">Fecha:</div>
+                <div class="col-4">{{ ultimo.datetime ? ultimo.datetime|date('Y-m-d H:i:s') : 'Sin fecha' }}</div>
+            </div>
+            <div class="row">
+                <div class="col-2">Registros incorporados:</div>
+                <div class="col-4">{{ ultimo.context['nuevos']|default is iterable ? ultimo.context['nuevos']|join(', ') : ultimo.context['nuevos']|default('0') }}</div>
+            </div>
+            {%- if ultimo.context['descartados'] is defined %}
+                <div class="row">
+                    <div class="col-2">Registros descartados:</div>
+                    <div class="col-4">{{ ultimo.context['descartados'] is iterable ? ultimo.context['descartados']|length : ultimo.context['descartados'] }}</div>
+                </div>
+            {%- endif %}
+            {%- if ultimo.context['inactivos'] is defined %}
+                <div class="row">
+                    <div class="col-2">Registros inactivos:</div>
+                    <div class="col-4">{{ ultimo.context['inactivos'] is iterable ? ultimo.context['inactivos']|length : ultimo.context['inactivos'] }}</div>
+                </div>
+            {%- endif %}
+        </div>
+    {%- endif %}
+
+    <div class="pagina-seccion">Volcado de la plantilla</div>
+    <div class="alert alert-info">
+        <div><span class="fas fa-exclamation-circle"></span> Aviso.</div>
+        <div>
+            El volcado de datos actualizará la información de la plantilla actual de la Universidad y debe realizarse
+            cargando un <strong>fichero CSV de empleados</strong> que contenga al menos los siguientes campos:<br>
+            {{ campos|join(', ') }}
+        </div>
+    </div>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <div class="linea-botones"></div>
+        <button id="cargar" class="btn btn-primary mb-3">
+            <span class="fas fa-upload"></span> Cargar fichero
+        </button>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path('desempenyo_admin') }}">Administrador</a></li>
+{% endblock %}
+
+{%  block modal %}
+    {{- include('layout/_dialogo_confirmar.html.twig', {pregunta: '¿Cargar plantilla?'}) }}
+    {{- include('layout/_dialogo_cargar.html.twig', {mensaje: 'Cargando plantilla', progreso: true}) }}
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+        const cargar = $("#cargar");
+        const modalConfirma = document.querySelector('#modalConfirma');
+        const modalCarga = document.querySelector('#modalCarga');
+        const barra = $('#modalCargaBarra');
+        // Confirmar el volcado, mostrar progreso de carga y cerrar modal al finalizar
+        cargar.on('click', function (e) {
+            e.preventDefault();
+            if (!$('#volcado_fichero_csv').val()) {
+                return false;
+            }
+            $('#modalConfirmaTexto').html('<p>Se actualizarán los datos de la plantilla actual y se podrán '
+                + 'eliminar o marcar como inactivos los no incluidos en el listado.<p>'
+                + '<p>El proceso de carga puede tardar un tiempo.</p>');
+            modalConfirma.showModal();
+        });
+        $('#modalConfirmaAceptar').on('click', function () {
+            let url = "{{ path('desempenyo_admin_plantilla_progreso')|escape('js') }}"
+            modalCarga.showModal();
+            setInterval(function () {
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    async: true,
+                    success: function (response) {
+                        if (response.linea !== undefined) {
+                            let porcentaje = response.total !== 0 ? 100 * response.linea / response.total : 0;
+                            barra.width(porcentaje.toFixed() + '%').html(response.linea + ' (' + porcentaje.toFixed() + '%)');
+                        }
+                    },
+                    error: function () {
+                        barra.width('0%').html('Sin datos');
+                    }
+                });
+            }, 3000);
+            cargar.parent().submit();
+        });
+    </script>
+{% endblock %}

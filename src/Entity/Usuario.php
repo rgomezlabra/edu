@@ -8,6 +8,7 @@ use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Stringable;
+use Symfony\Component\Clock\DatePoint;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -18,6 +19,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 #[ORM\Entity(repositoryClass: UsuarioRepository::class)]
 #[ORM\Index(columns: ['login'], name: 'idx_usuario_login')]
+#[ORM\HasLifecycleCallbacks]
 class Usuario implements UserInterface, PasswordAuthenticatedUserInterface, Stringable
 {
     #[ORM\Id]
@@ -144,9 +146,10 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface, Stri
         return $this->creado;
     }
 
-    public function setCreado(DateTimeInterface $creado): static
+    #[ORM\PrePersist]
+    public function setCreado(): static
     {
-        $this->creado = $creado;
+        $this->creado = new DatePoint();
 
         return $this;
     }
@@ -156,9 +159,10 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface, Stri
         return $this->modificado;
     }
 
-    public function setModificado(DateTimeInterface $modificado): static
+    #[ORM\PreUpdate]
+    public function setModificado(): static
     {
-        $this->modificado = $modificado;
+        $this->modificado = new DatePoint();
 
         return $this;
     }

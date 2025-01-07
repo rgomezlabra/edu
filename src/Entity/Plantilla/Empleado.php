@@ -70,17 +70,14 @@ class Empleado
     private ?string $nombre = null;
 
     #[ORM\Column(type: Types::STRING, length: 100)]
-    private ?string $apellido1 = null;
-
-    #[ORM\Column(type: Types::STRING, length: 100, nullable: true)]
-    private ?string $apellido2 = null;
+    private ?string $apellidos = null;
 
     #[ORM\Column(type: Types::STRING, length: 11, nullable: true)]
     private ?string $doc_identidad = null;
 
     public function __toString(): string
     {
-        return trim(sprintf('%s %s %s', $this->nombre ?? '', $this->getApellido1() ?? '', $this->getApellido2() ?? ''));
+        return trim(sprintf('%s %s', $this->nombre ?? '', $this->getApellidos() ?? ''));
     }
 
     public function getId(): ?int
@@ -93,7 +90,7 @@ class Empleado
         return $this->usuario;
     }
 
-    public function setUsuario(?Usuario $usuario): self
+    public function setUsuario(?Usuario $usuario): static
     {
         $this->usuario = $usuario;
 
@@ -105,7 +102,7 @@ class Empleado
         return $this->situacion;
     }
 
-    public function setSituacion(?Situacion $situacion): self
+    public function setSituacion(?Situacion $situacion): static
     {
         $this->situacion = $situacion;
 
@@ -117,7 +114,7 @@ class Empleado
         return $this->grupo;
     }
 
-    public function setGrupo(?Grupo $grupo): self
+    public function setGrupo(?Grupo $grupo): static
     {
         $this->grupo = $grupo;
 
@@ -129,9 +126,11 @@ class Empleado
         return $this->unidad;
     }
 
-    public function setUnidad(?Unidad $unidad): void
+    public function setUnidad(?Unidad $unidad): static
     {
         $this->unidad = $unidad;
+
+        return $this;
     }
 
     public function getAusencia(): ?Ausencia
@@ -139,7 +138,7 @@ class Empleado
         return $this->ausencia;
     }
 
-    public function setAusencia(?Ausencia $ausencia): self
+    public function setAusencia(?Ausencia $ausencia): static
     {
         $this->ausencia = $ausencia;
 
@@ -151,7 +150,7 @@ class Empleado
         return $this->nrp;
     }
 
-    public function setNrp(?string $nrp): self
+    public function setNrp(?string $nrp): static
     {
         $this->nrp = $nrp;
 
@@ -163,7 +162,7 @@ class Empleado
         return $this->nivel;
     }
 
-    public function setNivel(?int $nivel): self
+    public function setNivel(?int $nivel): static
     {
         $this->nivel = $nivel;
 
@@ -175,7 +174,7 @@ class Empleado
         return $this->vigente;
     }
 
-    public function setVigente(?DateTimeInterface $vigente): self
+    public function setVigente(?DateTimeInterface $vigente): static
     {
         $this->vigente = $vigente;
 
@@ -187,7 +186,7 @@ class Empleado
         return $this->validador;
     }
 
-    public function setValidador(?Empleado $empleado): self
+    public function setValidador(?Empleado $empleado): static
     {
         $this->validador = $empleado;
 
@@ -199,7 +198,7 @@ class Empleado
         return $this->cesado;
     }
 
-    public function setCesado(?DateTimeInterface $cesado): self
+    public function setCesado(?DateTimeInterface $cesado): static
     {
         $this->cesado = $cesado;
 
@@ -211,7 +210,7 @@ class Empleado
         return $this->consolidado;
     }
 
-    public function setConsolidado(?int $consolidado): self
+    public function setConsolidado(?int $consolidado): static
     {
         $this->consolidado = $consolidado;
 
@@ -223,7 +222,7 @@ class Empleado
         return $this->consolidacion;
     }
 
-    public function setConsolidacion(?DateTimeInterface $consolidacion): self
+    public function setConsolidacion(?DateTimeInterface $consolidacion): static
     {
         $this->consolidacion = $consolidacion;
 
@@ -235,7 +234,7 @@ class Empleado
         return $this->antiguedad;
     }
 
-    public function setAntiguedad(?int $periodo): self
+    public function setAntiguedad(?int $periodo): static
     {
         $this->antiguedad = $periodo;
 
@@ -247,7 +246,7 @@ class Empleado
         return $this->en_titular;
     }
 
-    public function setEnTitular(?int $periodo): self
+    public function setEnTitular(?int $periodo): static
     {
         $this->en_titular = $periodo;
 
@@ -259,7 +258,7 @@ class Empleado
         return $this->en_ocupada;
     }
 
-    public function setEnOcupada(?int $periodo): self
+    public function setEnOcupada(?int $periodo): static
     {
         $this->en_ocupada = $periodo;
 
@@ -278,26 +277,14 @@ class Empleado
         return $this;
     }
 
-    public function getApellido1(): ?string
+    public function getApellidos(): ?string
     {
-        return $this->apellido1;
+        return $this->apellidos;
     }
 
-    public function setApellido1(string $apellido1): static
+    public function setApellidos(string $apellidos): static
     {
-        $this->apellido1 = $apellido1;
-
-        return $this;
-    }
-
-    public function getApellido2(): ?string
-    {
-        return $this->apellido2;
-    }
-
-    public function setApellido2(?string $apellido2): static
-    {
-        $this->apellido2 = $apellido2;
+        $this->apellidos = $apellidos;
 
         return $this;
     }

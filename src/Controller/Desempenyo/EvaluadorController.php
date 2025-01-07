@@ -27,16 +27,12 @@ use Redis;
 use RedisArray;
 use RedisCluster;
 use RedisException;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use function Symfony\Component\String\u;
 
@@ -366,55 +362,6 @@ class EvaluadorController extends AbstractController
             'tipo' => $tipo,
             'campos' => $campos,
         ]);
-    }
-
-    /** Volcar datos que relacionan empleado con su evaluador desde la API REST del servidor Temponet mediante comando. */
-    #[Route(
-        path: '/admin/cuestionario/{id}/evaluador/volcado',
-        name: 'admin_evaluador_volcado',
-        defaults: ['titulo' => 'Volcado de Validaciones desde Temponet'],
-        methods: ['GET', 'POST']
-    )]
-    public function volcadoEvaluacion(
-        KernelInterface $kernel,
-        Request         $request,
-        Cuestionario    $cuestionario,
-    ): Response {
-        $this->denyAccessUnlessGranted('admin');
-        if (null === $this->lock->acquire($this->ttl)) {
-            $this->addFlash('warning', 'Recurso bloqueado por otra operación de carga.');
-
-            return $this->redirectToRoute($request->attributes->getString('_route'));
-        }
-
-        $app = new Application($kernel);
-        $app->setAutoExit(false);
-        $input = new ArrayInput([
-            'command' => 'sirhus:rest:validaciones',
-            'cuestionario' => $cuestionario->getCodigo(),
-        ]);
-        $output = new BufferedOutput();
-        try {
-            if (0 !== $app->run($input, $output)) {
-                throw new Exception();
-            }
-        } catch (Exception) {
-            $this->lock->release();
-            $this->addFlash('warning', 'Error al volcar datos desde Temponet.');
-
-            return $this->redirectToRoute($this->rutaBase);
-        }
-
-        $this->lock->release();
-        $this->generator->logAndFlash('info', 'Volcado de validaciones desde Temponet', [
-            'cuestionario' => $cuestionario->getCodigo(),
-            'salida' => $output->fetch(),
-        ]);
-
-        return $this->redirectToRoute($this->rutaBase . '_admin_evaluador_index', [
-            'id' => $cuestionario->getId(),
-            'tipo' => Evalua::EVALUA_RESPONSABLE,
-        ], Response::HTTP_SEE_OTHER);
     }
 
     /** Rechazar la evaluación de un empleado. */
