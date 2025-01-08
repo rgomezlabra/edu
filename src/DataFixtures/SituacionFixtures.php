@@ -12,11 +12,14 @@ use Doctrine\Persistence\ObjectManager;
  */
 class SituacionFixtures extends Fixture
 {
+    public const string SITUA_EJEMPLO = 'AC';
+
     public function load(ObjectManager $manager): void
     {
         $situacion = new Situacion();
-        $situacion->setCodigo('AC')->setNombre('Servicio Activo');
+        $situacion->setCodigo(self::SITUA_EJEMPLO)->setNombre('Servicio Activo');
         $manager->persist($situacion);
         $manager->flush();
+        $this->addReference(self::SITUA_EJEMPLO, $situacion);
     }
 }

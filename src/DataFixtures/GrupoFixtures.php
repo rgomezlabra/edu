@@ -12,6 +12,8 @@ use Doctrine\Persistence\ObjectManager;
  */
 class GrupoFixtures extends Fixture
 {
+    public const string GRUPO_EJEMPLO = 'A2';
+
     public function load(ObjectManager $manager): void
     {
         $grupo = new Grupo();
@@ -28,6 +30,7 @@ class GrupoFixtures extends Fixture
             ->setNivelMaximo(26)
         ;
         $manager->persist($grupo);
+        $this->addReference(self::GRUPO_EJEMPLO, $grupo);
         $grupo = new Grupo();
         $grupo->setNombre('B1')
             ->setAdscripcion('F')

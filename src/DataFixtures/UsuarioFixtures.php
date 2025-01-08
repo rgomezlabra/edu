@@ -3,6 +3,9 @@
 namespace App\DataFixtures;
 
 use App\Entity\Plantilla\Empleado;
+use App\Entity\Plantilla\Grupo;
+use App\Entity\Plantilla\Situacion;
+use App\Entity\Plantilla\Unidad;
 use App\Entity\Usuario;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -43,6 +46,9 @@ class UsuarioFixtures extends Fixture
             ->setApellidos('Total')
             ->setDocIdentidad('22222222R')
             ->setNrp('22222222R')
+            ->setGrupo($this->getReference(GrupoFixtures::GRUPO_EJEMPLO, Grupo::class))
+            ->setUnidad($this->getReference(UnidadFixtures::UNIDAD_EJEMPLO, Unidad::class))
+            ->setSituacion($this->getReference(SituacionFixtures::SITUA_EJEMPLO, Situacion::class))
         ;
         $manager->persist($empleado);
         $manager->flush();
@@ -55,5 +61,14 @@ class UsuarioFixtures extends Fixture
         ;
         $manager->persist($usuario);
         $manager->flush();
+    }
+
+    public function getDependencies(): array
+    {
+        return [
+            GrupoFixtures::class,
+            Situacion::class,
+            UnidadFixtures::class,
+        ];
     }
 }
