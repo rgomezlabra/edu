@@ -144,6 +144,7 @@ class PlantillaController extends AbstractController
             $grupos = $this->grupoRepository->findAll();
             $unidades = $this->unidadRepository->findAll();
             $situaciones = $this->situacionRepository->findAll();
+            $ausencias = $this->ausenciaRepository->findAll();
 
             foreach ($lineas as $linea) {
                 ++$resultado['linea'];
@@ -173,7 +174,7 @@ class PlantillaController extends AbstractController
                     ++$resultado['actualizados'];
                 }
 
-                $unidad = array_slice(array_filter($unidades, static fn (Unidad $u) => $u->getCodigo() === $linea['ID_UNI_DEPTO']), 0, 1)[0];
+                $unidad = array_slice(array_filter($unidades, static fn (Unidad $u) => $u->getCodigo() === $linea['ID_UNIDAD']), 0, 1)[0] ?? null;
                 if (!$unidad instanceof Unidad) {
                     // Nueva unidad
                     $unidad = new Unidad();
@@ -184,7 +185,7 @@ class PlantillaController extends AbstractController
                     ++$resultado['nuevos']['unidades'];
                 }
 
-                $situacion = array_slice(array_filter($situaciones, static fn (Situacion $s) => $s->getCodigo() === $linea['ID_SITAD']), 0, 1)[0];
+                $situacion = array_slice(array_filter($situaciones, static fn (Situacion $s) => $s->getCodigo() === $linea['ID_SITAD']), 0, 1)[0] ?? null;
                 if (!$situacion instanceof Situacion) {
                     // Nueva situación administrativa
                     $situacion = new Situacion();
@@ -196,7 +197,7 @@ class PlantillaController extends AbstractController
                 }
 
                 if ('S' === $linea['AUS_SN']) {
-                    $ausencia = $this->ausenciaRepository->findOneBy(['codigo' => $linea['ID_AUSENC']]);
+                    $ausencia = array_slice(array_filter($situaciones, static fn (Ausencia $a) => $a->getCodigo() === $linea['ID_AUSENC']), 0, 1)[0] ?? null;
                     if (!$ausencia instanceof Ausencia) {
                         // Nueva ausencia
                         $ausencia = new Ausencia();
@@ -231,6 +232,7 @@ class PlantillaController extends AbstractController
                 ;
                 $this->empleadoRepository->save($empleado, true);
                 $usuario->setLogin(u($linea['NIF'])->lower())
+                    ->setPassword($empleado->getNrp())  // TODO definir clave por defecto
                     ->setCorreo(u($linea['CORREO'])->lower())
                     ->setEmpleado($empleado)
                 ;
@@ -256,7 +258,7 @@ class PlantillaController extends AbstractController
         }
 
         try {
-            $ultimo = $this->redis->get('empleados');
+            $ultimo = json_decode($this->redis->get('empleados'));
         } catch (Exception) {
             $ultimo = null;
         }
