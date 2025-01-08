@@ -159,6 +159,7 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface, Stri
         return $this->modificado;
     }
 
+    #[ORM\PrePersist]
     #[ORM\PreUpdate]
     public function setModificado(): static
     {

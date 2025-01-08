@@ -77,20 +77,19 @@ class PlantillaController extends AbstractController
             'NIF',
             'CORREO',
             'PAS_SN',
+            'NRP',
             'ID_GRUPO',
             'ID_NIVEL',
-            'ID_UNI_DEPTO',
-            'DES_UNI_DEPTO',
+            'ID_UNIDAD',
+            'DES_UNIDAD',
             'ID_SITAD',
             'DES_SITAD',
-            'NRP',
             'AUS_SN',
-            'L_AUSENC',
+            'ID_AUSENC',
             'DES_AUSENC',
             'CES_SN',
             'F_CES',
             'F_INI_VIG',
-            'F_FIN',
         ];
         $ttl = 300;
         if (null === $lock->acquire($ttl)) {
@@ -127,13 +126,15 @@ class PlantillaController extends AbstractController
                 'inicio' => new DatePoint(),
                 'total' => count($lineas),
                 'linea' => 0,
-                'nuevos' => 0,
+                'nuevos' => [
+                    'empleados' => 0,
+                    'unidades' => 0,
+                    'situaciones' => 0,
+                    'ausencias' => 0,
+                ],
                 'actualizados' => 0,
                 'descartados' => 0,
                 'cesados' => 0,
-                'unidades' => 0,
-                'situaciones' => 0,
-                'ausencias' => 0,
                 'duracion' => 0,
                 'finalizado' => false,
             ];
@@ -166,7 +167,7 @@ class PlantillaController extends AbstractController
                 if (!$empleado instanceof Empleado) {
                     $empleado = new Empleado();
                     $usuario = new Usuario();
-                    ++$resultado['nuevos'];
+                    ++$resultado['nuevos']['empleados'];
                 } else {
                     $usuario = $empleado->getUsuario();
                     ++$resultado['actualizados'];
@@ -176,11 +177,11 @@ class PlantillaController extends AbstractController
                 if (!$unidad instanceof Unidad) {
                     // Nueva unidad
                     $unidad = new Unidad();
-                    $unidad->setCodigo($linea['ID_UNI_DEPTO'])
-                        ->setNombre($linea['DES_UNI_DEPTO'])
+                    $unidad->setCodigo($linea['ID_UNIDAD'])
+                        ->setNombre($linea['DES_UNIDAD'])
                     ;
                     $this->unidadRepository->save($unidad, true);
-                    ++$resultado['unidades'];
+                    ++$resultado['nuevos']['unidades'];
                 }
 
                 $situacion = array_slice(array_filter($situaciones, static fn (Situacion $s) => $s->getCodigo() === $linea['ID_SITAD']), 0, 1)[0];
@@ -191,18 +192,19 @@ class PlantillaController extends AbstractController
                         ->setNombre($linea['DES_SITAD'])
                     ;
                     $this->situacionRepository->save($situacion, true);
-                    ++$resultado['situaciones'];
+                    ++$resultado['nuevos']['situaciones'];
                 }
 
                 if ('S' === $linea['AUS_SN']) {
-                    $ausencia = $this->ausenciaRepository->findOneBy(['codigo' => $linea['L_AUSENC']]);
+                    $ausencia = $this->ausenciaRepository->findOneBy(['codigo' => $linea['ID_AUSENC']]);
                     if (!$ausencia instanceof Ausencia) {
                         // Nueva ausencia
                         $ausencia = new Ausencia();
-                        $ausencia->setCodigo($linea['L_AUSENC'])
+                        $ausencia->setCodigo($linea['ID_AUSENC'])
                             ->setNombre($linea['DES_AUSENC'])
                         ;
                         $this->ausenciaRepository->save($ausencia, true);
+                        ++$resultado['nuevos']['ausencias'];
                     }
                 } else {
                     $ausencia = null;

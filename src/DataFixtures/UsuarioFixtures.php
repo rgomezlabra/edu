@@ -4,7 +4,6 @@ namespace App\DataFixtures;
 
 use App\Entity\Plantilla\Empleado;
 use App\Entity\Usuario;
-use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -21,10 +20,9 @@ class UsuarioFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        $now = new DateTime();
         $empleado = new Empleado();
         $empleado->setNombre('Administrador')
-            ->setApellido1('Ejemplo')
+            ->setApellidos('de Ejemplo')
             ->setDocIdentidad('11111111H')
             ->setNrp('11111111H')
         ;
@@ -37,14 +35,12 @@ class UsuarioFixtures extends Fixture
             ->setCorreo('admin@localhost')
             ->setRoles(['ROLE_ADMIN'])
             ->setEmpleado($empleado)
-            ->setCreado($now)
-            ->setModificado($now);
         ;
         $manager->persist($usuario);
 
         $empleado = new Empleado();
         $empleado->setNombre('Currante')
-            ->setApellido1('Total')
+            ->setApellidos('Total')
             ->setDocIdentidad('22222222R')
             ->setNrp('22222222R')
         ;
@@ -56,8 +52,6 @@ class UsuarioFixtures extends Fixture
             ->setPassword($clave)
             ->setCorreo('curry@localhost')
             ->setEmpleado($empleado)
-            ->setCreado($now)
-            ->setModificado($now);
         ;
         $manager->persist($usuario);
         $manager->flush();

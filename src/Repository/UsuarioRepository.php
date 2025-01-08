@@ -72,13 +72,7 @@ class UsuarioRepository extends ServiceEntityRepository implements UserLoaderInt
                             $qb->expr()->like(
                                 $qb->expr()->concat(
                                     'empleado.nombre',
-                                    $qb->expr()->concat(
-                                        $qb->expr()->literal(' '),
-                                        $qb->expr()->concat(
-                                            'empleado.apellido1',
-                                            $qb->expr()->concat($qb->expr()->literal(' '), 'empleado.apellido2')
-                                        )
-                                    )
+                                    $qb->expr()->concat($qb->expr()->literal(' '), 'empleado.apellidos')
                                 ),
                                 ':buscar'
                             )
@@ -91,20 +85,10 @@ class UsuarioRepository extends ServiceEntityRepository implements UserLoaderInt
             );
         }
         match ($orden) {
-            'id', 'login', 'creado', 'modificado' => $qb->orderBy('usuario.' . $orden, $dir),
-            'correo' => $qb->orderBy('usuario.correo1', $dir),
+            'id', 'login', 'correo', 'creado', 'modificado' => $qb->orderBy('usuario.' . $orden, $dir),
             'nif' => $qb->orderBy('empleado.doc_identidad', $dir),
-            'nombre' => $qb->orderBy(
-                $qb->expr()->concat(
-                    'empleado.nombre',
-                    $qb->expr()->concat(
-                        'empleado.apellido1',
-                        'empleado.apellido2'
-                    )
-                ),
-                $dir
-            ),
-            'apellidos' => $qb->orderBy($qb->expr()->concat('empleado.apellido1', 'empleado.apellido2'), $dir),
+            'nombre' => $qb->orderBy($qb->expr()->concat('empleado.nombre','empleado.apellidos'), $dir),
+            'apellidos' => $qb->orderBy('empleado.apellidos', $dir),
             default => $qb,
         };
 
