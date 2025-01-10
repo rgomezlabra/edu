@@ -52,129 +52,166 @@
             </tbody>
         </table>
     {% elseif tipo in [tipoResp, tipoOtro] %}
-        {#- Relación de evaluadores y empleados #}
-        <table class="tabla-condensada" id="datosEvaluadores">
-            <thead class="cabecera-condensada">
-            <tr>
-                <th colspan="8" data-dt-order="disable">Empleado</th>
-                <th colspan="8" data-dt-order="disable">
-                    {{- tipo == tipoResp ? 'Evaluador responsable' : 'Tercer agente' -}}
-                </th>
-                <th rowspan="2">Cargado</th>
-                <th rowspan="2" data-dt-order="disable">Acciones</th>
-            </tr>
-            <tr>
-                <th>Unidad</th>
-                <th>Nombre</th>
-                <th><abbr title="Grupo y nivel">Gr./Niv.</abbr></th>
-                <th><abbr title="Antigüedad total">Antig.</abbr></th>
-                <th>Vigente</th>
-                <th><abbr title="Ausencia">Aus.</abbr></th>
-                <th><abbr title="Situación Administrativa">S.A.</abbr></th>
-                <th>Avisos</th>
-                <th>Unidad</th>
-                <th>Nombre</th>
-                <th><abbr title="Grupo y nivel">Gr./Niv.</abbr></th>
-                <th><abbr title="Antigüedad total">Antig.</abbr></th>
-                <th>Vigente</th>
-                <th><abbr title="Ausencia">Aus.</abbr></th>
-                <th><abbr title="Situación Administrativa">S.A.</abbr></th>
-                <th>Avisos</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for evaluacion in evaluaciones -%}
-                {%- set empleado = evaluacion[tipoAuto] is defined ? evaluacion[tipoAuto].empleado : evaluacion[tipoNo].empleado %}
-                {%- set evaluador = evaluacion[tipo].evaluador|default(null) %}
-                <tr {% if empleado.unidad|default != evaluador.unidad|default %}class="table-info" {% endif %}>
-                    <td><span title="{{ empleado.unidad.nombre|default }}">{{ empleado.unidad }}</span></td>
-                    <td>{{ empleado }}</td>
-                    <td>{{ empleado.grupo.nombre ~ (empleado.nivel > 0 ? '/' ~ empleado.nivel) }}</td>
-                    <td>{{ empleado.antiguedad|default }}</td>
-                    <td>{{ empleado.vigente|date('Y-m-d') }}</td>
-                    <td>
-                        {%- if empleado.ausencia -%}
-                            <span title="{{ empleado.ausencia.nombre }}">{{ empleado.ausencia.codigo }}</span>
-                        {%- endif -%}
-                    </td>
-                    <td>
-                        {%- if empleado.situacion -%}
-                            <span title="{{ empleado.situacion.nombre }}">{{ empleado.situacion.codigo }}</span>
-                        {%- endif -%}
-                    </td>
-                    <td>
-                        {%- if date(empleado.vigente) > date() -%}
-                            <sup class="badge-warning mx-1" title="{{ avisos['VF'] }}">VF</sup>
-                        {%- endif %}
-                        {% if empleado.unidad|default != evaluador.unidad|default %}
-                            <sup class="badge-warning mx-1" title="{{ avisos['DU'] }}">DU</sup>
-                        {%- endif %}
-                    </td>
-                    {%- if evaluador %}
-                        <td><span title="{{ evaluador.unidad.nombre|default }}">{{ evaluador.unidad }}</span></td>
-                        <td>{{ evaluador }}</td>
-                        <td>{{ evaluador.grupo.nombre ~ (evaluador.nivel > 0 ? '/' ~ evaluador.nivel) }}</td>
-                        <td>{{ evaluador.antiguedad|default }}</td>
-                        <td>{{ evaluador.vigente|date('Y-m-d') }}</td>
+        {% if cuenta -%}
+            {#- Contar evaluados por cada evaluador #}
+            <table class="tabla-condensada" id="evaluadosEvaluador">
+                <caption class="caption-top">Evaluados por {{ tipo == tipoResp ? 'responsable' : 'tercer agente' }}</caption>
+                <thead class="cabecera-condensada">
+                <tr>
+                    <th>Evaluador</th>
+                    <th>Unidad</th>
+                    <th>Nº asignados</th>
+                    <th>Nº evaluados</th>
+                    <th>Nº rechazados</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for evaluacion in evaluaciones -%}
+                    <tr>
+                        <td>{{ evaluacion.evaluador }}</td>
+                        <td>{{ evaluacion.evaluador.unidad.nombre }}</td>
+                        <td>{{ evaluacion.asignados }}</td>
+                        <td>{{ evaluacion.evaluados }}</td>
+                        <td>{{ evaluacion.rechazados }}</td>
                         <td>
-                            {%- if evaluador.ausencia -%}
-                                <span title="{{ evaluador.ausencia.nombre }}">{{ evaluador.ausencia.codigo }}</span>
+                            {%- if evaluacion.asignados == (evaluacion.evaluados + evaluacion.rechazados) -%}
+                                <sup class="badge-success mx-1">Finalizado</sup>
+                            {%- elseif evaluacion.asignados > (evaluacion.evaluados + evaluacion.rechazados) -%}
+                                <sup class="badge-warning mx-1">Pendiente</sup>
+                            {%- else -%}
+                                <sup class="badge-danger mx-1">Error</sup>
+                            {%- endif -%}
+                        </td>
+                    </tr>
+                {%- endfor %}
+                </tbody>
+            </table>
+        {%- else %}
+            {#- Relación de evaluadores y empleados #}
+            <table class="tabla-condensada" id="datosEvaluadores">
+                <thead class="cabecera-condensada">
+                <tr>
+                    <th colspan="8" data-dt-order="disable">Empleado</th>
+                    <th colspan="8" data-dt-order="disable">
+                        {{- tipo == tipoResp ? 'Evaluador responsable' : 'Tercer agente' -}}
+                    </th>
+                    <th rowspan="2">Cargado</th>
+                    <th rowspan="2" data-dt-order="disable">Acciones</th>
+                </tr>
+                <tr>
+                    <th>Unidad</th>
+                    <th>Nombre</th>
+                    <th><abbr title="Grupo y nivel">Gr./Niv.</abbr></th>
+                    <th><abbr title="Antigüedad total">Antig.</abbr></th>
+                    <th>Vigente</th>
+                    <th><abbr title="Ausencia">Aus.</abbr></th>
+                    <th><abbr title="Situación Administrativa">S.A.</abbr></th>
+                    <th>Avisos</th>
+                    <th>Unidad</th>
+                    <th>Nombre</th>
+                    <th><abbr title="Grupo y nivel">Gr./Niv.</abbr></th>
+                    <th><abbr title="Antigüedad total">Antig.</abbr></th>
+                    <th>Vigente</th>
+                    <th><abbr title="Ausencia">Aus.</abbr></th>
+                    <th><abbr title="Situación Administrativa">S.A.</abbr></th>
+                    <th>Avisos</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for evaluacion in evaluaciones -%}
+                    {%- set empleado = evaluacion[tipoAuto] is defined ? evaluacion[tipoAuto].empleado : evaluacion[tipoNo].empleado %}
+                    {%- set evaluador = evaluacion[tipo].evaluador|default(null) %}
+                    <tr {% if empleado.unidad|default != evaluador.unidad|default %}class="table-info" {% endif %}>
+                        <td><span title="{{ empleado.unidad.nombre|default }}">{{ empleado.unidad }}</span></td>
+                        <td>{{ empleado }}</td>
+                        <td>{{ empleado.grupo.nombre ~ (empleado.nivel > 0 ? '/' ~ empleado.nivel) }}</td>
+                        <td>{{ empleado.antiguedad|default }}</td>
+                        <td>{{ empleado.vigente|date('Y-m-d') }}</td>
+                        <td>
+                            {%- if empleado.ausencia -%}
+                                <span title="{{ empleado.ausencia.nombre }}">{{ empleado.ausencia.codigo }}</span>
                             {%- endif -%}
                         </td>
                         <td>
-                            {%- if evaluador.situacion -%}
-                                <span title="{{ evaluador.situacion.nombre }}">{{ evaluador.situacion.codigo }}</span>
+                            {%- if empleado.situacion -%}
+                                <span title="{{ empleado.situacion.nombre }}">{{ empleado.situacion.codigo }}</span>
                             {%- endif -%}
                         </td>
                         <td>
-                            {% if date(evaluador.vigente) > date() -%}
+                            {%- if date(empleado.vigente) > date() -%}
                                 <sup class="badge-warning mx-1" title="{{ avisos['VF'] }}">VF</sup>
                             {%- endif %}
-                        </td>
-                        <td>{{ evaluacion.origen.nombre|default|capitalize }}</td>
-                    {%- else %}
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    {%- endif %}
-                    <td>
-                        {%- if evaluacion.formulario.fechaGrabacion is not defined %}
-                            <a class="asignar"
-                               data-url="{{ path('desempenyo_admin_evaluador_asigna', {
-                                   cuestionario: cuestionario.id,
-                                   empleado: empleado.id,
-                                   tipo: tipo
-                               }) }}">
-                                <em class="mx-1 fas fa-people-arrows" title="Asignar evaluador"></em>
-                            </a>
-                            {%- if evaluador %}
-                                <form method="post" class="d-inline"
-                                      action="{{ path('desempenyo_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion[tipo].id}) }}"
-                                      onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluador }} sobre {{ empleado }}?');">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cuestionario.id ~ '-' ~ evaluacion[tipo].id) }}">
-                                    <button class="border-0 text-primary">
-                                        <em class="mx-1 fas fa-trash" title="Desasignar"></em>
-                                    </button>
-                                </form>
+                            {% if empleado.unidad|default != evaluador.unidad|default %}
+                                <sup class="badge-warning mx-1" title="{{ avisos['DU'] }}">DU</sup>
                             {%- endif %}
+                        </td>
+                        {%- if evaluador %}
+                            <td><span title="{{ evaluador.unidad.nombre|default }}">{{ evaluador.unidad }}</span></td>
+                            <td>{{ evaluador }}</td>
+                            <td>{{ evaluador.grupo.nombre ~ (evaluador.nivel > 0 ? '/' ~ evaluador.nivel) }}</td>
+                            <td>{{ evaluador.antiguedad|default }}</td>
+                            <td>{{ evaluador.vigente|date('Y-m-d') }}</td>
+                            <td>
+                                {%- if evaluador.ausencia -%}
+                                    <span title="{{ evaluador.ausencia.nombre }}">{{ evaluador.ausencia.codigo }}</span>
+                                {%- endif -%}
+                            </td>
+                            <td>
+                                {%- if evaluador.situacion -%}
+                                    <span title="{{ evaluador.situacion.nombre }}">{{ evaluador.situacion.codigo }}</span>
+                                {%- endif -%}
+                            </td>
+                            <td>
+                                {% if date(evaluador.vigente) > date() -%}
+                                    <sup class="badge-warning mx-1" title="{{ avisos['VF'] }}">VF</sup>
+                                {%- endif %}
+                            </td>
+                            <td>{{ evaluacion.origen.nombre|default|capitalize }}</td>
+                        {%- else %}
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         {%- endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-            <caption>
-                <span class="me-4">Avisos:</span>
-                {%- for indice, aviso in avisos -%}
-                    <span class="me-4"><sup class="badge-warning">{{ indice }}</sup> {{ aviso }}</span>
-                {%- endfor -%}
-            </caption>
-        </table>
+                        <td>
+                            {%- if evaluacion.formulario.fechaGrabacion is not defined %}
+                                <a class="asignar"
+                                   data-url="{{ path('desempenyo_admin_evaluador_asigna', {
+                                       cuestionario: cuestionario.id,
+                                       empleado: empleado.id,
+                                       tipo: tipo
+                                   }) }}">
+                                    <em class="mx-1 fas fa-people-arrows" title="Asignar evaluador"></em>
+                                </a>
+                                {%- if evaluador %}
+                                    <form method="post" class="d-inline"
+                                          action="{{ path('desempenyo_admin_evaluador_delete', {cuestionario: cuestionario.id, evalua: evaluacion[tipo].id}) }}"
+                                          onsubmit="return confirm('¿Eliminar la asignación de evaluación de {{ evaluador }} sobre {{ empleado }}?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cuestionario.id ~ '-' ~ evaluacion[tipo].id) }}">
+                                        <button class="border-0 text-primary">
+                                            <em class="mx-1 fas fa-trash" title="Desasignar"></em>
+                                        </button>
+                                    </form>
+                                {%- endif %}
+                            {%- endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <caption>
+                    <span class="me-4">Avisos:</span>
+                    {%- for indice, aviso in avisos -%}
+                        <span class="me-4"><sup class="badge-warning">{{ indice }}</sup> {{ aviso }}</span>
+                    {%- endfor -%}
+                </caption>
+            </table>
+        {%- endif %}
     {% elseif tipo == tipoNo %}
         {# Empleados que rechazan la evaluación #}
         <table class="tabla-condensada" id="datosRechazan">
@@ -273,7 +310,15 @@
             </a>
         </li>
     {%- endif %}
-    {% if tipo != tipoResp -%}
+    {% if tipo == tipoResp and not cuenta -%}
+        <li class="nav-item me-2">
+            <a class="btn btn-primary" title="Asignados / responsable"
+               href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoResp, cuenta: true}) }}">
+                <em class="fas fa-user"></em><sup style="margin-left: -1px"><em class="fas fa-users"></em></sup>
+                Asignados
+            </a>
+        </li>
+    {% else -%}
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoResp}) }}">
@@ -281,13 +326,23 @@
             </a>
         </li>
     {%- endif %}
-    {% if cuestionario.configuracion.peso3|default(0) > 0 and tipo != tipoOtro -%}
-        <li class="nav-item me-2">
-            <a class="btn btn-primary"
-               href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoOtro}) }}">
-                <em class="fas fa-user-pen"></em> Ver otros
-            </a>
-        </li>
+    {% if cuestionario.configuracion.peso3|default(0) -%}
+        {% if tipo == tipoOtro and not cuenta -%}
+            <li class="nav-item me-2">
+                <a class="btn btn-primary" title="Asignados / tercer agente"
+                   href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoOtro, cuenta: true}) }}">
+                    <em class="fas fa-user"></em><sup style="margin-left: -1px"><em class="fas fa-users"></em></sup>
+                    Asignados
+                </a>
+            </li>
+        {% else -%}
+            <li class="nav-item me-2">
+                <a class="btn btn-primary"
+                   href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoOtro}) }}">
+                    <em class="fas fa-user-pen"></em> Ver otros
+                </a>
+            </li>
+        {%- endif %}
     {%- endif %}
     {% if tipo != tipoNo -%}
         <li class="nav-item me-2">
@@ -385,6 +440,12 @@
             ...config,
             order: [
                 [1, 'asc'],
+            ],
+        });
+        $('#evaluadosEvaluador').dataTable({
+            ...config,
+            order: [
+                [2, 'desc'],
             ],
         });
         $('#datosRechazan').dataTable({

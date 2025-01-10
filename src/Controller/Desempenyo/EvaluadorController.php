@@ -82,9 +82,38 @@ class EvaluadorController extends AbstractController
             case Evalua::EVALUA_RESPONSABLE:
             case Evalua::EVALUA_OTRO:
                 $evaluaciones = [];
-                foreach ($this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario]) as $evaluacion) {
-                    if (in_array($evaluacion->getTipoEvaluador(), [Evalua::NO_EVALUACION, Evalua::AUTOEVALUACION, $tipo])) {
-                        $evaluaciones[(int) $evaluacion->getEmpleado()?->getId()][$evaluacion->getTipoEvaluador()] = $evaluacion;
+                $cuenta = $request->query->has('cuenta');
+                if ($cuenta) {
+                    // Contar evaluados por cada evaluador
+                    $evaluaciones = array_reduce(
+                        $this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario, 'tipo' => $tipo]),
+                        /** @param array<array-key, array{evaluador: ?Empleado, asignados: int, evaluados: int, rechazados: int}>|null $cuentas */
+                        function (?array $cuentas, Evalua $evaluacion) {
+                            $id = $evaluacion->getEvaluador()?->getId() ?? 0;
+                            if (0 !== $id && isset($cuentas[$id])) {
+                                ++$cuentas[$id]['asignados'];
+                                if (null !== $evaluacion->getFormulario()?->getFechaEnvio()) {
+                                    ++$cuentas[$id]['evaluados'];
+                                }
+                                if (null !== $evaluacion->getRechazado()) {
+                                    ++$cuentas[$id]['rechazados'];
+                                }
+                            } else {
+                                $cuentas[$id] = [
+                                    'evaluador' => $evaluacion->getEvaluador(),
+                                    'asignados' => 1,
+                                    'evaluados' => null === $evaluacion->getFormulario()?->getFechaEnvio() ? 0 : 1,
+                                    'rechazados' => null === $evaluacion->getRechazado() ? 0 : 1,
+                                ];
+                            }
+                            return $cuentas;
+                        }
+                    );
+                } else {
+                    foreach ($this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario]) as $evaluacion) {
+                        if (in_array($evaluacion->getTipoEvaluador(), [Evalua::NO_EVALUACION, Evalua::AUTOEVALUACION, $tipo])) {
+                            $evaluaciones[(int)$evaluacion->getEmpleado()?->getId()][$evaluacion->getTipoEvaluador()] = $evaluacion;
+                        }
                     }
                 }
                 break;
@@ -113,6 +142,7 @@ class EvaluadorController extends AbstractController
             'cuestionario' => $cuestionario,
             'evaluaciones' => $evaluaciones,
             'tipo' => $tipo,
+            'cuenta' => $cuenta ?? false,
             'volcado_empleados' => $ultimo,
         ]);
     }

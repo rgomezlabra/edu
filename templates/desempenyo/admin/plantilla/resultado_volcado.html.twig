@@ -1,4 +1,4 @@
-{% extends path(aplicacion.ruta) ~ '/admin/index.html.twig' %}
+{% extends 'desempenyo/admin/index.html.twig' %}
 
 {% block content %}
     {%- set titulo = 'Volcado de Datos' %}
@@ -45,5 +45,5 @@
 
 {% block migas %}
     {{ parent() }}
-    <li class="breadcrumb-item"><a href="{{ path(aplicacion.ruta ~ '_admin') }}">Administrador</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('desempenyo_admin') }}">Administrador</a></li>
 {% endblock %}
