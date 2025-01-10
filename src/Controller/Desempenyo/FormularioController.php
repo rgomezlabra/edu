@@ -10,6 +10,7 @@ use App\Entity\Desempenyo\Evalua;
 use App\Entity\Estado;
 use App\Entity\Plantilla\Empleado;
 use App\Entity\Usuario;
+use App\Form\Desempenyo\CorreccionType;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Cuestiona\FormularioRepository;
 use App\Repository\Cuestiona\PreguntaRepository;
@@ -17,7 +18,6 @@ use App\Repository\Cuestiona\RespuestaRepository;
 use App\Repository\Desempenyo\EvaluaRepository;
 use App\Repository\Plantilla\EmpleadoRepository;
 use App\Service\MessageGenerator;
-use App\Service\RutaActual;
 use App\Service\SirhusLock;
 use App\Service\Slug;
 use DateTimeImmutable;
@@ -45,12 +45,12 @@ class FormularioController extends AbstractController
     public const int RANGO_COMPARA = 5;
 
     public function __construct(
-        private readonly MessageGenerator $generator,
-        private readonly RutaActual       $actual,
-        private readonly SirhusLock       $lock,
-        private readonly EvaluaRepository $evaluaRepository,
+        private readonly MessageGenerator       $generator,
+        private readonly SirhusLock             $lock,
+        private readonly CuestionarioRepository $cuestionarioRepository,
+        private readonly EvaluaRepository       $evaluaRepository,
     ) {
-        $this->rutaBase = $this->actual->getRuta() ?? 'inicio';
+        $this->rutaBase = 'desempenyo';
         $this->ttl = 300;
     }
 
@@ -60,13 +60,10 @@ class FormularioController extends AbstractController
         defaults: ['titulo' => 'Formularios Entregados'],
         methods: ['GET']
     )]
-    public function index(
-        Request                $request,
-        CuestionarioRepository $cuestionarioRepository,
-        EvaluaRepository       $evaluaRepository,
-    ): Response {
+    public function index(Request $request): Response
+    {
         $this->denyAccessUnlessGranted('admin');
-        $cuestionario = $cuestionarioRepository->find($request->query->getString('cuestionario'));
+        $cuestionario = $this->cuestionarioRepository->find($request->query->getString('cuestionario'));
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
@@ -74,7 +71,7 @@ class FormularioController extends AbstractController
         }
 
         $datos = [];
-        foreach ($evaluaRepository->findByEntregados(['cuestionario' => $cuestionario]) as $formulario) {
+        foreach ($this->evaluaRepository->findByEntregados(['cuestionario' => $cuestionario]) as $formulario) {
             $total = 0;
             /** @var Respuesta[] $respuestas */
             $respuestas = $formulario->getFormulario()?->getRespuestas();
@@ -126,18 +123,14 @@ class FormularioController extends AbstractController
         defaults: ['titulo' => 'Matriz de Formularios Entregados'],
         methods: ['GET']
     )]
-    public function matriz(
-        Request          $request,
-        EvaluaRepository $evaluaRepository,
-        Cuestionario     $cuestionario,
-        Empleado         $empleado
-    ): Response {
+    public function matriz(Request $request, Cuestionario $cuestionario, Empleado $empleado): Response
+    {
         $this->denyAccessUnlessGranted('admin');
         /** @var array<Respuesta[]> $respuestas */
         $respuestas = [];
         /** @var float[] $medias */
         $medias = [];
-        $formularios = $evaluaRepository->findByEntregados([
+        $formularios = $this->evaluaRepository->findByEntregados([
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
         ]);
@@ -171,16 +164,13 @@ class FormularioController extends AbstractController
         defaults: ['titulo' => 'Evaluadores Asignados para el Cuestionario'],
         methods: ['GET']
     )]
-    public function indexEvaluador(
-        Request                $request,
-        CuestionarioRepository $cuestionarioRepository,
-        EmpleadoRepository     $empleadoRepository,
-    ): Response {
+    public function indexEvaluador(Request $request, EmpleadoRepository $empleadoRepository): Response
+    {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
         $empleado = $empleadoRepository->findOneByUsuario($usuario);
-        $cuestionario = $cuestionarioRepository->findOneBy([
+        $cuestionario = $this->cuestionarioRepository->findOneBy([
             'url' => u($request->getRequestUri())->beforeLast("/")->toString(),
         ]);
         if (!$cuestionario instanceof Cuestionario) {
@@ -210,16 +200,13 @@ class FormularioController extends AbstractController
         defaults: ['titulo' => 'Empleados Asignados para el Cuestionario'],
         methods: ['GET']
     )]
-    public function indexEmpleado(
-        Request                $request,
-        CuestionarioRepository $cuestionarioRepository,
-        EmpleadoRepository     $empleadoRepository,
-    ): Response {
+    public function indexEmpleado(Request $request, EmpleadoRepository $empleadoRepository): Response
+    {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
         $evaluador = $empleadoRepository->findOneByUsuario($usuario);
-        $cuestionario = $cuestionarioRepository->findOneBy([
+        $cuestionario = $this->cuestionarioRepository->findOneBy([
             'url' => u($request->getRequestUri())->beforeLast("/")->toString(),
         ]);
         if (!$cuestionario instanceof Cuestionario) {
@@ -261,16 +248,12 @@ class FormularioController extends AbstractController
         requirements: ['codigo' => '[a-z0-9-]+', 'id' => '\d+'],
         methods: ['GET']
     )]
-    public function pdf(
-        CuestionarioRepository $cuestionarioRepository,
-        EmpleadoRepository     $empleadoRepository,
-        string                 $codigo,
-        ?int                   $id,
-    ): Response {
+    public function pdf(EmpleadoRepository $empleadoRepository, string $codigo, ?int $id): Response
+    {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
-        $cuestionario = $cuestionarioRepository->findOneBy([
+        $cuestionario = $this->cuestionarioRepository->findOneBy([
             'url' => sprintf('/desempenyo/formulario/%s', $codigo),
         ]);
         if (null === $id) {
@@ -342,22 +325,21 @@ class FormularioController extends AbstractController
         methods: ['GET', 'POST']
     )]
     public function rellenar(
-        Request                $request,
-        CuestionarioRepository $cuestionarioRepository,
-        EmpleadoRepository     $empleadoRepository,
-        FormularioRepository   $formularioRepository,
-        PreguntaRepository     $preguntaRepository,
-        RespuestaRepository    $respuestaRepository,
-        string                 $codigo,
-        ?int                   $id,
+        Request              $request,
+        EmpleadoRepository   $empleadoRepository,
+        FormularioRepository $formularioRepository,
+        PreguntaRepository   $preguntaRepository,
+        RespuestaRepository  $respuestaRepository,
+        string               $codigo,
+        ?int                 $id,
     ): Response {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
         if (null === $id) {
-            $cuestionario = $cuestionarioRepository->findOneBy(['url' => $request->getRequestUri()]);
+            $cuestionario = $this->cuestionarioRepository->findOneBy(['url' => $request->getRequestUri()]);
         } else {
-            $cuestionario = $cuestionarioRepository->findOneBy([
+            $cuestionario = $this->cuestionarioRepository->findOneBy([
                 'url' => u($request->getRequestUri())->before('/' . $id)->toString(),
             ]);
         }
@@ -543,17 +525,13 @@ class FormularioController extends AbstractController
         defaults: ['titulo' => 'Valoraciones Dispares'],
         methods: ['GET']
     )]
-    public function comparar(
-        Request                $request,
-        CuestionarioRepository $cuestionarioRepository,
-        EmpleadoRepository     $empleadoRepository,
-        string                 $codigo,
-    ): Response {
+    public function comparar(Request $request, EmpleadoRepository $empleadoRepository, string $codigo): Response
+    {
         $this->denyAccessUnlessGranted(null, ['relacion' => null]);
         /** @var Usuario $usuario */
         $usuario = $this->getUser();
         $empleado = $empleadoRepository->findOneByUsuario($usuario);
-        $cuestionario = $cuestionarioRepository->findOneBy([
+        $cuestionario = $this->cuestionarioRepository->findOneBy([
             'url' => u($request->getRequestUri())->beforeLast("/")->toString(),
         ]);
         if (!$cuestionario instanceof Cuestionario) {
@@ -603,6 +581,59 @@ class FormularioController extends AbstractController
         return $this->render('desempenyo/formulario_compara.html.twig', [
             'respuestas' => $respuestas,
             'codigo' => $codigo,
+        ]);
+    }
+
+    /** Formulario para corregir la puntuación global de un empleado. */
+    #[Route(
+        path: '/admin/cuestionario/{cuestionario}/formulario/empleado/{empleado}/corrige',
+        name: 'admin_cuestionario_formulario_corrige',
+        defaults: ['titulo' => 'Corrección de Valoración de Empleado'],
+        methods: ['POST']
+    )]
+    public function corregir(Request $request, Cuestionario $cuestionario, Empleado $empleado): Response
+    {
+        $this->denyAccessUnlessGranted('admin');
+        $auto = $this->evaluaRepository->findByEvaluacion([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'tipo' => Evalua::AUTOEVALUACION,
+        ])[0] ?? null;
+        $principal = $this->evaluaRepository->findByEntregados([
+            'cuestionario' => $cuestionario,
+            'empleado' => $empleado,
+            'tipo' => Evalua::EVALUA_RESPONSABLE,
+        ])[0] ?? null;
+        if (!$auto instanceof Evalua || !$principal instanceof Evalua) {
+            $this->addFlash('warning', 'Deben estar entregadas la autoevaluación y la evaluación del responsable.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        $form = $this->createForm(CorreccionType::class, $auto, [
+            'action' => $request->getPathInfo(),
+            'method' => 'POST',
+        ]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var Usuario $usuario */
+            $usuario = $this->getUser();
+            $auto->setCorregido(new DateTimeImmutable())
+                ->setCorrector($usuario)
+            ;
+            $this->evaluaRepository->save($auto, true);
+            $this->generator->logAndFlash('info', 'Valoración de evaluación corregida', [
+                'codigo' => $cuestionario->getCodigo(),
+                'empleado' => $empleado->getDocIdentidad(),
+            ]);
+
+            return $this->redirectToRoute('desempenyo_admin_formulario_index', [
+                'cuestionario' => $cuestionario->getId(),
+            ]);
+        }
+        return $this->render('desempenyo/admin/cuestionario/_form.html.twig', [
+            'cuestionario' => $cuestionario,
+            'form' => $form->createView(),
         ]);
     }
 

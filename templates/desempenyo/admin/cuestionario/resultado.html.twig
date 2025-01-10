@@ -15,6 +15,7 @@
                 <th colspan="2" data-dt-order="disable">({{ config.peso3 }}%)</th>
                 <th colspan="2" data-dt-order="disable" class="text-center">Piloto</th>
                 <th colspan="2" data-dt-order="disable" class="text-center">Desempeño</th>
+                <th data-dt-order="disable" class="text-center" title="Tribunal General">Tribunal</th>
                 <th rowspan="2" data-dt-order="disable">Acciones</th>
             </tr>
             <tr>
@@ -29,6 +30,7 @@
                 <th class="text-start">A 100</th>
                 <th class="text-start"><abbr title="Competencias">CCIAS</abbr></th>
                 <th class="text-start"><abbr title="Objetivos">DPO.</abbr></th>
+                <th class="text-start">A 100</th>
             </tr>
             </thead>
             <tbody>
@@ -58,10 +60,12 @@
                         + (dato[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')].puntos|default(0) * config['peso2'] / 100)
                         + (dato[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')].puntos|default(0) * config['peso3'] / 100)
                     -%}
+                    {% set correccion = dato[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')].formulario.correccion|default %}
                     <td {% if (media * 6) < 36 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|number_format(2, ',' ) }}</td>
                     <td {% if (media * 10) < 60 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 10)|number_format(2, ',' ) }}</td>
                     <td {% if (media * 6) < 20 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|number_format(2, ',' ) }}</td>
                     <td>{{ 0|number_format(2, ',' ) }}</td>
+                    <td {% if correccion < 36 %}class="bg-danger text-bg-danger"{% endif %}>{{ correccion }}</td>
                     <td>
                         <a href="{{ path('desempenyo_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
                             <em class="mx-1 fas fa-table" title="Matriz de resultados"></em>
@@ -69,7 +73,10 @@
                         <a href="{{ path('desempenyo_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado, detalle: true}) }}">
                             <em class="mx-1 fas fa-table-cells" title="Matriz detallada"></em>
                         </a>
-                        <em class="mx-1 fas fa-pen-clip" title="Correción tribunal"></em>
+                        <a class="corrige"
+                           data-url="{{ path(aplicacion.ruta ~ '_admin_cuestionario_formulario_corrige', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
+                            <em class="mx-1 fas fa-pen-clip" title="Corrección tribunal"></em>
+                        </a>
                     </td>
                 </tr>
             {%- endfor %}
@@ -88,6 +95,10 @@
     </li>
 {% endblock %}
 
+{% block modal %}
+    {{- include('layout/_dialogo_form.html.twig', {id: 'corregir', titulo: 'Corregir valoración'}) }}
+{% endblock %}
+
 {% block js %}
     {{ parent() }}
     <script type="module">
@@ -96,7 +107,7 @@
                 {
                     extend: 'copy',
                     exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
                     },
                     text: '<i class="fas fa-copy"></i>',
                     titleAttr: 'Copiar',
@@ -104,7 +115,7 @@
                 {
                     extend: 'print',
                     exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
                     },
                     orientation: 'landscape',
                     text: '<i class="fas fa-print"></i>',
@@ -113,7 +124,7 @@
                 {
                     extend: 'csv',
                     exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
                     },
                     text: '<i class="fas fa-file-csv"></i>',
                     titleAttr: 'Generar fichero CSV',
@@ -121,7 +132,7 @@
                 {
                     extend: 'excelHtml5',
                     exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
                     },
                     text: '<i class="fas fa-file-excel"></i>',
                     titleAttr: 'Generar fichero Excel',
@@ -136,6 +147,29 @@
             order: [
                 [2, 'asc'],
             ],
+        });
+        // Formulario para corregir valoración final del empleado
+        $('.corrige').on('click', function (e) {
+            e.preventDefault();
+            let url = $(this).data('url');
+            if (url === undefined) {
+                return confirm('Se ha producido un error al ejecutar la operación.');
+            }
+            const modal = document.querySelector('#corregir');
+            $.ajax({
+                method: 'POST',
+                url: url,
+                async: true,
+                success: function (response) {
+                    $('#corregirForm').html(response);
+                    modal.showModal();
+                },
+                error: function (xhr) {
+                    $('#corregirTitulo').html('Error ' + xhr.status);
+                    $('#corregirForm').html(response);
+                    modal.showModal();
+                },
+            });
         });
     </script>
 {% endblock %}
