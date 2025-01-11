@@ -31,17 +31,18 @@
                 <em class="fas fa-edit"></em> Editar
             </a>
         </li>
-    {%- elseif grupo.preguntas|length == 0 %}
-        <li class="nav-item ms-5 me-2">
-            {{ include('desempenyo/admin/grupo/_delete_form.html.twig') }}
-        </li>
-    {%- else %}
-        <li class="nav-item me-2">
-            <a class="btn btn-primary"
-               href="{{ path('desempenyo_admin_pregunta_index', {'cuestionario': grupo.cuestionario.id, 'grupo': grupo.id}) }}">
-                <em class="fas fa-question-circle"></em> Preguntas
-            </a>
-        </li>
+        {%- if grupo.preguntas|length == 0 %}
+            <li class="nav-item ms-5 me-2">
+                {{ include('desempenyo/admin/grupo/_delete_form.html.twig') }}
+            </li>
+        {%- else %}
+            <li class="nav-item me-2">
+                <a class="btn btn-primary"
+                   href="{{ path('desempenyo_admin_pregunta_index', {'cuestionario': grupo.cuestionario.id, 'grupo': grupo.id}) }}">
+                    <em class="fas fa-question-circle"></em> Preguntas
+                </a>
+            </li>
+        {%- endif %}
     {%- endif %}
 {% endblock %}
 

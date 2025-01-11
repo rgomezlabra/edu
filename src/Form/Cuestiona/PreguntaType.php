@@ -6,7 +6,7 @@ use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Cuestiona\Grupo;
 use App\Entity\Cuestiona\Pregunta;
 use App\Form\DataTransformer\JsonTransformer;
-use FOS\CKEditorBundle\Form\Type\CKEditorType;
+use App\Form\Type\TextEditorType;
 use Override;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -60,9 +60,10 @@ class PreguntaType extends AbstractType
             ->add('titulo', null, [
                 'label' => 'Pregunta',
             ])
-            ->add('descripcion', CKEditorType::class, [
+            ->add('descripcion', TextEditorType::class, [
                 'help' => 'Información adicional para describir la pregunta.',
                 'label' => 'Descripción',
+                'required' => false,
             ])
             ->add('ayuda', TextType::class, [
                 'help' => 'Texto de ayuda.',

@@ -4,7 +4,7 @@ namespace App\Form\Cuestiona;
 
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Cuestiona\Grupo;
-use FOS\CKEditorBundle\Form\Type\CKEditorType;
+use App\Form\Type\TextEditorType;
 use Override;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -41,8 +41,9 @@ class GrupoType extends AbstractType
             ->add('titulo', null, [
                 'label' => 'Título',
             ])
-            ->add('descripcion', CKEditorType::class, [
+            ->add('descripcion', TextEditorType::class, [
                 'label' => 'Descripción',
+                'required' => false,
             ])
             ->add('activa', null, [
                 'required' => false,

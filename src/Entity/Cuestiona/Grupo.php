@@ -42,14 +42,12 @@ class Grupo implements Stringable
     #[ORM\Column(type: Types::STRING, length: 255)]
     private ?string $titulo = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $descripcion = null;
 
     /** @var Collection<int, Pregunta> */
     #[ORM\OneToMany(mappedBy: 'grupo', targetEntity: Pregunta::class, cascade: ['persist', 'remove'])]
     private Collection $preguntas;
-
-    // TODO etiquetas (ManyToMany)
 
     public function __construct()
     {
