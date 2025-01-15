@@ -15,3 +15,26 @@
         <a href="{{ path('desempenyo_admin_cuestionario_show', {id: cuestionario.id}) }}">{{ cuestionario.codigo }}</a>
     </li>
 {% endblock %}
+
+{% block modal %}
+    {{ include('layout/_dialogo_confirmar.html.twig', {
+        texto: 'Activar un cuestionario implica que ya no podrá ser editado y que se empezarán a recibir respuestas.'
+    }) }}
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    alert('{{activar }});
+    {% if activar|default(false) %}
+        <script type="module">
+            const boton = document.querySelector('#actualizar');
+            boton.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector('#modalConfirma').showModal();
+            });
+            document.querySelector('#modalConfirmaAceptar').addEventListener('click', function() {
+                boton.form.submit();
+            });
+        </script>
+    {% endif %}
+{% endblock %}
