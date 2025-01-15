@@ -11,7 +11,7 @@
         </div>
         <div>
             La dirección para rellenar este cuestionario es:
-            <div class="bloque-codigo">{{ app.request.schemeAndHttpHost }}/{{ cuestionario.url }}</div>
+            <div class="bloque-codigo">{{ app.request.schemeAndHttpHost }}{{ cuestionario.url }}</div>
         </div>
     </div>
 {% endblock %}

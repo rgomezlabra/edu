@@ -9,6 +9,7 @@ use App\Entity\Plantilla\Unidad;
 use App\Entity\Usuario;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\Clock\DatePoint;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
@@ -28,6 +29,7 @@ class UsuarioFixtures extends Fixture
             ->setApellidos('de Ejemplo')
             ->setDocIdentidad('11111111H')
             ->setNrp('11111111H')
+            ->setCesado(DatePoint::createFromFormat('Y-m-d', '2022-01-01'))
         ;
         $manager->persist($empleado);
         $manager->flush();
