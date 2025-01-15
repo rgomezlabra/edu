@@ -3,20 +3,17 @@
 namespace App\DataFixtures;
 
 use App\Entity\Plantilla\Empleado;
-use App\Entity\Plantilla\Grupo;
-use App\Entity\Plantilla\Situacion;
-use App\Entity\Plantilla\Unidad;
 use App\Entity\Usuario;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\Clock\DatePoint;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Cargar usuario administrador por defecto.
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
-class UsuarioFixtures extends Fixture
+class UsuarioFixtures extends Fixture implements DependentFixtureInterface
 {
     public function __construct(private readonly UserPasswordHasherInterface $hasher)
     {
@@ -24,42 +21,33 @@ class UsuarioFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        $empleado = new Empleado();
-        $empleado->setNombre('Administrador')
-            ->setApellidos('de Ejemplo')
-            ->setDocIdentidad('11111111H')
-            ->setNrp('11111111H')
-            ->setCesado(DatePoint::createFromFormat('Y-m-d', '2022-01-01'))
-        ;
-        $manager->persist($empleado);
-        $manager->flush();
         $usuario = new Usuario();
-        $clave = $this->hasher->hashPassword($usuario, 'edu-admin');
-        $usuario->setLogin('admin')
+        $clave = $this->hasher->hashPassword($usuario, 'edu-' . EmpleadoFixtures::ADMIN_EJEMPLO);
+        $usuario->setLogin(EmpleadoFixtures::ADMIN_EJEMPLO)
             ->setPassword($clave)
-            ->setCorreo('admin@localhost')
+            ->setCorreo(EmpleadoFixtures::ADMIN_EJEMPLO . '@localhost')
             ->setRoles(['ROLE_ADMIN'])
-            ->setEmpleado($empleado)
+            ->setEmpleado($this->getReference(EmpleadoFixtures::ADMIN_EJEMPLO, Empleado::class))
         ;
         $manager->persist($usuario);
-
-        $empleado = new Empleado();
-        $empleado->setNombre('Currante')
-            ->setApellidos('Total')
-            ->setDocIdentidad('22222222R')
-            ->setNrp('22222222R')
-            ->setGrupo($this->getReference(GrupoFixtures::GRUPO_EJEMPLO, Grupo::class))
-            ->setUnidad($this->getReference(UnidadFixtures::UNIDAD_EJEMPLO, Unidad::class))
-            ->setSituacion($this->getReference(SituacionFixtures::SITUA_EJEMPLO, Situacion::class))
-        ;
-        $manager->persist($empleado);
         $manager->flush();
+
         $usuario = new Usuario();
-        $clave = $this->hasher->hashPassword($usuario, 'edu-curry');
-        $usuario->setLogin('curry')
+        $clave = $this->hasher->hashPassword($usuario, 'edu-' . EmpleadoFixtures::EMPLEADO_EJEMPLO);
+        $usuario->setLogin(EmpleadoFixtures::EMPLEADO_EJEMPLO)
             ->setPassword($clave)
-            ->setCorreo('curry@localhost')
-            ->setEmpleado($empleado)
+            ->setCorreo(EmpleadoFixtures::EMPLEADO_EJEMPLO . '@localhost')
+            ->setEmpleado($this->getReference(EmpleadoFixtures::EMPLEADO_EJEMPLO, Empleado::class))
+        ;
+        $manager->persist($usuario);
+        $manager->flush();
+
+        $usuario = new Usuario();
+        $clave = $this->hasher->hashPassword($usuario, 'edu-' . EmpleadoFixtures::EVALUADOR_EJEMPLO);
+        $usuario->setLogin(EmpleadoFixtures::EVALUADOR_EJEMPLO)
+            ->setPassword($clave)
+            ->setCorreo(EmpleadoFixtures::EVALUADOR_EJEMPLO . '@localhost')
+            ->setEmpleado($this->getReference(EmpleadoFixtures::EVALUADOR_EJEMPLO, Empleado::class))
         ;
         $manager->persist($usuario);
         $manager->flush();
@@ -68,9 +56,7 @@ class UsuarioFixtures extends Fixture
     public function getDependencies(): array
     {
         return [
-            GrupoFixtures::class,
-            Situacion::class,
-            UnidadFixtures::class,
+            EmpleadoFixtures::class,
         ];
     }
 }
