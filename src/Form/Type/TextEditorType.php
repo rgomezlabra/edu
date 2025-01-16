@@ -13,7 +13,6 @@ class TextEditorType extends AbstractType
         parent::configureOptions($resolver);
         $resolver->setDefaults([
             'attr' => [
-//                'class' => 'ckeditor',
                 'data-controller' => 'ckeditor',
                 'novalidate' => 'novalidate',
             ],

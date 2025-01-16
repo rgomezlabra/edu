@@ -24,7 +24,6 @@
 
 {% block js %}
     {{ parent() }}
-    alert('{{activar }});
     {% if activar|default(false) %}
         <script type="module">
             const boton = document.querySelector('#actualizar');

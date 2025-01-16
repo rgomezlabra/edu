@@ -17,7 +17,7 @@
                 </tr>
             </thead>
             <tbody>
-            {%- for grupo in grupos %}
+            {% for grupo in grupos -%}
                 <tr class="fila" data-id="{{ grupo.id }}">
                     <td><span class="badge-secondary" title="Reordenar grupos"><em class="fas fa-sort"></em></span></td>
                     <td>{{ grupo.orden }}</td>
@@ -59,15 +59,17 @@
             </a>
         </li>
     {%- endif %}
-    <li class="nav-item me-2">
-         <a id="ordenar" class="btn btn-primary disabled" href=""><em class="fas fa-save"></em> Grabar orden</a>
-    </li>
-    <div id="aviso" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body"></div>
-            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    {%- if grupos|length > 1 %}
+        <li class="nav-item me-2">
+             <a id="ordenar" class="btn btn-primary disabled" href=""><em class="fas fa-save"></em> Grabar orden</a>
+        </li>
+        <div id="aviso" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body"></div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
         </div>
-    </div>
+    {%- endif %}
 {% endblock %}
 
 {% block migas %}

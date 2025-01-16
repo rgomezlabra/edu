@@ -130,4 +130,7 @@ return [
     '@ckeditor/ckeditor5-build-classic' => [
         'version' => '44.1.0',
     ],
+    'ckeditor5/translations/es.js' => [
+        'version' => '44.1.0',
+    ],
 ];
