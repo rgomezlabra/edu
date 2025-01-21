@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\Cirhus;
+namespace App\Entity\Desempenyo;
 
 use App\Repository\Cirhus\ServicioRepository;
 use Doctrine\DBAL\Types\Types;
@@ -9,24 +9,11 @@ use Stringable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: ServicioRepository::class)]
-#[ORM\Table(name: "cirhus_servicio")]
+#[ORM\Table(name: "desempenyo_servicio")]
 #[ORM\Index(columns: ['codigo'], name: 'idx_codigo')]
 #[UniqueEntity(fields: 'codigo', message: 'Este código ya existe')]
 class Servicio implements Stringable
 {
-    // Tipos especiales de servicios
-    final public const string EVALUACION_PTGAS = 'evaluacion.ptgas';
-    final public const string DESARROLLO_R2H2 = 'desarrollo.rrhh';
-    final public const string GERENCIA = 'gerencia';
-    final public const string RECURSOS_HUMANOS = 'recursos.humanos';
-
-    final public const array TIPOS_FIJOS = [
-        self::EVALUACION_PTGAS,
-        self::DESARROLLO_R2H2,
-        self::GERENCIA,
-        self::RECURSOS_HUMANOS,
-    ];
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

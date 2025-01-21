@@ -1,0 +1,90 @@
+{% extends '/desempenyo/admin/index.html.twig' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+    <div class="pagina-titulo">{{ titulo }}</div>
+
+    <table class="tabla-condensada" id="datos-servicio">
+        <thead class="cabecera-condensada">
+        <tr>
+            <th>Id</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Teléfono</th>
+            <th>Responsable</th>
+            <th data-dt-order="disable">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for servicio in servicios %}
+            <tr>
+                <td>{{ servicio.id }}</td>
+                <td>{{ servicio.codigo }}</td>
+                <td>{{ servicio.nombre }}</td>
+                <td>{{ servicio.correo  }}</td>
+                <td>{{ servicio.telefono  }}</td>
+                <td>{{ servicio.responsable  }}</td>
+                <td>
+                    <a href="{{ path('desempenyo_admin_servicio_show', {id: servicio.id}) }}">
+                        <span class="mx-1 fas fa-eye" title="Ver"></span>
+                    </a>
+                    <a href="{{ path('desempenyo_admin_servicio_edit', {id: servicio.id}) }}">
+                        <span class="mx-1 fas fa-edit" title="Editar"></span>
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
+
+{% block botones %}
+    <li class="boton-inferior nav-item me-2">
+        <a class="btn btn-primary" href="{{ path('desempenyo_admin_servicio_new') }}">
+            <span class="fas fa-plus"></span> Crear servicio
+        </a>
+    </li>
+{% endblock %}
+
+{% block migas %}
+    {{ parent() }}
+    <li class="breadcrumb-item"><a href="{{ path('desempenyo_admin') }}">Administrador</a></li>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="module">
+        $('#datos-servicio').dataTable({
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="fas fa-copy"></i>',
+                    titleAttr: 'Copiar',
+                },
+                {
+                    extend: 'print',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6],
+                    },
+                    text: '<i class="fas fa-print"></i>',
+                    title: 'Servicios',
+                    titleAttr: 'Imprimir',
+                },
+                {
+                    extend: 'csv',
+                    text: '<i class="fas fa-file-csv"></i>',
+                    titleAttr: 'Generar fichero CSV',
+                },
+            ],
+            dom: '<"row"<"col-sm-12 col-md-4"B><"col-sm-12 col-md-4"l><"col-sm-12 col-md-4"f>>' +
+                '<"row"<"col-sm-12"<"table-responsive"tr>>>' +
+                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            language: {
+                url: '{{ asset("includes/datatable.es.json") }}'
+            },
+        });
+    </script>
+{% endblock %}
