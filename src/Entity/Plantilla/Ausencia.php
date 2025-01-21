@@ -44,7 +44,7 @@ class Ausencia implements Stringable
         return $this->codigo;
     }
 
-    public function setCodigo(?string $codigo): self
+    public function setCodigo(?string $codigo): static
     {
         $this->codigo = $codigo;
 
@@ -56,7 +56,7 @@ class Ausencia implements Stringable
         return $this->nombre;
     }
 
-    public function setNombre(?string $nombre): self
+    public function setNombre(?string $nombre): static
     {
         $this->nombre = $nombre;
 

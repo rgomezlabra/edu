@@ -57,7 +57,7 @@ class Grupo implements Stringable
         return $this->nombre;
     }
 
-    public function setNombre(?string $nombre): self
+    public function setNombre(?string $nombre): static
     {
         $this->nombre = $nombre;
 
@@ -69,7 +69,7 @@ class Grupo implements Stringable
         return $this->adscripcion;
     }
 
-    public function setAdscripcion(?string $adscripcion): self
+    public function setAdscripcion(?string $adscripcion): static
     {
         $this->adscripcion = $adscripcion;
 
@@ -81,7 +81,7 @@ class Grupo implements Stringable
         return $this->nivel_minimo;
     }
 
-    public function setNivelMinimo(?int $nivel_minimo): self
+    public function setNivelMinimo(?int $nivel_minimo): static
     {
         $this->nivel_minimo = $nivel_minimo;
 
@@ -93,7 +93,7 @@ class Grupo implements Stringable
         return $this->nivel_maximo;
     }
 
-    public function setNivelMaximo(?int $nivel_maximo): self
+    public function setNivelMaximo(?int $nivel_maximo): static
     {
         $this->nivel_maximo = $nivel_maximo;
 

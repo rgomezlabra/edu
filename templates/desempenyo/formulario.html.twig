@@ -51,7 +51,7 @@
                 {%- endif %}
                 {%- if evalua.tipoEvaluador != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
                     {#- Grupos de preguntas de cuestionario completo #}
-                    {%- for grupo in grupos %}
+                    {% for grupo in grupos -%}
                         <a class="nav-link {% if not editar and loop.first %}show active{% endif %}"
                            id="vert-tabs-{{ grupo.orden }}-tab" role="tab"
                            data-bs-toggle="pill" href="#vert-tabs-{{ grupo.orden }}" aria-controls="vert-tabs-{{ grupo.orden }}"
@@ -82,7 +82,7 @@
                 </div>
                 {%- if evalua.tipoEvaluador != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
                     {#- Páginas de grupos de preguntas de cuestionario completo #}
-                    {%- for grupo in grupos %}
+                    {% for grupo in grupos -%}
                         <div class="tab-pane fade text-left {% if not editar and loop.first %}show active{% endif %}"
                              id="vert-tabs-{{ grupo.orden }}" role="tabpanel"
                              aria-labelledby="vert-tabs-{{ grupo.orden }}-tab" tabindex="0">
@@ -97,7 +97,7 @@
                                 </div>
                                 {%- set puntos = 0 %}
                                 {%- set preguntas = grupo.preguntas|filter(p => p.activa and not p.reducida)|sort((a, b) => a.orden <=> b.orden)  %}
-                                {%- for pregunta in preguntas %}
+                                {% for pregunta in preguntas -%}
                                     {%- set tipo = (tipos_preguntas|json_decode)[pregunta.tipo] %}
                                     <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
                                         <div class="col-5">
@@ -148,9 +148,9 @@
                                 <div class="col-5">Evidencias</div>
                             </div>
                             {%- set puntos = 0 %}
-                            {%- for grupo in evalua.cuestionario.grupos|sort((a, b) => a.orden <=> b.orden) %}
+                            {% for grupo in evalua.cuestionario.grupos|sort((a, b) => a.orden <=> b.orden) -%}
                                 {%- set preguntas = grupo.preguntas|filter(p => p.activa and p.reducida)|sort((a, b) => a.orden <=> b.orden)  %}
-                                {%- for pregunta in preguntas %}
+                                {% for pregunta in preguntas -%}
                                     {%- set tipo = (tipos_preguntas|json_decode)[pregunta.tipo] %}
                                     <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
                                         <div class="col-5">
@@ -321,7 +321,7 @@
         {%- if sesion is defined %}
             // Tiemout
             const reloj = $('#reloj');
-            setInterval(function () {
+            setInterval(() => {
                 let cuenta = reloj.text();
                 --cuenta;
                 if (cuenta > 0) {
@@ -332,10 +332,7 @@
                 }
             }, 1000);
             let ms = {{ sesion > 30 ? (sesion - 30) * 1000 : 0 }};
-            setTimeout(function () {
-                const poco = new Toast('#poco');
-                poco.show();
-            }, ms);
+            setTimeout(() => { new Toast('#poco').show(); }, ms);
         {%- endif %}
     </script>
 {% endblock %}

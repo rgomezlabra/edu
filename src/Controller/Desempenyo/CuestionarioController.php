@@ -190,9 +190,15 @@ class CuestionarioController extends AbstractController
             }
 
             $publicado = $estadoRepository->findOneBy(['nombre' => Estado::PUBLICADO]);
+            $url = $cuestionario->getUrl() ?? sprintf(
+                '/%s/formulario/%s-%s',
+                $this->actual->getAplicacion()?->rutaToTemplateDir() ?? '',
+                (new Slug())((string) $cuestionario->getCodigo()),
+                uniqid()
+            );
             $cuestionario
                 ->setEstado($publicado)
-                ->setUrl(sprintf('/desempenyo/formulario/%s-%s', (new Slug())((string) $cuestionario->getCodigo()), uniqid()))
+                ->setUrl($url)
             ;
             $this->cuestionarioRepository->save($cuestionario, true);
             $this->generator->logAndFlash('info', 'Cuestionario activado', [
@@ -207,7 +213,7 @@ class CuestionarioController extends AbstractController
 
         return $this->render('desempenyo/admin/cuestionario/edit.html.twig', [
             'cuestionario' => $cuestionario,
-            'activar' => true,
+            'activar' => $cuestionario->getEstado()?->getNombre() === Estado::BORRADOR,
             'form' => $form->createView(),
         ]);
     }

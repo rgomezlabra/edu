@@ -27,13 +27,11 @@
     {% if activar|default(false) %}
         <script type="module">
             const boton = document.querySelector('#actualizar');
-            boton.addEventListener('click', function(e) {
+            boton.addEventListener('click', (e) => {
                 e.preventDefault();
                 document.querySelector('#modalConfirma').showModal();
             });
-            document.querySelector('#modalConfirmaAceptar').addEventListener('click', function() {
-                boton.form.submit();
-            });
+            document.querySelector('#modalConfirmaAceptar').addEventListener('click', () => { boton.form.submit(); });
         </script>
     {% endif %}
 {% endblock %}
