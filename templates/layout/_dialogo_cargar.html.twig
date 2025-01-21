@@ -1,6 +1,5 @@
 {% set id = id|default('modalCarga') %}
-<dialog id="{{ id }}" aria-modal="false"
-        class="flex position-absolute top-50 w-25 bg-dark text-bg-dark rounded-3 shadow-lg z-1">
+<dialog id="{{ id }}" class="dialogo-{{ ancho|default('15') }}">
     <div class="flex-grow-0 p-2">
         <div class="row">
             <div class="col-sm-3">

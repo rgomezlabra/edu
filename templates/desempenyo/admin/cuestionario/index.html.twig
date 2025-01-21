@@ -40,7 +40,14 @@
                         <a href="{{ path('desempenyo_admin_grupo_index', {id: cuestionario.id}) }}">
                             <em class="mx-1 fas fa-object-group" title="Grupos de preguntas"></em>
                         </a>
-                        {%- if cuestionario.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO') %}
+                        {% if cuestionario.estado.nombre == constant('App\\Entity\\Estado::BORRADOR') -%}
+                            <a href="{{ path('desempenyo_admin_cuestionario_edit', {id: cuestionario.id}) }}">
+                                <em class="mx-1 fas fa-edit" title="Editar"></em>
+                            </a>
+                            <a href="{{ path('desempenyo_admin_cuestionario_activar', {id: cuestionario.id}) }}">
+                                <em class="mx-1 fas fa-check" title="Activar"></em>
+                            </a>
+                        {%- elseif cuestionario.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO') %}
                             <a href="{{ path('desempenyo_admin_cuestionario_activar', {id: cuestionario.id}) }}">
                                 <em class="mx-1 fas fa-calendar" title="Modificar plazo"></em>
                             </a>

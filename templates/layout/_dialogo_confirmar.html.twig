@@ -1,6 +1,5 @@
 {% set id = id|default('modalConfirma') %}
-<dialog id="{{ id }}"
-        class="flex position-absolute top-0 bg-dark text-bg-dark rounded-3 shadow-lg z-1 {{ ancho|default('w-50') }}">
+<dialog id="{{ id }}" class="dialogo{{ ancho|default ? '-' ~ ancho }}">
     <div class="flex-grow-0 p-2">
         <div id="{{ id ~ 'Texto' }}">{{ texto|default }}</div>
         <div class="border-top border-light py-3">
