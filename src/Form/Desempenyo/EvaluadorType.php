@@ -47,10 +47,8 @@ class EvaluadorType extends AbstractType
                 'required' => true,
             ])
         ;
-        // Convertir empleado en UVUS para poder elegir usando una "datatable"
-        $builder->get('evaluador')
-            ->addModelTransformer($this->empleadoDniTransformer)
-        ;
+        // Convertir empleado en documento para poder elegir usando una "datatable"
+        $builder->get('evaluador')->addModelTransformer($this->empleadoDniTransformer);
     }
 
     #[Override]

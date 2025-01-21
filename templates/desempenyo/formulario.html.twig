@@ -43,18 +43,17 @@
         <div class="col-3 col-sm-2 me-3">
             <div class="nav flex-column nav-pills h-100" id="vert-tabs-tab" role="tablist" aria-orientation="vertical">
                 {%- if editar %}
-                    <a class="nav-link show active" id="vert-tabs-bienvenida-tab" role="tab"
-                       data-bs-toggle="pill" href="#vert-tabs-bienvenida" aria-controls="vert-tabs-bienvenida"
-                       aria-selected="true">
+                    <a class="nav-link show active" id="vert-tabs-bienvenida-tab" role="tab" data-bs-toggle="pill"
+                       href="#vert-tabs-bienvenida" aria-controls="vert-tabs-bienvenida" aria-selected="true">
                         Comenzar la evaluación
                     </a>
                 {%- endif %}
                 {%- if evalua.tipoEvaluador != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
                     {#- Grupos de preguntas de cuestionario completo #}
                     {% for grupo in grupos -%}
-                        <a class="nav-link {% if not editar and loop.first %}show active{% endif %}"
-                           id="vert-tabs-{{ grupo.orden }}-tab" role="tab"
-                           data-bs-toggle="pill" href="#vert-tabs-{{ grupo.orden }}" aria-controls="vert-tabs-{{ grupo.orden }}"
+                        <a class="nav-link {{ not editar and loop.first ? 'show active' }}"
+                           id="vert-tabs-{{ grupo.orden }}-tab" role="tab" data-bs-toggle="pill"
+                           href="#vert-tabs-{{ grupo.orden }}" aria-controls="vert-tabs-{{ grupo.orden }}"
                            aria-selected="false">
                             <span class="ms-3">{{ grupo.titulo }}</span>
                         </a>
@@ -66,24 +65,23 @@
                         <span class="ms-3">Cuestionario reducido</span>
                     </a>
                 {%- endif %}
-                <a class="nav-link" id="vert-tabs-despedida-tab" role="tab"
-                   data-bs-toggle="pill" href="#vert-tabs-despedida" aria-controls="vert-tabs-despedida"
-                   aria-selected="false">
-                    {% if editar %}Finalizar la evaluación{% else %}Evaluación finalizada{% endif %}
+                <a class="nav-link" id="vert-tabs-despedida-tab" role="tab" data-bs-toggle="pill"
+                   href="#vert-tabs-despedida" aria-controls="vert-tabs-despedida" aria-selected="false">
+                    {{ editar ? 'Finalizar la evaluación' : 'Evaluación finalizada' }}
                 </a>
             </div>
         </div>
         <div class="col-9 col-sm-10">
             <div class="tab-content" id="vert-tabs-tabContent">
                 {#- Página de bienvenida #}
-                <div class="tab-pane fade text-left {% if editar %}show active{% endif %}"
-                     id="vert-tabs-bienvenida" role="tabpanel" aria-labelledby="vert-tabs-bienvenida-tab" tabindex="0">
+                <div class="tab-pane fade text-left {{ editar ? 'show active' }}" id="vert-tabs-bienvenida"
+                     role="tabpanel" aria-labelledby="vert-tabs-bienvenida-tab" tabindex="0">
                     <div>{{ evalua.cuestionario.bienvenida|raw }}</div>
                 </div>
                 {%- if evalua.tipoEvaluador != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
                     {#- Páginas de grupos de preguntas de cuestionario completo #}
                     {% for grupo in grupos -%}
-                        <div class="tab-pane fade text-left {% if not editar and loop.first %}show active{% endif %}"
+                        <div class="tab-pane fade text-left {{ not editar and loop.first ? 'show active' }}"
                              id="vert-tabs-{{ grupo.orden }}" role="tabpanel"
                              aria-labelledby="vert-tabs-{{ grupo.orden }}-tab" tabindex="0">
                             <div class="pagina-seccion">{{ grupo }}</div>
@@ -99,7 +97,7 @@
                                 {%- set preguntas = grupo.preguntas|filter(p => p.activa and not p.reducida)|sort((a, b) => a.orden <=> b.orden)  %}
                                 {% for pregunta in preguntas -%}
                                     {%- set tipo = (tipos_preguntas|json_decode)[pregunta.tipo] %}
-                                    <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
+                                    <div class="row {{ loop.index % 2 ? 'bg-light' }}">
                                         <div class="col-5">
                                             <div class="fw-bold" title="{{ pregunta.descripcion|raw }}">{{ pregunta }}</div>
                                         </div>
@@ -152,7 +150,7 @@
                                 {%- set preguntas = grupo.preguntas|filter(p => p.activa and p.reducida)|sort((a, b) => a.orden <=> b.orden)  %}
                                 {% for pregunta in preguntas -%}
                                     {%- set tipo = (tipos_preguntas|json_decode)[pregunta.tipo] %}
-                                    <div class="row {% if loop.index % 2 %}bg-light{% endif %}">
+                                    <div class="row {{ loop.index % 2 ? 'bg-light' }}">
                                         <div class="col-5">
                                             <div class="fw-bold" title="{{ pregunta.descripcion|raw }}">{{ pregunta }}</div>
                                         </div>
@@ -247,6 +245,11 @@
     <li class="breadcrumb-item">
         <a href="{{ path('desempenyo') }}"><em class="me-1 fas fa-user-check"></em>Desempeño</a>
     </li>
+    {% if evalua.tipoEvaluador in [constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'), constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')] %}
+        <li class="breadcrumb-item">
+            <a href="{{ path('desempenyo_formulario_empleado_index', {codigo: codigo}) }}">Asignados</a>
+        </li>
+    {% endif %}
 {% endblock %}
 
 {% block modal %}
