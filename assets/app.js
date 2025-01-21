@@ -1,4 +1,3 @@
-import './bootstrap.js';
 // jQuery
 import $ from 'jquery';
 window.$ = $;
@@ -38,13 +37,5 @@ import '@fortawesome/fontawesome-free';
 library.add(fab, far, fas);
 import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
 import '@fortawesome/fontawesome-svg-core/styles.min.css';
-// CKEditor 5
-// import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-// window.ClassicEditor = ClassicEditor;
-// import 'ckeditor5/translations/es.js';
-
-// Funciones propias
-// import './cookies.js';
-// import './funciones.js';
 // Estilos propios
 import './styles/app.scss';

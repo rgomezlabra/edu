@@ -2,7 +2,7 @@
 
 namespace App\Entity\Desempenyo;
 
-use App\Repository\Cirhus\ServicioRepository;
+use App\Repository\Desempenyo\ServicioRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Stringable;

@@ -109,13 +109,11 @@ class PreguntaController extends AbstractController
                 'label' => 'Solo en cuestionario reducido',
                 'help' => 'Marcar para que la pregunta se incluya solo en el cuestionario reducido del tercer agente evaluador.',
             ])
-            ->remove('orden')
             ->remove('opcional')
         ;
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $pregunta->setOrden(-1);
             $this->preguntaRepository->save($pregunta, true);
             $this->generator->logAndFlash('info', 'Nueva pregunta de desempeño', [
                 'id' => $pregunta->getId(),

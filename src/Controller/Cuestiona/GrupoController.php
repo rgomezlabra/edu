@@ -60,7 +60,6 @@ class GrupoController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $grupo->setOrden(-1);
             $this->grupoRepository->save($grupo, true);
             $this->generator->logAndFlash('info', 'Nuevo grupo de preguntas.', [
                 'id' => $cuestionario->getId(),

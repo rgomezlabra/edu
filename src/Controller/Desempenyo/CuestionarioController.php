@@ -191,8 +191,7 @@ class CuestionarioController extends AbstractController
 
             $publicado = $estadoRepository->findOneBy(['nombre' => Estado::PUBLICADO]);
             $url = $cuestionario->getUrl() ?? sprintf(
-                '/%s/formulario/%s-%s',
-                $this->actual->getAplicacion()?->rutaToTemplateDir() ?? '',
+                '/desempenyo/formulario/%s-%s',
                 (new Slug())((string) $cuestionario->getCodigo()),
                 uniqid()
             );
