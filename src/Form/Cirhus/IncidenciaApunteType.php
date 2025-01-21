@@ -52,7 +52,14 @@ EOT;
                 ->add('comentario')
                 ->add('servicio', null, [
                     'attr' => ['class' => 'w-25'],
-                    'label' => 'Servicio',
+                    'help' => 'Dato interno que no se muestra al usuario creador de la incidencia.',
+                    'label' => 'Servicio asignado',
+                    'required' => false,
+                ])
+                ->add('observaciones', null, [
+                    'help' => 'Dato interno que no se muestra al usuario creador de la incidencia.',
+                    'label' => 'Observaciones internas',
+                    'required' => false,
                 ])
             ;
         }

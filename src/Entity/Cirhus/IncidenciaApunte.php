@@ -2,6 +2,7 @@
 
 namespace App\Entity\Cirhus;
 
+use App\Entity\Desempenyo\Servicio;
 use App\Entity\Estado;
 use App\Entity\Usuario;
 use App\Repository\Cirhus\IncidenciaApunteRepository;
@@ -18,10 +19,8 @@ class IncidenciaApunte
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Servicio::class, inversedBy: 'incidencias')]
-    private ?Servicio $servicio = null;
-
     #[ORM\ManyToOne(targetEntity: Incidencia::class, inversedBy: 'apuntes')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Incidencia $incidencia = null;
 
     #[ORM\ManyToOne(targetEntity: Estado::class)]
@@ -39,21 +38,15 @@ class IncidenciaApunte
     #[ORM\ManyToOne(targetEntity: Usuario::class)]
     private ?Usuario $autor = null;
 
+    #[ORM\ManyToOne(targetEntity: Servicio::class, inversedBy: 'incidencias')]
+    private ?Servicio $servicio = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $observaciones = null;
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getServicio(): ?Servicio
-    {
-        return $this->servicio;
-    }
-
-    public function setServicio(?Servicio $servicio): static
-    {
-        $this->servicio = $servicio;
-
-        return $this;
     }
 
     public function getIncidencia(): ?Incidencia
@@ -124,6 +117,30 @@ class IncidenciaApunte
     public function setAutor(?Usuario $autor): static
     {
         $this->autor = $autor;
+
+        return $this;
+    }
+
+    public function getServicio(): ?Servicio
+    {
+        return $this->servicio;
+    }
+
+    public function setServicio(?Servicio $servicio): static
+    {
+        $this->servicio = $servicio;
+
+        return $this;
+    }
+
+    public function getObservaciones(): ?string
+    {
+        return $this->observaciones;
+    }
+
+    public function setObservaciones(?string $observaciones): static
+    {
+        $this->observaciones = $observaciones;
 
         return $this;
     }

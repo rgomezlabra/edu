@@ -22,12 +22,15 @@ class Incidencia
     private ?int $id = null;
 
     #[ORM\OneToOne(targetEntity: IncidenciaCirhus::class)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?IncidenciaCirhus $incidencia = null;
 
     #[ORM\ManyToOne(targetEntity: TipoIncidencia::class)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?TipoIncidencia $tipo = null;
 
     #[ORM\ManyToOne(targetEntity: Cuestionario::class)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Cuestionario $cuestionario = null;
 
     public function getId(): ?int

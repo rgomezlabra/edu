@@ -335,7 +335,9 @@ class IncidenciaController extends AbstractController
             $nuevo = true;
         }
 
-        $form = $this->createForm(IncidenciaApunteType::class, $apunte);
+        $form = $this->createForm(IncidenciaApunteType::class, $apunte, [
+            'rol' => 'admin',
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
