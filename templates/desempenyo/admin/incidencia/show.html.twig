@@ -28,8 +28,8 @@
     <div class="row py-2">
         <div class="fila-campo">Histórico de la incidencia</div>
         <div class="fila-valor w-75">
-            <table class="table" id="datosApuntes">
-                <thead>
+            <table class="tabla-condensada" id="datosApuntes">
+                <thead class="cabecera-condensada">
                 <tr>
                     <th>Estado</th>
                     <th>Fecha inicial</th>
@@ -41,7 +41,7 @@
                 </thead>
                 {%- set inicio = 0 -%}
                 {%- set fin = 0 -%}
-                {%- for apunte in incidencia.incidencia.apuntes %}
+                {% for apunte in incidencia.incidencia.apuntes -%}
                     <tr>
                         <td>
                             <span class="badge">
@@ -54,7 +54,10 @@
                         <td>{{ apunte.comentario }}</td>
                         <td>{{ apunte.autor.empleado }}</td>
                         <td>
-                            {%- if incidencia.incidencia.apuntes.last.estado.nombre|default != constant('App\\Entity\\Estado::FINALIZADO')  and loop.last %}
+                            <a class="apunte mx-1" href="" title="Ver detalle" data-id="{{ apunte.id }}">
+                                <em class="mx-1 fas fa-magnifying-glass" title="Ver detalles"></em>
+                            </a>
+                            {% if incidencia.incidencia.apuntes.last.estado.nombre|default != constant('App\\Entity\\Estado::FINALIZADO')  and loop.last -%}
                                 <a href="{{ path('desempenyo_admin_incidencia_apunte',{'incidencia': incidencia.id, 'apunte': apunte.id}) }}">
                                     <em class="mx-1 fas fa-edit" title="Editar"></em>
                                 </a>
@@ -91,7 +94,44 @@
     </li>
 {% endblock %}
 
-{% block modal %}{% endblock %}
+{% block modal %}
+    {% for apunte in incidencia.incidencia.apuntes -%}
+        {% set texto -%}
+            <div class="row py-2">
+                <div class="fila-campo">Estado</div>
+                <div class="fila-valor">
+                    <span class="badge">
+                        <em class="bg-{{ apunte.estado.color }} p-1 fas {{ apunte.estado.icono|default }}"></em>
+                    </span>
+                    {{- apunte.estado.nombre|default -}}
+                </div>
+            </div>
+            <div class="row py-2">
+                <div class="fila-campo">Fecha inicial</div>
+                <div class="fila-valor">{{ apunte.fechaInicio ? apunte.fechaInicio | date('d/m/Y, H:i') }}</div>
+            </div>
+            <div class="row py-2">
+                <div class="fila-campo">Fecha final</div>
+                <div class="fila-valor">{{ apunte.fechaFin ? apunte.fechaFin | date('d/m/Y, H:i') : 'activo' }}</div>
+            </div>
+            <div class="row py-2">
+                <div class="fila-campo">Comentario</div>
+                <div class="fila-valor">{{ apunte.comentario }}</div>
+            </div>
+            <div class="row py-2">
+                <div class="fila-campo">Servicio</div>
+                <div class="fila-valor">{{ apunte.servicio.nombre|default }}</div>
+            </div>
+            <div class="row py-2">
+                <div class="fila-campo">Observaciones internas</div>
+                <div class="fila-valor">{{ apunte.observaciones }}</div>
+            </div>
+        {%- endset %}
+        {{- include('layout/_dialogo_info.html.twig', {
+            id: 'apunte' ~ apunte.id, ancho: 75, titulo: 'Detalle del apunte', contenido: texto
+        }) }}
+    {%- endfor %}
+{% endblock %}
 
 {% block migas %}
     {{ parent() }}
@@ -109,6 +149,13 @@
             order: [
                 [1, 'desc'],
             ],
+        });
+        // Mostrar detalles del apunte
+        document.querySelectorAll('.apunte').forEach(apunte => {
+            apunte.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelector('#apunte' + apunte.dataset.id).showModal();
+            });
         });
     </script>
 {% endblock %}

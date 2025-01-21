@@ -42,6 +42,7 @@ $utilities: (
     values: (
       blue: linear-gradient($blue, darken($blue, 15%)),
       cyan: linear-gradient($cyan, darken($cyan, 15%)),
+      dark: $dark,
       gray: linear-gradient($gray-500, darken($gray-500, 15%)),
       fuchsia: linear-gradient(fuchsia, deeppink),
       green: linear-gradient($green, darken($green, 15%)),
@@ -326,20 +327,18 @@ $utilities: (
   @extend #{'.border-top', '.border-primary', '.border-4', '.my-3', '.py-3'};
 }
 
-// Iconos
-.icon {
-  height: 1em;
-  width: 1em;
+// Cuadros de diálogo
+.dialogo {
+  @extend #{'.rounded-3', '.shadow-lg', '.w-50'};
 }
-.icon-2x {
-  height: 2em;
-  width: 2em;
+.dialogo-oscuro {
+  @extend #{'.dialogo', '.bg-dark', '.text-white'};
 }
-@each $color, $valor in $theme-colors {
-  .icon-#{$color} {
-    @extend #{'.icon', '.text-#{$color}'};
+@each $ancho in ('15', '50', '75', '100', 'auto') {
+  .dialogo-#{$ancho} {
+    @extend #{'.dialogo', '.w-#{$ancho}'};
   }
-  .icon-2x-#{$color} {
-    @extend #{'.icon-2x', '.text-#{$color}'};
+  .dialogo-oscuro-#{$ancho} {
+    @extend #{'.dialogo-oscuro', '.w-#{$ancho}'};
   }
 }
