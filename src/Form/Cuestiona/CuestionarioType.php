@@ -30,17 +30,13 @@ class CuestionarioType extends AbstractType
         $subform = $options['form_configuracion'];
         $builder
             ->add('estado', null, [
-                'attr' => [
-                    'class' => 'w-25',
-                ],
+                'attr' => ['class' => 'w-25'],
                 'choices' => [$cuestionario->getEstado()],
                 'disabled' => true,
                 'help' => 'Podrá definir preguntas mientras el cuestionario siga en estado "borrador".',
             ])
             ->add('codigo', null, [
-                'attr' => [
-                    'class' => 'w-25',
-                ],
+                'attr' => ['class' => 'w-25'],
                 'label' => 'Código',
             ])
             ->add('titulo', null, [
@@ -93,9 +89,7 @@ class CuestionarioType extends AbstractType
 
         $builder
             ->add('autor', null, [
-                'attr' => [
-                    'class' => 'w-25',
-                ],
+                'attr' => ['class' => 'w-25'],
                 'choices' => [$cuestionario->getAutor()],
                 'disabled' => true,
             ])

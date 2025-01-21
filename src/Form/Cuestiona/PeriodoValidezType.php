@@ -26,18 +26,14 @@ class PeriodoValidezType extends AbstractType
     {
         $builder
             ->add('fecha_alta', DateType::class, [
-                'attr' => [
-                    'class' => 'w-25',
-                ],
+                'attr' => ['class' => 'w-25'],
                 'help' => $options['con_fechas'] ? 'Dato obligatorio al publicar el cuestionario.' : 'Opcional.',
                 'label' => 'Fecha de inicio',
                 'required' => false,
                 'widget' => 'single_text',
             ])
             ->add('fecha_baja', DateType::class, [
-                'attr' => [
-                    'class' => 'w-25',
-                ],
+                'attr' => ['class' => 'w-25'],
                 'help' => $options['con_fechas'] ? 'Dato obligatorio al publicar el cuestionario.' : 'Opcional.',
                 'label' => 'Fecha de fin',
                 'required' => false,

@@ -37,24 +37,15 @@ class PreguntaType extends AbstractType
 
         $builder
             ->add('grupo', EntityType::class, [
-                'attr' => [
-                    'class' => 'w-auto',
-                ],
+                'attr' => ['class' => 'w-auto'],
                 'class' => Grupo::class,
                 'choice_label' => 'titulo',
                 'choices' => [$pregunta->getGrupo()],
                 'placeholder' => false,
                 'required' => false,
             ])
-            ->add('orden', null, [
-                'attr' => [
-                    'class' => 'w-auto',
-                ],
-            ])
             ->add('codigo', null, [
-                'attr' => [
-                    'class' => 'w-25',
-                ],
+                'attr' => ['class' => 'w-25'],
                 'label' => 'Código',
             ])
             ->add('titulo', null, [

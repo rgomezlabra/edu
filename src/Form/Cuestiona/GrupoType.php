@@ -22,20 +22,11 @@ class GrupoType extends AbstractType
     {
         $builder
             ->add('cuestionario', null, [
-                'attr' => [
-                    'class' => 'w-auto',
-                ],
+                'attr' => ['class' => 'w-auto'],
                 'placeholder' => false,
             ])
-            ->add('orden', null, [
-                'attr' => [
-                    'class' => 'w-auto',
-                ],
-            ])
             ->add('codigo', null, [
-                'attr' => [
-                    'class' => 'w-25',
-                ],
+                'attr' => ['class' => 'w-25'],
                 'label' => 'Código',
             ])
             ->add('titulo', null, [

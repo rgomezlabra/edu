@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250108100846 extends AbstractMigration
+final class Version20250121161844 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -24,15 +24,15 @@ final class Version20250108100846 extends AbstractMigration
         $this->addSql('CREATE TABLE cirhus_archivo (id INT AUTO_INCREMENT NOT NULL, incidencia_id INT NOT NULL, archivo_id INT DEFAULT NULL, fecha DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', INDEX IDX_770A50CFE1605BE2 (incidencia_id), UNIQUE INDEX UNIQ_770A50CF46EBF93B (archivo_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE cirhus_incidencia (id INT AUTO_INCREMENT NOT NULL, solicitante_id INT NOT NULL, descripcion LONGTEXT NOT NULL, INDEX IDX_27F12BC7C680A87 (solicitante_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE cirhus_incidencia_archivo (incidencia_id INT NOT NULL, archivo_id INT NOT NULL, INDEX IDX_51974F1FE1605BE2 (incidencia_id), INDEX IDX_51974F1F46EBF93B (archivo_id), PRIMARY KEY(incidencia_id, archivo_id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-        $this->addSql('CREATE TABLE cirhus_incidencia_apunte (id INT AUTO_INCREMENT NOT NULL, servicio_id INT DEFAULT NULL, incidencia_id INT DEFAULT NULL, estado_id INT DEFAULT NULL, autor_id INT DEFAULT NULL, empleado_id INT DEFAULT NULL, comentario LONGTEXT DEFAULT NULL, fecha_inicio DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', fecha_fin DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', INDEX IDX_36C85F2B71CAA3E7 (servicio_id), INDEX IDX_36C85F2BE1605BE2 (incidencia_id), INDEX IDX_36C85F2B9F5A440B (estado_id), INDEX IDX_36C85F2B14D45BBE (autor_id), INDEX IDX_36C85F2B952BE730 (empleado_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-        $this->addSql('CREATE TABLE cirhus_servicio (id INT AUTO_INCREMENT NOT NULL, codigo VARCHAR(255) NOT NULL, nombre VARCHAR(255) NOT NULL, correo LONGTEXT DEFAULT NULL, telefono VARCHAR(255) NOT NULL, responsable VARCHAR(255) NOT NULL, INDEX idx_codigo (codigo), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE cirhus_incidencia_apunte (id INT AUTO_INCREMENT NOT NULL, incidencia_id INT NOT NULL, estado_id INT DEFAULT NULL, autor_id INT DEFAULT NULL, servicio_id INT DEFAULT NULL, comentario LONGTEXT DEFAULT NULL, fecha_inicio DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', fecha_fin DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', observaciones LONGTEXT DEFAULT NULL, INDEX IDX_36C85F2BE1605BE2 (incidencia_id), INDEX IDX_36C85F2B9F5A440B (estado_id), INDEX IDX_36C85F2B14D45BBE (autor_id), INDEX IDX_36C85F2B71CAA3E7 (servicio_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE cuestiona_cuestionario (id INT AUTO_INCREMENT NOT NULL, estado_id INT DEFAULT NULL, autor_id INT DEFAULT NULL, codigo VARCHAR(100) NOT NULL, titulo VARCHAR(255) NOT NULL, descripcion LONGTEXT NOT NULL, bienvenida LONGTEXT DEFAULT NULL, despedida LONGTEXT DEFAULT NULL, url VARCHAR(255) DEFAULT NULL, editable TINYINT(1) DEFAULT 1 NOT NULL, privado TINYINT(1) DEFAULT 1 NOT NULL, fecha_alta DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', fecha_baja DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', configuracion JSON DEFAULT NULL COMMENT \'(DC2Type:json)\', INDEX IDX_2435EE999F5A440B (estado_id), INDEX IDX_2435EE9914D45BBE (autor_id), INDEX index_cuestionario_codigo (codigo), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE cuestiona_formulario (id INT AUTO_INCREMENT NOT NULL, cuestionario_id INT DEFAULT NULL, usuario_id INT DEFAULT NULL, fecha_grabacion DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', fecha_envio DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', INDEX IDX_551278FB8AAA3CFB (cuestionario_id), INDEX IDX_551278FBDB38439E (usuario_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE cuestiona_grupo (id INT AUTO_INCREMENT NOT NULL, cuestionario_id INT NOT NULL, activa TINYINT(1) NOT NULL, orden SMALLINT NOT NULL, codigo VARCHAR(100) NOT NULL, titulo VARCHAR(255) NOT NULL, descripcion LONGTEXT DEFAULT NULL, INDEX IDX_15D3A8968AAA3CFB (cuestionario_id), INDEX idx_grupo_cuestionario_orden (cuestionario_id, orden), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE cuestiona_pregunta (id INT AUTO_INCREMENT NOT NULL, grupo_id INT NOT NULL, activa TINYINT(1) NOT NULL, opcional TINYINT(1) NOT NULL, orden SMALLINT NOT NULL, codigo VARCHAR(100) NOT NULL, titulo VARCHAR(255) NOT NULL, descripcion LONGTEXT DEFAULT NULL, ayuda LONGTEXT DEFAULT NULL, tipo SMALLINT NOT NULL, opciones JSON DEFAULT NULL COMMENT \'(DC2Type:json)\', reducida TINYINT(1) DEFAULT 0 NOT NULL, INDEX IDX_D4B8651C9C833003 (grupo_id), INDEX idx_pregunta_grupo_orden (grupo_id, orden), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE cuestiona_respuesta (id INT AUTO_INCREMENT NOT NULL, formulario_id INT NOT NULL, pregunta_id INT NOT NULL, valor JSON NOT NULL COMMENT \'(DC2Type:json)\', INDEX IDX_5BCCA69A41CFE234 (formulario_id), INDEX IDX_5BCCA69A31A5801E (pregunta_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE desempenyo_evalua (id INT AUTO_INCREMENT NOT NULL, empleado_id INT NOT NULL, evaluador_id INT DEFAULT NULL, cuestionario_id INT NOT NULL, formulario_id INT DEFAULT NULL, corrector_id INT DEFAULT NULL, tipo_evaluador SMALLINT DEFAULT 1 NOT NULL, rechazado DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', rechazo_texto LONGTEXT DEFAULT NULL, registrado DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', correccion DOUBLE PRECISION DEFAULT NULL, comentario LONGTEXT DEFAULT NULL, corregido DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', habilita TINYINT(1) DEFAULT 0 NOT NULL, origen VARCHAR(10) NOT NULL, INDEX IDX_122A1E0F952BE730 (empleado_id), INDEX IDX_122A1E0F40815979 (evaluador_id), INDEX IDX_122A1E0F8AAA3CFB (cuestionario_id), INDEX IDX_122A1E0F41CFE234 (formulario_id), INDEX IDX_122A1E0F3A6E8746 (corrector_id), INDEX desempenyo_cuestionario_empleado_evaluador_idx (cuestionario_id, empleado_id, evaluador_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-        $this->addSql('CREATE TABLE desempenyo_incidencia (id INT AUTO_INCREMENT NOT NULL, incidencia_id INT DEFAULT NULL, tipo_id INT DEFAULT NULL, cuestionario_id INT DEFAULT NULL, UNIQUE INDEX UNIQ_CC9CD7FAE1605BE2 (incidencia_id), INDEX IDX_CC9CD7FAA9276E6C (tipo_id), INDEX IDX_CC9CD7FA8AAA3CFB (cuestionario_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE desempenyo_incidencia (id INT AUTO_INCREMENT NOT NULL, incidencia_id INT NOT NULL, tipo_id INT NOT NULL, cuestionario_id INT NOT NULL, UNIQUE INDEX UNIQ_CC9CD7FAE1605BE2 (incidencia_id), INDEX IDX_CC9CD7FAA9276E6C (tipo_id), INDEX IDX_CC9CD7FA8AAA3CFB (cuestionario_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE desempenyo_servicio (id INT AUTO_INCREMENT NOT NULL, codigo VARCHAR(255) NOT NULL, nombre VARCHAR(255) NOT NULL, correo LONGTEXT DEFAULT NULL, telefono VARCHAR(255) NOT NULL, responsable VARCHAR(255) NOT NULL, INDEX idx_codigo (codigo), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE desempenyo_tipo_incidencia (id INT AUTO_INCREMENT NOT NULL, nombre VARCHAR(50) NOT NULL, descripcion LONGTEXT NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE estado (id INT AUTO_INCREMENT NOT NULL, nombre VARCHAR(50) NOT NULL, descripcion LONGTEXT NOT NULL, icono VARCHAR(50) DEFAULT NULL, color VARCHAR(22) DEFAULT NULL, tipo VARCHAR(10) NOT NULL, INDEX idx_estado_nombre (nombre), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE plantilla_ausencia (id INT AUTO_INCREMENT NOT NULL, codigo VARCHAR(50) NOT NULL, nombre VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
@@ -48,11 +48,10 @@ final class Version20250108100846 extends AbstractMigration
         $this->addSql('ALTER TABLE cirhus_incidencia ADD CONSTRAINT FK_27F12BC7C680A87 FOREIGN KEY (solicitante_id) REFERENCES usuario (id)');
         $this->addSql('ALTER TABLE cirhus_incidencia_archivo ADD CONSTRAINT FK_51974F1FE1605BE2 FOREIGN KEY (incidencia_id) REFERENCES cirhus_incidencia (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE cirhus_incidencia_archivo ADD CONSTRAINT FK_51974F1F46EBF93B FOREIGN KEY (archivo_id) REFERENCES archivo (id) ON DELETE CASCADE');
-        $this->addSql('ALTER TABLE cirhus_incidencia_apunte ADD CONSTRAINT FK_36C85F2B71CAA3E7 FOREIGN KEY (servicio_id) REFERENCES cirhus_servicio (id)');
         $this->addSql('ALTER TABLE cirhus_incidencia_apunte ADD CONSTRAINT FK_36C85F2BE1605BE2 FOREIGN KEY (incidencia_id) REFERENCES cirhus_incidencia (id)');
         $this->addSql('ALTER TABLE cirhus_incidencia_apunte ADD CONSTRAINT FK_36C85F2B9F5A440B FOREIGN KEY (estado_id) REFERENCES estado (id)');
         $this->addSql('ALTER TABLE cirhus_incidencia_apunte ADD CONSTRAINT FK_36C85F2B14D45BBE FOREIGN KEY (autor_id) REFERENCES usuario (id)');
-        $this->addSql('ALTER TABLE cirhus_incidencia_apunte ADD CONSTRAINT FK_36C85F2B952BE730 FOREIGN KEY (empleado_id) REFERENCES plantilla_empleado (id)');
+        $this->addSql('ALTER TABLE cirhus_incidencia_apunte ADD CONSTRAINT FK_36C85F2B71CAA3E7 FOREIGN KEY (servicio_id) REFERENCES desempenyo_servicio (id)');
         $this->addSql('ALTER TABLE cuestiona_cuestionario ADD CONSTRAINT FK_2435EE999F5A440B FOREIGN KEY (estado_id) REFERENCES estado (id)');
         $this->addSql('ALTER TABLE cuestiona_cuestionario ADD CONSTRAINT FK_2435EE9914D45BBE FOREIGN KEY (autor_id) REFERENCES usuario (id)');
         $this->addSql('ALTER TABLE cuestiona_formulario ADD CONSTRAINT FK_551278FB8AAA3CFB FOREIGN KEY (cuestionario_id) REFERENCES cuestiona_cuestionario (id)');
@@ -87,11 +86,10 @@ final class Version20250108100846 extends AbstractMigration
         $this->addSql('ALTER TABLE cirhus_incidencia DROP FOREIGN KEY FK_27F12BC7C680A87');
         $this->addSql('ALTER TABLE cirhus_incidencia_archivo DROP FOREIGN KEY FK_51974F1FE1605BE2');
         $this->addSql('ALTER TABLE cirhus_incidencia_archivo DROP FOREIGN KEY FK_51974F1F46EBF93B');
-        $this->addSql('ALTER TABLE cirhus_incidencia_apunte DROP FOREIGN KEY FK_36C85F2B71CAA3E7');
         $this->addSql('ALTER TABLE cirhus_incidencia_apunte DROP FOREIGN KEY FK_36C85F2BE1605BE2');
         $this->addSql('ALTER TABLE cirhus_incidencia_apunte DROP FOREIGN KEY FK_36C85F2B9F5A440B');
         $this->addSql('ALTER TABLE cirhus_incidencia_apunte DROP FOREIGN KEY FK_36C85F2B14D45BBE');
-        $this->addSql('ALTER TABLE cirhus_incidencia_apunte DROP FOREIGN KEY FK_36C85F2B952BE730');
+        $this->addSql('ALTER TABLE cirhus_incidencia_apunte DROP FOREIGN KEY FK_36C85F2B71CAA3E7');
         $this->addSql('ALTER TABLE cuestiona_cuestionario DROP FOREIGN KEY FK_2435EE999F5A440B');
         $this->addSql('ALTER TABLE cuestiona_cuestionario DROP FOREIGN KEY FK_2435EE9914D45BBE');
         $this->addSql('ALTER TABLE cuestiona_formulario DROP FOREIGN KEY FK_551278FB8AAA3CFB');
@@ -119,7 +117,6 @@ final class Version20250108100846 extends AbstractMigration
         $this->addSql('DROP TABLE cirhus_incidencia');
         $this->addSql('DROP TABLE cirhus_incidencia_archivo');
         $this->addSql('DROP TABLE cirhus_incidencia_apunte');
-        $this->addSql('DROP TABLE cirhus_servicio');
         $this->addSql('DROP TABLE cuestiona_cuestionario');
         $this->addSql('DROP TABLE cuestiona_formulario');
         $this->addSql('DROP TABLE cuestiona_grupo');
@@ -127,6 +124,7 @@ final class Version20250108100846 extends AbstractMigration
         $this->addSql('DROP TABLE cuestiona_respuesta');
         $this->addSql('DROP TABLE desempenyo_evalua');
         $this->addSql('DROP TABLE desempenyo_incidencia');
+        $this->addSql('DROP TABLE desempenyo_servicio');
         $this->addSql('DROP TABLE desempenyo_tipo_incidencia');
         $this->addSql('DROP TABLE estado');
         $this->addSql('DROP TABLE plantilla_ausencia');

@@ -24,16 +24,12 @@ class OpcionesRangoType extends AbstractType
     {
         $builder
             ->add('min', NumberType::class, [
-                'attr' => [
-                    'class' => 'w-auto',
-                ],
+                'attr' => ['class' => 'w-auto'],
                 'help' => 'Valor mínimo (obligatorio).',
                 'label' => 'Mínimo',
             ])
             ->add('max', NumberType::class, [
-                'attr' => [
-                    'class' => 'w-auto',
-                ],
+                'attr' => ['class' => 'w-auto'],
                 'help' => 'Valor máximo (obligatorio).',
                 'label' => 'Máximo',
             ])
