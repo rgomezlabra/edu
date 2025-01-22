@@ -9,7 +9,7 @@
         <table class="tabla-condensada" id="datosResultados">
             <thead class="cabecera-condensada">
             <tr>
-                <th data-dt-order="disable"></th>
+                <th data-dt-order="disable" colspan="2"></th>
                 <th colspan="2" data-dt-order="disable">({{ config.peso1 }}%)</th>
                 <th colspan="2" data-dt-order="disable">({{ config.peso2 }}%)</th>
                 <th colspan="2" data-dt-order="disable">({{ config.peso3 }}%)</th>
@@ -20,6 +20,7 @@
             </tr>
             <tr>
                 <th>Empleado</th>
+                <th class="text-start"><abbr title="Validado en Registro General">V.R.</abbr></th>
                 <th class="text-start">Media</th>
                 <th class="text-start">Fecha</th>
                 <th class="text-start">Media</th>
@@ -37,14 +38,16 @@
             {%- for idEmpleado, dato in datos %}
                 <tr>
                     <td>{{ (dato|first).formulario.empleado }}</td>
-                    {%- if (dato|first).formulario.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION' )%}
-                        <td>0</td>
-                        <td>{{ (dato|first).formulario.rechazado ? (dato|first).formulario.rechazado|date('Y-m-d') }}</td>
+                    {%- if rechazos[idEmpleado] is defined %}
+                        <td>{{ rechazos[idEmpleado].registrado ? rechazos[idEmpleado].registrado|date('Y-m-d') }}</td>
+                        <td></td>
+                        <td></td>
                         {%- set tipos = [
                             constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
                             constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'),
                         ] %}
                     {%- else %}
+                        <td></td>
                         {%- set tipos = [
                             constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'),
                             constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
@@ -61,11 +64,13 @@
                         + (dato[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')].puntos|default(0) * config['peso3'] / 100)
                     -%}
                     {% set correccion = dato[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')].formulario.correccion|default %}
-                    <td {% if (media * 6) < 36 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|number_format(2, ',' ) }}</td>
-                    <td {% if (media * 10) < 60 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 10)|number_format(2, ',' ) }}</td>
-                    <td {% if (media * 6) < 20 %}class="bg-danger text-bg-danger"{% endif %}>{{ (media * 6)|number_format(2, ',' ) }}</td>
+                    <td class="{{ (media * 6) < 36 ? 'bg-danger text-bg-danger' }}">{{ (media * 6)|number_format(2, ',' ) }}</td>
+                    <td class="{{ (media * 10) < 60 ? 'bg-danger text-bg-danger' }}">{{ (media * 10)|number_format(2, ',' ) }}</td>
+                    <td class="{{ (media * 6) < 20 ? 'bg-danger text-bg-danger' }}">{{ (media * 6)|number_format(2, ',' ) }}</td>
                     <td>{{ 0|number_format(2, ',' ) }}</td>
-                    <td {% if correccion < 36 %}class="bg-danger text-bg-danger"{% endif %}>{{ correccion }}</td>
+                    <td class="{{ correccion != '' and correccion < 60 ? 'bg-danger text-bg-danger' }}">
+                        {{ correccion != '' ? correccion|number_format(2, ',' ) }}
+                    </td>
                     <td>
                         <a href="{{ path('desempenyo_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
                             <em class="mx-1 fas fa-table" title="Matriz de resultados"></em>
@@ -166,7 +171,7 @@
                 },
                 error: function (xhr) {
                     $('#corregirTitulo').html('Error ' + xhr.status);
-                    $('#corregirForm').html(response);
+                    $('#corregirForm').html(xhr.responseText);
                     modal.showModal();
                 },
             });

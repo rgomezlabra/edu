@@ -59,30 +59,39 @@ class Evalua
     #[ORM\ManyToOne(targetEntity: Formulario::class)]
     private ?Formulario $formulario = null;
 
+    /** @var DateTimeImmutable|null $rechazado Fecha que el usuario solicitó rechazar su evaluación */
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $rechazado = null;
 
+    /** @var string|null $rechazo_texto Texto descriptivo del rechazo en Registro General */
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $rechazo_texto = null;
 
+    /** @var DateTimeImmutable|null $registrado Fecha en que el rechazo entra en Registro General */
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $registrado = null;
 
+    /** @var float|null $correccion Corrección de puntuación global de un empleado por parte del tribunal */
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
     private ?float $correccion = null;
 
+    /** @var string|null $comentario Comentario sobre la corrección de la puntuación global */
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $comentario = null;
 
+    /** @var Usuario|null $corrector Usuario que añade la corrección global */
     #[ORM\ManyToOne(targetEntity: Usuario::class)]
     private ?Usuario $corrector = null;
 
+    /** @var DateTimeImmutable|null $corregido Fecha en que se hace la corrección global */
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $corregido = null;
 
+    /** @var bool $habilita Indica si el usuario habilita su autoevaluación */
     #[ORM\Column(type: Types::BOOLEAN, nullable: false, options: ['default' => 0])]
     private bool $habilita = false;
 
+    /** @var string|null $origen Origen de los datos guardados */
     #[ORM\Column(type: Types::STRING, length: 10)]
     private ?string $origen = null;
 

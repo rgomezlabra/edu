@@ -25,7 +25,7 @@ class CorreccionType extends AbstractType
             ->add('correccion', null, [
                 'attr' => ['class' => 'w-25'],
                 'help' => 'Valor numérico entre 0 y 100 con hasta 2 decimales.',
-                'label' => 'Puntuación corregida',
+                'label' => 'Puntuación global corregida',
             ])
             ->add('comentario', null , [
                 'required' => false,

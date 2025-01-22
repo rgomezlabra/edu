@@ -70,7 +70,16 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
+        // Empleados que han registrado su rechazo
+        $rechazados = array_filter(
+            $this->evaluaRepository->findByEvaluacion([
+                'cuestionario' => $cuestionario,
+                'tipo' => Evalua::NO_EVALUACION,
+            ]),
+            static fn (Evalua $evalua): bool => null !== $evalua->getRegistrado()
+        );
         $datos = [];
+        $rechazos = [];
         foreach ($this->evaluaRepository->findByEntregados(['cuestionario' => $cuestionario]) as $formulario) {
             $total = 0;
             /** @var Respuesta[] $respuestas */
@@ -82,15 +91,23 @@ class FormularioController extends AbstractController
             if ($total > 0) {
                 $total /= count($respuestas);
             }
-            $datos[(int) $formulario->getEmpleado()?->getId()][$formulario->getTipoEvaluador()] = [
-                'formulario' => $formulario,
-                'puntos' => $total,
-            ];
+            $empleado = $formulario->getEmpleado();
+            if ($empleado instanceof Empleado) {
+                $datos[(int) $empleado->getId()][$formulario->getTipoEvaluador()] = [
+                    'formulario' => $formulario,
+                    'puntos' => $total,
+                ];
+                $rechazado = array_filter($rechazados, static fn (Evalua $evalua): bool => $evalua->getEmpleado() === $empleado);
+                if ([] !== $rechazado) {
+                    $rechazos[(int) $empleado->getId()] = $rechazado[0];
+                }
+            }
         }
 
         return $this->render('desempenyo/admin/cuestionario/resultado.html.twig', [
             'cuestionario' => $cuestionario,
             'datos' => $datos,
+            'rechazos' => $rechazos,
         ]);
     }
 
@@ -605,9 +622,7 @@ class FormularioController extends AbstractController
             'tipo' => Evalua::EVALUA_RESPONSABLE,
         ])[0] ?? null;
         if (!$auto instanceof Evalua || !$principal instanceof Evalua) {
-            $this->addFlash('warning', 'Deben estar entregadas la autoevaluación y la evaluación del responsable.');
-
-            return $this->redirectToRoute($this->rutaBase);
+            return new Response('Deben estar entregadas la autoevaluación y la evaluación del responsable.', Response::HTTP_BAD_REQUEST);
         }
 
         $form = $this->createForm(CorreccionType::class, $auto, [
