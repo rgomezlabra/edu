@@ -107,7 +107,9 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
             "requirements-checker": "script",
             "importmap:install": "symfony-cmd",
-            "sass:build": "symfony-cmd"
+            "sass:build": "symfony-cmd",
+            "/bin/rm -fr %PUBLIC_DIR%/assets/*": "script",
+            "asset-map:compile": "symfony-cmd"
         },
         "post-install-cmd": [
             "@auto-scripts"

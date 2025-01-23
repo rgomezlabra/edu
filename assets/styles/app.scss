@@ -329,7 +329,7 @@ $utilities: (
 
 // Cuadros de diálogo
 .dialogo {
-  @extend #{'.rounded-3', '.shadow-lg', '.w-50'};
+  @extend #{'.rounded-3', '.shadow-lg', '.w-50', '.border-primary'};
 }
 .dialogo-oscuro {
   @extend #{'.dialogo', '.bg-dark', '.text-white'};

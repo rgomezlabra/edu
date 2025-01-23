@@ -289,7 +289,7 @@
         $('[id^=preg_]').on('change', function () {
             let valor = $(this).val();
             const salida = $('#' + $(this).prop('id').replace('preg_', 'salida_'));
-            salida.prop('class', 'fw-bold ' + (valor < 5 ? 'text-danger-emphasis' : (valor > 7 ? 'text-success-emphasis' : 'text-info')));
+            salida.prop('class', 'fw-bold ' + (valor < 5 || valor > 7 ? 'text-danger-emphasis' : 'text-info'));
             let total = 0;
             const grupo = $(this).closest('.d-grid');
             const preguntas = grupo.find('[id^=preg_]');

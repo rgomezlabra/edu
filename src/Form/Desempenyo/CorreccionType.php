@@ -25,7 +25,7 @@ class CorreccionType extends AbstractType
             ->add('correccion', null, [
                 'attr' => ['class' => 'w-25'],
                 'help' => 'Valor numérico entre 0 y 100 con hasta 2 decimales.',
-                'label' => 'Puntuación global corregida',
+                'label' => 'Puntuación global tribunal',
             ])
             ->add('comentario', null , [
                 'required' => false,
@@ -33,7 +33,7 @@ class CorreccionType extends AbstractType
             ->add('corrector', TextType::class, [
                 'attr' => ['readonly' => true],
                 'data' => (string) $evaluacion->getCorrector()?->getLogin(),
-                'label' => 'Corregido por',
+                'label' => 'Confirmada por',
                 'mapped' => false,
             ])
         ;

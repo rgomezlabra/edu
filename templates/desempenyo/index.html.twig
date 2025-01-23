@@ -4,6 +4,8 @@
     {#- Pesos establecidos por defecto #}
     {% set pesos = [34, 56, 10] -%}
     {% set activos = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO')) -%}
+    {% set rechazado = evaluados|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION'))|length > 0 -%}
+    {% set registrado = evaluados|filter(e => e.registrado != null)|length > 0 -%}
     <div class="pagina-titulo">Evaluación del Desempeño Universitario</div>
     <p class=""><em>(descripción de la aplicación)</em></p>
 
@@ -82,13 +84,15 @@
                         Si existe alguna incidencia, puede comunicarla en el apartado
                         <a href="#incidencias1">Revisar o comunicar incidencias del proceso de autoevaluación</a>.
                     </div>
-                {%- elseif evaluados|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION'))|length > 0 %}
+                {%- elseif rechazado %}
                     <div class="alert alert-warning">
                         <em class="mx-1 fas fa-triangle-exclamation"></em>Usted ha solicitado no ser evaluado.<br>
-                        <a id="recupera" href="" data-url="{{ activos[0].url ~ '/recupera' }}">
-                            Volver a activar mi participación (solo disponible hasta el día
-                            {{ activos[0].fechaBaja|date('d/m/Y') }}, inclusive)
-                        </a>
+                        {% if not rechazado -%}
+                            <a id="recupera" href="" data-url="{{ activos[0].url ~ '/recupera' }}">
+                                Volver a activar mi participación (solo disponible hasta el día
+                                {{ activos[0].fechaBaja|date('d/m/Y') }}, inclusive)
+                            </a>
+                        {%- endif %}
                     </div>
                 {%- else %}
                     {%- if evaluados|filter(e => e.habilita)|length == 0 %}
@@ -100,7 +104,7 @@
                                     Doy mi habilitación para ser evaluado en mi actual puesto desempeñado
                                 </a>
                             </li>
-                            {%- if evaluados|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION'))|length == 0 %}
+                            {%- if not rechazado %}
                                 <li>
                                     <a id="rechaza" href="" data-url="{{ activos[0].url ~ '/rechaza' }}">
                                         Solicito no participar en el proceso de autoevaluación del desempeño
@@ -270,7 +274,7 @@
             {# Otros #}
             <div class="pagina-seccion">Resultados del proceso de evaluación activo</div>
             <ul class="lead my-3">
-                {% if (activos[0].configuracion.peso3|default(0) == 0 and medias|length == 2)
+                {% if registrado or (activos[0].configuracion.peso3|default(0) == 0 and medias|length == 2)
                     or (activos[0].configuracion.peso3|default(0) > 0 and medias|length == 3)
                 -%}
                     <li>
@@ -282,9 +286,11 @@
             <div class="pagina-seccion" id="documentos">Área de desarrollo profesional</div>
             <div class="container-fluid my-2">
                 <ul class="lead my-3">
-                    <li>
-                        <a href="{{ activos[0].url ~ '/compara' }}">Oportunidades de alineación de expectativas</a>
-                    </li>
+                    {% if not registrado -%}
+                        <li>
+                            <a href="{{ activos[0].url ~ '/compara' }}">Oportunidades de alineación de expectativas</a>
+                        </li>
+                    {%- endif %}
                 </ul>
             </div>
             <div class="pagina-seccion" id="documentos">Documentos y enlaces de interés del procedimiento activo</div>
@@ -320,6 +326,7 @@
 {% endblock %}
 
 {% block modal %}
+    {% set registrado = evaluados|filter(e => e.registrado != null)|length > 0 %}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRechaza',
         texto: 'Aunque conozco que uno de los requerimientos necesarios para la progresión en mi carrera profesional '
             ~ 'horizontal es la superación de la evaluación del desempeño en los términos establecidos en el acuerdo '
@@ -337,52 +344,43 @@
     {% if activo -%}
         {% set datosProvisional -%}
             <div class="container-fluid py-4 g-4">
+                {% if registrado -%}
                 <div class="row py-2">
-                    <div class="fila-campo col-sm-6">Autoevaluación</div>
-                    <div class="fila-valor col-sm-6">
-                        {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'))]|default|number_format(2, ',' ) -}}
+                    <div class="fila-campo col-sm-4">Resultado</div>
+                    <div class="fila-valor col-sm-8 fw-bold">
+                        {{ ux_icon('fa6-solid:ban', {class: 'icon-primary'}) }} Usted ha solicitado no ser evaluado
                     </div>
                 </div>
-                <div class="row py-2">
-                    <div class="fila-campo col-sm-6">Evaluación responsable/principal</div>
-                    <div class="fila-valor col-sm-6">
-                        {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'))]|default|number_format(2, ',' ) -}}
-                    </div>
-                </div>
-                {% if activo.configuracion.peso3 > 0 -%}
+                {% else -%}
+                    {% set media =
+                        (medias[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')]|default(0) * activo.configuracion.peso1 / 100)
+                        + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')]|default(0) * activo.configuracion.peso2 / 100)
+                        + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')]|default(0) * activo.configuracion.peso3 / 100)
+                    -%}
+                    {# Este valor no se usa en el piloto de la US
                     <div class="row py-2">
-                        <div class="fila-campo col-sm-6">Evaluación tercer agente</div>
-                        <div class="fila-valor col-sm-6">
-                            {{- medias[(constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'))]|default|number_format(2, ',' ) -}}
+                        <div class="fila-campo col-sm-6">Puntuación sobre 60</div>
+                        <div class="fila-valor col-sm-6">{{ (media * 6)|number_format(2, ',' ) }}</div>
+                    </div>
+                    #}
+                    <div class="row py-2">
+                        <div class="fila-campo col-sm-6">Puntuación sobre 100</div>
+                        <div class="fila-valor col-sm-6">{{ (media * 10)|number_format(2, ',' ) }}</div>
+                    </div>
+                    <div class="row py-2">
+                        <div class="fila-campo col-sm-6">Resultado</div>
+                        <div class="fila-valor col-sm-6 fw-bold">
+                            {%- if media < 6 -%}
+                                <em class="fas fa-times text-danger"></em> NO SUPERADO
+                            {%- else -%}
+                                <em class="fas fa-check text-success"></em> SUPERADO
+                            {%- endif -%}
                         </div>
                     </div>
                 {%- endif %}
-                {% set media =
-                    (medias[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')]|default(0) * activo.configuracion.peso1 / 100)
-                    + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')]|default(0) * activo.configuracion.peso2 / 100)
-                    + (medias[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')]|default(0) * activo.configuracion.peso3 / 100)
-                -%}
-                <div class="row py-2">
-                    <div class="fila-campo col-sm-6">Puntuación sobre 60</div>
-                    <div class="fila-valor col-sm-6">{{ (media * 6)|number_format(2, ',' ) }}</div>
-                </div>
-                <div class="row py-2">
-                    <div class="fila-campo col-sm-6">Puntuación sobre 100</div>
-                    <div class="fila-valor col-sm-6">{{ (media * 10)|number_format(2, ',' ) }}</div>
-                </div>
-                <div class="row py-2">
-                    <div class="fila-campo col-sm-6">Resultado</div>
-                    <div class="fila-valor col-sm-6 fw-bold">
-                        {%- if media < 6 -%}
-                            <em class="fas fa-times text-danger"></em> NO SUPERADO
-                        {%- else -%}
-                            <em class="fas fa-check text-success"></em> SUPERADO
-                        {%- endif -%}
-                    </div>
-                </div>
             </div>
         {% endset -%}
-        {{- include('layout/_dialogo_info.html.twig', {id: 'provisional', ancho: 'w-50', titulo: 'Resultado provisional',
+        {{- include('layout/_dialogo_info.html.twig', {id: 'provisional', titulo: 'Resultado provisional',
             contenido: datosProvisional}) }}
     {%- endif %}
 {% endblock %}
