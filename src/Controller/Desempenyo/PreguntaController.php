@@ -28,9 +28,15 @@ class PreguntaController extends AbstractController
     // Opciones por defecto para las preguntas soportadas por la aplicación
     /** @var array<array-key, int[]|bool[]> $opciones */
     private array $opciones = [
+        Pregunta::NUMERO => [
+            'min' => 1,
+            'max' => 10,
+            'observaciones' => true,
+        ],
         Pregunta::RANGO => [
             'min' => 1,
             'max' => 10,
+            'salto' => 1,
             'observaciones' => true,
         ],
     ];

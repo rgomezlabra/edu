@@ -25,5 +25,5 @@
     valor = {{ preg }}.value
     puntua = document.getElementById('{{ salida|default }}');
     puntua.innerHTML = 'Puntuación: ' + valor;
-    puntua.className = valor < 5 ? 'text-danger-emphasis' : (valor > 7 ? 'text-success-emphasis' : 'text-info');
+    puntua.className = (valor < 5 || valor > 7) ? 'text-danger-emphasis' : 'text-info';
 </script>

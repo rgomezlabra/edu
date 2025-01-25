@@ -1,0 +1,19 @@
+{% set preg = etiqueta|default('preg_0') %}
+{% set val = valor.valor|default %}
+{% if ejemplo is defined -%}
+    <label><input type="number" disabled value="8" /></label>
+{% else -%}
+    {% set observa = preg|regex_replace('/preg_/', 'observa_') -%}
+    {% if pregunta.opciones.observaciones|default(false) %}<div class="col-2">{% endif -%}
+    <label for="{{ preg }}">
+    <input type="number" id="{{ preg }}" name="{{ preg }}" value="{{ val }}"
+           class="fw-bold {{ val < 5 or val > 7 ? 'text-danger-emphasis' : 'text-info' }}"
+           min="{{ pregunta.opciones.min|default }}" max="{{ pregunta.opciones.max|default }}"
+           step=" {{ pregunta.opciones.salto|default }}"/>
+    {%- if pregunta.opciones.observaciones|default(false) %}</div>{% endif %}
+    {%- if pregunta.opciones.observaciones|default(false) %}
+        <label class="col-5">
+            <input class="w-100" type="text" id="{{ observa }}" name="{{ observa }}" value="{{ valor.observa|default }}" />
+        </label>
+    {% endif %}
+{% endif %}
