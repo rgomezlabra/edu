@@ -272,17 +272,19 @@
             {%- endif %}
 
             {# Otros #}
-            <div class="pagina-seccion">Resultados del proceso de evaluación activo</div>
-            <ul class="lead my-3">
-                {% if registrado or (activos[0].configuracion.peso3|default(0) == 0 and medias|length == 2)
-                    or (activos[0].configuracion.peso3|default(0) > 0 and medias|length == 3)
-                -%}
+            {% if activos[0].configuracion.provisional.date is defined and activos[0].configuracion.provisional.date|date('c') < 'now'|date('c') %}
+                <div class="pagina-seccion">Resultados del proceso de evaluación activo</div>
+                <ul class="lead my-3">
+                    {# Solo se debe mostrar en periodo entre fecha de resultado provisional y de resultado definitivo #}
                     <li>
                         <a id="verProvisional" href="">Resultado provisional del proceso de evaluación del desempeño</a>
                     </li>
-                {% endif -%}
-                <li>Resultado final del proceso de evaluación del desempeño</li>
-            </ul>
+                    {% if activos[0].configuracion.definitiva.date is defined and activos[0].configuracion.definitiva.date|date('c') < 'now'|date('c') %}
+                        {# Solo se debe mostrar cuando se cumpla la fecha de resultado definitivo #}
+                        <li>Resultado final del proceso de evaluación del desempeño</li>
+                    {% endif -%}
+                </ul>
+            {% endif %}
             <div class="pagina-seccion" id="documentos">Área de desarrollo profesional</div>
             <div class="container-fluid my-2">
                 <ul class="lead my-3">

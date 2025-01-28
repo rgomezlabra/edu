@@ -12,13 +12,11 @@ class JsonTransformer implements DataTransformerInterface
 {
     /** @inheritDoc */
     public function transform(mixed $value): mixed {
-        return empty($value) ? json_encode([]) : json_encode($value);
-
+        return json_encode(empty($value) ? [] : $value);
     }
 
     /** @inheritDoc */
     public function reverseTransform(mixed $value): mixed {
         return empty($value) ? [] : json_decode($value, true);
-
     }
 }

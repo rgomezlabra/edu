@@ -7,11 +7,11 @@ use App\Entity\Estado;
 use App\Entity\Usuario;
 use App\Form\Cuestiona\CuestionarioType;
 use App\Form\Cuestiona\PeriodoValidezType;
-use App\Form\Desempenyo\ConfiguraCuestionarioType;
+use App\Form\Desempenyo\CuestionarioFechasType;
+use App\Form\Desempenyo\CuestionarioPesosType;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\EstadoRepository;
 use App\Service\MessageGenerator;
-use App\Service\RutaActual;
 use App\Service\Slug;
 use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,15 +26,10 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(path: '/desempenyo/admin/cuestionario', name: 'desempenyo_admin_cuestionario_')]
 class CuestionarioController extends AbstractController
 {
-    /** @var string $rutaBase Ruta base de la aplicación actual */
-    private readonly string $rutaBase;
-
     public function __construct(
         private readonly MessageGenerator       $generator,
-        private readonly RutaActual             $actual,
         private readonly CuestionarioRepository $cuestionarioRepository,
     ) {
-        $this->rutaBase = $this->actual->getRuta();
     }
 
     #[Route(
@@ -72,7 +67,7 @@ class CuestionarioController extends AbstractController
         $form = $this->createForm(CuestionarioType::class, $cuestionario, [
             'de_aplicacion' => true,
             'con_fechas' => true,
-            'form_configuracion' => ConfiguraCuestionarioType::class,
+            'form_configuracion' => CuestionarioPesosType::class,
         ]);
         $form->handleRequest($request);
 
@@ -83,7 +78,7 @@ class CuestionarioController extends AbstractController
                 'codigo' => $cuestionario->getCodigo(),
             ]);
 
-            return $this->redirectToRoute($this->rutaBase . '_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('desempenyo_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('desempenyo/admin/cuestionario/new.html.twig', [
@@ -119,13 +114,13 @@ class CuestionarioController extends AbstractController
         if (Estado::BORRADOR !== $cuestionario->getEstado()?->getNombre()) {
             $this->addFlash('warning', 'El cuestionario no puede ser editado porque no es un borrador.');
 
-            return $this->redirectToRoute($this->rutaBase);
+            return $this->redirectToRoute('desempenyo');
         }
 
         $form = $this->createForm(CuestionarioType::class, $cuestionario, [
             'de_aplicacion' => true,
             'con_fechas' => true,
-            'form_configuracion' => ConfiguraCuestionarioType::class,
+            'form_configuracion' => CuestionarioPesosType::class,
         ]);
         $form->handleRequest($request);
 
@@ -139,7 +134,7 @@ class CuestionarioController extends AbstractController
                 'codigo' => $cuestionario->getCodigo(),
             ]);
 
-            return $this->redirectToRoute($this->rutaBase . '_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('desempenyo_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('desempenyo/admin/cuestionario/edit.html.twig', [
@@ -161,11 +156,11 @@ class CuestionarioController extends AbstractController
         if (0 === count($cuestionario->getGrupos())) {
             $this->addFlash('warning', 'El cuestionario no tiene preguntas definidas.');
 
-            return $this->redirectToRoute($this->rutaBase . '_admin_cuestionario_show', ['id' => $cuestionario->getId()]);
+            return $this->redirectToRoute('desempenyo_admin_cuestionario_show', ['id' => $cuestionario->getId()]);
         } elseif ($cuestionario->getGrupos()->filter(static fn ($grupo) => count($grupo->getPreguntas()) === 0)->count() > 0) {
             $this->addFlash('warning', 'El cuestionario tiene algún grupo de preguntas vacío.');
 
-            return $this->redirectToRoute($this->rutaBase . '_admin_cuestionario_show', ['id' => $cuestionario->getId()]);
+            return $this->redirectToRoute('desempenyo_admin_cuestionario_show', ['id' => $cuestionario->getId()]);
         }
 
         $form = $this->createForm(PeriodoValidezType::class, $cuestionario, [
@@ -232,6 +227,68 @@ class CuestionarioController extends AbstractController
 
         return $this->render('desempenyo/admin/cuestionario/show.html.twig', [
             'cuestionario' => $cuestionario,
+        ]);
+    }
+
+
+    /** Configurar fechas para mostrar resultados del cuestionario. */
+    #[Route(
+        path: '/{id}/fechas',
+        name: 'fechas',
+        defaults: ['titulo' => 'Fechas para Mostrar Resultados del Cuestionario'],
+        methods: ['GET', 'POST']
+    )]
+    public function fechasResultados(Request $request, Cuestionario $cuestionario): Response
+    {
+        $this->denyAccessUnlessGranted('admin');
+        if (Estado::PUBLICADO !== $cuestionario->getEstado()?->getNombre()) {
+            $this->addFlash('warning', 'El cuestionario no está activo.');
+
+            return $this->redirectToRoute('desempenyo');
+        }
+
+        $form = $this->createForm(CuestionarioType::class, $cuestionario, [
+            'form_configuracion' => CuestionarioFechasType::class,
+            'solo_configuracion' => true,
+        ]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $error = '';
+            /** @var array{provisional: DateTimeImmutable|null, definitiva: DateTimeImmutable|null} $config */
+            $config = $cuestionario->getConfiguracion();
+            $finPeriodo = $cuestionario->getFechaBaja();
+            if (!$finPeriodo instanceof DateTimeImmutable) {
+                $error = 'Periodo de validez del cuestionario no establecido.';
+            } elseif ($config['provisional'] instanceof DateTimeImmutable && $finPeriodo >= $config['provisional']) {
+                $error = sprintf(
+                    'La fecha provisional debe ser posterior a %s.',
+                    $finPeriodo->format('d/m/Y')
+                );
+            } elseif ($config['provisional'] instanceof DateTimeImmutable && $config['definitiva'] instanceof DateTimeImmutable && $config['provisional'] > $config['definitiva']) {
+                $error = sprintf(
+                    'La fecha definitiva debe ser igual o posterior a %s.',
+                    $config['provisional']->format('d/m/Y')
+                );
+            }
+            if ('' !== $error) {
+                $this->addFlash('warning', $error);
+                return $this->redirectToRoute($request->attributes->getString('_route'), [
+                    'id' => $cuestionario->getId(),
+                ]);
+            }
+
+            $this->cuestionarioRepository->save($cuestionario, true);
+            $this->generator->logAndFlash('info', 'Fechas guardadas correctamente', [
+                'id' => $cuestionario->getId(),
+                'codigo' => $cuestionario->getCodigo(),
+            ]);
+
+            return $this->redirectToRoute('desempenyo_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('desempenyo/admin/cuestionario/edit.html.twig', [
+            'cuestionario' => $cuestionario,
+            'form' => $form->createView(),
         ]);
     }
 }

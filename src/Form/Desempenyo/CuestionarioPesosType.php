@@ -9,7 +9,10 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\Range;
 
-class ConfiguraCuestionarioType extends AbstractType
+/**
+ * Formulario para configurar los pesos de las fases de un cuestionario de evaluación del desempeño.
+ * @author Ramón M. Gómez <ramongomez@us.es>
+ */class CuestionarioPesosType extends AbstractType
 {
     #[Override]
     public function getParent(): string
