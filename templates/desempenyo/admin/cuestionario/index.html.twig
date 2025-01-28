@@ -61,6 +61,10 @@
                             <a href="{{ path('desempenyo_admin_formulario_index', {cuestionario: cuestionario.id}) }}">
                                 <em class="mx-1 fas fa-list-check" title="Formularios entregados"></em>
                             </a>
+                            <a title="Editar fechas para ver resultados"
+                               href="{{ path('desempenyo_admin_cuestionario_fechas', {id: cuestionario.id}) }}">
+                                <em class="mx-1 fas fa-calendar-check"></em>
+                            </a>
                             <em class="mx-1 fas fa-upload" title="Cargar resultados finales"></em>
                         {%- endif %}
                     </td>

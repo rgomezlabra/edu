@@ -56,7 +56,7 @@
                     {%- endif %}
                     {%- for tipo in tipos %}
                         <td>{{ dato[tipo].puntos|default|number_format(2, ',' ) }}</td>
-                        <td>{{ dato[tipo] is defined ? (dato[tipo].formulario.formulario.fechaEnvio ? dato[tipo].formulario.formulario.fechaEnvio|date('Y-m-d')) }}</td>
+                        <td>{{ dato[tipo] is defined ? (dato[tipo].formulario.formulario.fechaEnvio is defined ? dato[tipo].formulario.formulario.fechaEnvio|date('Y-m-d')) }}</td>
                     {%- endfor %}
                     {%- set media =
                         (dato[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')].puntos|default(0) * config['peso1'] / 100)
@@ -78,10 +78,15 @@
                         <a href="{{ path('desempenyo_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado, detalle: true}) }}">
                             <em class="mx-1 fas fa-table-cells" title="Matriz detallada"></em>
                         </a>
-                        <a class="corrige"
-                           data-url="{{ path(aplicacion.ruta ~ '_admin_cuestionario_formulario_corrige', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
-                            <em class="mx-1 fas fa-pen-clip" title="Corrección tribunal"></em>
-                        </a>
+                        {% if cuestionario.configuracion.provisional.date is defined and cuestionario.configuracion.provisional.date|date('c') < 'now'|date('c') and
+                            cuestionario.configuracion.definitiva.date is defined and cuestionario.configuracion.definitiva.date|date('c') > 'now'|date('c')
+                        %}
+                            {# Solo disponible en periodo de resultados provisionales y antes de definitivos #}
+                            <a class="corrige"
+                               data-url="{{ path(aplicacion.ruta ~ '_admin_cuestionario_formulario_corrige', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
+                                <em class="mx-1 fas fa-pen-clip" title="Corrección tribunal"></em>
+                            </a>
+                        {% endif %}
                     </td>
                 </tr>
             {%- endfor %}
@@ -91,6 +96,18 @@
 {% endblock %}
 
 {% block botones %}
+    {% if cuestionario.configuracion.provisional is defined and cuestionario.configuracion.provisional.date|date('c') < 'now'|date('c') and
+        cuestionario.configuracion.definitiva is defined and cuestionario.configuracion.definitiva.date|date('c') > 'now'|date('c')
+    %}
+        {# Solo disponible en periodo de resultados provisionales y antes de definitivos #}
+        <li class="nav-item me-2">
+            <button class="btn btn-primary" id="traslada"
+                    title="Trasladar valoraciones provisionales a definitivas del tribunal"
+                    data-url="{{ 'desempenyo_admin_formulario_traslada', {cuestionario: cuestionario.id}) }}">
+                {{ ux_icon('fa6-solid:dolly') }} Trasladar valores
+            </button>
+        </li>
+    {% endif %}
 {% endblock %}
 
 {% block migas %}
@@ -102,6 +119,9 @@
 
 {% block modal %}
     {{- include('layout/_dialogo_form.html.twig', {id: 'corregir', titulo: 'Corregir valoración'}) }}
+    {{- include('layout/_dialogo_confirmar.html.twig', {id: 'modalTraslada',
+        texto: '¿Trasladar todas las calificaciones provisionales a calificaciones definitivas del tribunal?'
+    }) }}
 {% endblock %}
 
 {% block js %}

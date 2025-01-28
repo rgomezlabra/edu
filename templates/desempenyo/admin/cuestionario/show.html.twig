@@ -51,7 +51,7 @@
             <div class="fila-campo">Parámetros de configuración</div>
             <div class="fila-valor">
                 {%- for opcion, valor in cuestionario.configuracion -%}
-                    <span class="me-4">{{ opcion|capitalize }}: {{ valor }}</span>
+                    <span class="me-4">{{ opcion|capitalize }}: {{ valor.date is defined ? valor.date|date('d/m/Y') : valor|json_encode }}</span>
                 {%- endfor -%}
             </div>
         </div>
@@ -95,6 +95,11 @@
         <li class="nav-item me-2">
             <a class="btn btn-primary" href="{{ path('desempenyo_admin_cuestionario_activar', {id: cuestionario.id}) }}">
                 <em class="fas fa-calendar"></em> Plazo
+            </a>
+        </li>
+        <li class="nav-item me-2">
+            <a class="btn btn-primary" href="{{ path('desempenyo_admin_cuestionario_fechas', {id: cuestionario.id}) }}">
+                <em class="fas fa-calendar-check"></em> Fechas resultados
             </a>
         </li>
         <li class="nav-item me-2">

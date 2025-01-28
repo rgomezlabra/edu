@@ -80,7 +80,7 @@ class FormularioController extends AbstractController
         );
         $datos = [];
         $rechazos = [];
-        foreach ($this->evaluaRepository->findByEntregados(['cuestionario' => $cuestionario]) as $formulario) {
+        foreach ($this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario]) as $formulario) {
             $total = 0;
             /** @var Respuesta[] $respuestas */
             $respuestas = $formulario->getFormulario()?->getRespuestas();
@@ -108,6 +108,79 @@ class FormularioController extends AbstractController
             'cuestionario' => $cuestionario,
             'datos' => $datos,
             'rechazos' => $rechazos,
+        ]);
+    }
+
+    /** Traslada todas las puntuaciones finales pendientes como valor otorgado por el tribunal. */
+    #[Route(
+        path: '/admin/formulario/traslada',
+        name: 'admin_formulario_traslada',
+        defaults: ['titulo' => 'Trasladar Puntuaciones a'],
+        methods: ['GET']
+    )]
+    public function trasladar(Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('admin');
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        $ahora = new DateTimeImmutable();
+        $cuestionario = $this->cuestionarioRepository->find($request->query->getInt('cuestionario'));
+        if (!$cuestionario instanceof Cuestionario) {
+            $this->addFlash('warning', 'Sin acceso al cuestionario.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+        // TODO comprobar que hoy sea igual o posterior a fecha para resultados definitivos del cuestionario activo
+
+        $evaluaciones =  $this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario]);
+        $rechazados = array_map(
+            static fn (Evalua $evalua): int => (int) $evalua->getEmpleado()?->getId(),
+            array_filter($evaluaciones, static fn (Evalua $evalua): bool => null !== $evalua->getRegistrado())
+        );
+        $trasladables = array_filter(
+            $evaluaciones,
+            static fn (Evalua $evalua): bool =>
+                Evalua::AUTOEVALUACION === $evalua->getTipoEvaluador() && null === $evalua->getCorregido() &&
+                !in_array($evalua->getEvaluador()?->getId(), $rechazados, true)
+        );
+
+        // Obtener puntuación media de cada formulario
+        $medias = [];
+        foreach ($evaluaciones as $evaluacion) {
+            $formulario = $evaluacion->getFormulario();
+            $medias[(int) $evaluacion->getEmpleado()?->getId()][$evaluacion->getTipoEvaluador()] =
+                $formulario instanceof Formulario ? $this->media($formulario) : 0;
+        }
+
+        // Calcular y trasladar valoraciones finales
+        $traslados = 0;
+        foreach ($trasladables as $trasladable) {
+            $id = (int) $trasladable->getEmpleado()?->getId();
+            /** @var float $puntos */
+            $puntos = ($medias[$id][Evalua::AUTOEVALUACION] ?? 0) * ($cuestionario->getConfiguracion()['peso1'] ?? 0) / 10 +
+                ($medias[$id][Evalua::EVALUA_RESPONSABLE] ?? 0) * ($cuestionario->getConfiguracion()['peso2'] ?? 0) / 10 +
+                ($medias[$id][Evalua::EVALUA_OTRO] ?? 0) * ($cuestionario->getConfiguracion()['peso3'] ?? 0) / 10
+            ;
+            $trasladable->setCorreccion($puntos)
+                ->setComentario(sprintf('Valoración trasladada: %.2f', $puntos))
+                ->setCorrector($usuario)
+                ->setCorregido($ahora)
+            ;
+            $this->evaluaRepository->save($trasladable);
+            ++$traslados;
+        }
+
+        if ($traslados > 0) {
+            $this->evaluaRepository->save($trasladables[array_key_last($trasladables)], true);
+            $this->generator->logAndFlash('info', 'Valoraciones trasladadas correctamente', [
+                'id' => $traslados,
+                'cuestionario' => $cuestionario->getCodigo(),
+                'total' => $traslados,
+            ]);
+        }
+
+        return $this->redirectToRoute($this->rutaBase . '_admin_formulario_index', [
+            'cuestionario' => $cuestionario->getId(),
         ]);
     }
 
@@ -670,5 +743,18 @@ class FormularioController extends AbstractController
         $criterios += null === $evaluador ? ['tipo_evaluador' => Evalua::AUTOEVALUACION] : ['evaluador' => $evaluador];
 
         return $this->evaluaRepository->findOneBy($criterios);
+    }
+
+    /** Devuelve la media de valoración de un formulario. */
+    private function media(Formulario $formulario): float
+    {
+        $total = 0;
+        $respuestas = $formulario->getRespuestas();
+        foreach ($respuestas as $respuesta) {
+            $valor = $respuesta->getValor();
+            $total += (int) $valor['valor'];
+        }
+
+        return $total > 0 ? $total / count($respuestas) : 0;
     }
 }
