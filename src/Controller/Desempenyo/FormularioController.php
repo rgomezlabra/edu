@@ -78,24 +78,20 @@ class FormularioController extends AbstractController
             ]),
             static fn (Evalua $evalua): bool => null !== $evalua->getRegistrado()
         );
+        // Datos de formularios entregados o con valoración corregida y empleados rechazados
         $datos = [];
         $rechazos = [];
-        foreach ($this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario]) as $formulario) {
-            $total = 0;
-            /** @var Respuesta[] $respuestas */
-            $respuestas = $formulario->getFormulario()?->getRespuestas();
-            foreach ($respuestas as $respuesta) {
-                $valor = $respuesta->getValor();
-                $total += (int) $valor['valor'];
-            }
-            if ($total > 0) {
-                $total /= count($respuestas);
-            }
-            $empleado = $formulario->getEmpleado();
+        $evaluaciones = array_merge(
+            $this->evaluaRepository->findByEntregados(['cuestionario' => $cuestionario]),
+            $this->evaluaRepository->findByCorregidos(['cuestionario' => $cuestionario])
+        );
+        foreach ($evaluaciones as $evaluacion) {
+            $empleado = $evaluacion->getEmpleado();
+            $formulario = $evaluacion->getFormulario();
             if ($empleado instanceof Empleado) {
-                $datos[(int) $empleado->getId()][$formulario->getTipoEvaluador()] = [
-                    'formulario' => $formulario,
-                    'puntos' => $total,
+                $datos[(int) $empleado->getId()][$evaluacion->getTipoEvaluador()] = [
+                    'formulario' => $evaluacion,
+                    'puntos' => $formulario instanceof Formulario ? $this->media($formulario) : 0,
                 ];
                 $rechazado = array_filter($rechazados, static fn (Evalua $evalua): bool => $evalua->getEmpleado() === $empleado);
                 if ([] !== $rechazado) {
@@ -111,111 +107,23 @@ class FormularioController extends AbstractController
         ]);
     }
 
-    /** Traslada todas las puntuaciones finales pendientes como valor otorgado por el tribunal. */
+    /** Obtener la matriz comparativa con los formularios entregados para un empleado. */
     #[Route(
-        path: '/admin/formulario/traslada',
-        name: 'admin_formulario_traslada',
-        defaults: ['titulo' => 'Trasladar Puntuaciones a'],
+        path: '/admin/formulario/empleado/{empleado}',
+        name: 'admin_formulario_matriz',
+        defaults: ['titulo' => 'Matriz de Formularios Entregados'],
         methods: ['GET']
     )]
-    public function trasladar(Request $request): Response
+    public function matriz(Request $request, Empleado $empleado): Response
     {
         $this->denyAccessUnlessGranted('admin');
-        /** @var Usuario $usuario */
-        $usuario = $this->getUser();
-        $ahora = new DateTimeImmutable();
         $cuestionario = $this->cuestionarioRepository->find($request->query->getInt('cuestionario'));
         if (!$cuestionario instanceof Cuestionario) {
             $this->addFlash('warning', 'Sin acceso al cuestionario.');
 
             return $this->redirectToRoute($this->rutaBase);
         }
-        // TODO comprobar que hoy sea igual o posterior a fecha para resultados definitivos del cuestionario activo
 
-        $evaluaciones =  $this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario]);
-        $rechazados = array_map(
-            static fn (Evalua $evalua): int => (int) $evalua->getEmpleado()?->getId(),
-            array_filter($evaluaciones, static fn (Evalua $evalua): bool => null !== $evalua->getRegistrado())
-        );
-        $trasladables = array_filter(
-            $evaluaciones,
-            static fn (Evalua $evalua): bool =>
-                Evalua::AUTOEVALUACION === $evalua->getTipoEvaluador() && null === $evalua->getCorregido() &&
-                !in_array($evalua->getEvaluador()?->getId(), $rechazados, true)
-        );
-
-        // Obtener puntuación media de cada formulario
-        $medias = [];
-        foreach ($evaluaciones as $evaluacion) {
-            $formulario = $evaluacion->getFormulario();
-            $medias[(int) $evaluacion->getEmpleado()?->getId()][$evaluacion->getTipoEvaluador()] =
-                $formulario instanceof Formulario ? $this->media($formulario) : 0;
-        }
-
-        // Calcular y trasladar valoraciones finales
-        $traslados = 0;
-        foreach ($trasladables as $trasladable) {
-            $id = (int) $trasladable->getEmpleado()?->getId();
-            /** @var float $puntos */
-            $puntos = ($medias[$id][Evalua::AUTOEVALUACION] ?? 0) * ($cuestionario->getConfiguracion()['peso1'] ?? 0) / 10 +
-                ($medias[$id][Evalua::EVALUA_RESPONSABLE] ?? 0) * ($cuestionario->getConfiguracion()['peso2'] ?? 0) / 10 +
-                ($medias[$id][Evalua::EVALUA_OTRO] ?? 0) * ($cuestionario->getConfiguracion()['peso3'] ?? 0) / 10
-            ;
-            $trasladable->setCorreccion($puntos)
-                ->setComentario(sprintf('Valoración trasladada: %.2f', $puntos))
-                ->setCorrector($usuario)
-                ->setCorregido($ahora)
-            ;
-            $this->evaluaRepository->save($trasladable);
-            ++$traslados;
-        }
-
-        if ($traslados > 0) {
-            $this->evaluaRepository->save($trasladables[array_key_last($trasladables)], true);
-            $this->generator->logAndFlash('info', 'Valoraciones trasladadas correctamente', [
-                'id' => $traslados,
-                'cuestionario' => $cuestionario->getCodigo(),
-                'total' => $traslados,
-            ]);
-        }
-
-        return $this->redirectToRoute($this->rutaBase . '_admin_formulario_index', [
-            'cuestionario' => $cuestionario->getId(),
-        ]);
-    }
-
-    #[Route(
-        path: '/admin/formulario/{id}',
-        name: 'admin_formulario_show',
-        defaults: ['titulo' => 'Formulario Enviado'],
-        methods: ['GET']
-    )]
-    public function show(Evalua $evalua): Response
-    {
-        $this->denyAccessUnlessGranted('admin');
-        $formulario = $evalua->getFormulario();
-        if (!$formulario instanceof Formulario) {
-            $this->addFlash('warning', 'Evaluación sin cuestionario asociado.');
-
-            return $this->redirectToRoute($this->rutaBase);
-        }
-
-        return $this->render('desempenyo/admin/formulario/show.html.twig', [
-            'cuestionario' => $formulario->getCuestionario(),
-            'evaluacion' => $evalua,
-        ]);
-    }
-
-    /** Obtener la matriz comparativa con los formularios entregados para un empleado. */
-    #[Route(
-        path: '/admin/cuestionario/{cuestionario}/formulario/empleado/{empleado}',
-        name: 'admin_cuestionario_formulario_matriz',
-        defaults: ['titulo' => 'Matriz de Formularios Entregados'],
-        methods: ['GET']
-    )]
-    public function matriz(Request $request, Cuestionario $cuestionario, Empleado $empleado): Response
-    {
-        $this->denyAccessUnlessGranted('admin');
         /** @var array<Respuesta[]> $respuestas */
         $respuestas = [];
         /** @var float[] $medias */
@@ -245,6 +153,103 @@ class FormularioController extends AbstractController
             'respuestas' => $respuestas,
             'medias' => $medias,
             'detalle' => $request->query->getBoolean('detalle'),
+        ]);
+    }
+
+    /** Traslada todas las puntuaciones finales pendientes como valor otorgado por el tribunal. */
+    #[Route(
+        path: '/admin/formulario/traslada',
+        name: 'admin_formulario_traslada',
+        defaults: ['titulo' => 'Trasladar Puntuaciones a'],
+        methods: ['GET']
+    )]
+    public function trasladar(Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('admin');
+        /** @var Usuario $usuario */
+        $usuario = $this->getUser();
+        $ahora = new DateTimeImmutable();
+        $cuestionario = $this->cuestionarioRepository->find($request->query->getInt('cuestionario'));
+        if (!$cuestionario instanceof Cuestionario) {
+            $this->addFlash('warning', 'Sin acceso al cuestionario.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+        // TODO ¿comprobar que hoy sea igual o posterior a fecha para resultados provisionales del cuestionario activo?
+
+        $evaluaciones =  $this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario]);
+        $rechazados = array_map(
+            static fn (Evalua $evalua): int => (int) $evalua->getEmpleado()?->getId(),
+            array_filter($evaluaciones, static fn (Evalua $evalua): bool => null !== $evalua->getRegistrado())
+        );
+        $trasladables = array_filter(
+            $evaluaciones,
+            static fn (Evalua $evalua): bool =>
+                Evalua::AUTOEVALUACION === $evalua->getTipoEvaluador() && null === $evalua->getCorregido() &&
+                !in_array($evalua->getEvaluador()?->getId(), $rechazados, true)
+        );
+
+        // Obtener puntuación media de cada formulario
+        /** @var float[][] $medias */
+        $medias = [];
+        foreach ($evaluaciones as $evaluacion) {
+            $formulario = $evaluacion->getFormulario();
+            $medias[(int) $evaluacion->getEmpleado()?->getId()][$evaluacion->getTipoEvaluador()] =
+                $formulario instanceof Formulario ? $this->media($formulario) : 0;
+        }
+
+        // Calcular y trasladar valoraciones finales
+        $traslados = 0;
+        foreach ($trasladables as $trasladable) {
+            $id = (int) $trasladable->getEmpleado()?->getId();
+            /** @var float $puntos */
+            $puntos = ($medias[$id][Evalua::AUTOEVALUACION] ?? 0) * ($cuestionario->getConfiguracion()['peso1'] ?? 0) / 10 +
+                ($medias[$id][Evalua::EVALUA_RESPONSABLE] ?? 0) * ($cuestionario->getConfiguracion()['peso2'] ?? 0) / 10 +
+                ($medias[$id][Evalua::EVALUA_OTRO] ?? 0) * ($cuestionario->getConfiguracion()['peso3'] ?? 0) / 10
+            ;
+            $trasladable->setCorreccion($puntos)
+                ->setComentario(sprintf('Valoración trasladada: %.2f', $puntos))
+                ->setCorrector($usuario)
+                ->setCorregido($ahora)
+            ;
+            $this->evaluaRepository->save($trasladable);
+            ++$traslados;
+        }
+
+        if (0 === $traslados) {
+            $this->addFlash('warning', 'No se ha trasladado ningún valor.');
+        } else {
+            $this->evaluaRepository->save($trasladables[array_key_last($trasladables)], true);
+            $this->generator->logAndFlash('info', 'Valoraciones trasladadas correctamente' . $traslados, [
+                'cuestionario' => $cuestionario->getCodigo(),
+                'total' => $traslados,
+            ]);
+        }
+
+        return $this->redirectToRoute($this->rutaBase . '_admin_formulario_index', [
+            'cuestionario' => $cuestionario->getId(),
+        ]);
+    }
+
+    #[Route(
+        path: '/admin/formulario/{id}',
+        name: 'admin_formulario_show',
+        defaults: ['titulo' => 'Formulario Enviado'],
+        methods: ['GET']
+    )]
+    public function show(Evalua $evalua): Response
+    {
+        $this->denyAccessUnlessGranted('admin');
+        $formulario = $evalua->getFormulario();
+        if (!$formulario instanceof Formulario) {
+            $this->addFlash('warning', 'Evaluación sin cuestionario asociado.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        return $this->render('desempenyo/admin/formulario/show.html.twig', [
+            'cuestionario' => $formulario->getCuestionario(),
+            'evaluacion' => $evalua,
         ]);
     }
 

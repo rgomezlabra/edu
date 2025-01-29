@@ -72,10 +72,10 @@
                         {{ correccion != '' ? correccion|number_format(2, ',' ) }}
                     </td>
                     <td>
-                        <a href="{{ path('desempenyo_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
+                        <a href="{{ path('desempenyo_admin_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
                             <em class="mx-1 fas fa-table" title="Matriz de resultados"></em>
                         </a>
-                        <a href="{{ path('desempenyo_admin_cuestionario_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado, detalle: true}) }}">
+                        <a href="{{ path('desempenyo_admin_formulario_matriz', {cuestionario: cuestionario.id, empleado: idEmpleado, detalle: true}) }}">
                             <em class="mx-1 fas fa-table-cells" title="Matriz detallada"></em>
                         </a>
                         {% if cuestionario.configuracion.provisional.date is defined and cuestionario.configuracion.provisional.date|date('c') < 'now'|date('c') and

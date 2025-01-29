@@ -103,6 +103,9 @@ class EvaluaRepository extends ServiceEntityRepository
                     $qb->join('evalua.formulario', 'formulario')
                         ->andWhere('formulario.fecha_envio ' . ($valor ? 'IS NOT NULL' : 'IS NULL'))
                     ;
+                    break;
+                case 'corregidos':
+                    $qb->andWhere('evalua.correccion IS NOT NULL');
             }
         }
 
@@ -125,6 +128,17 @@ class EvaluaRepository extends ServiceEntityRepository
     public function findByEntregados(array $criterios): array
     {
         return $this->findByEvaluacion([...$criterios, 'entregados' => true]);
+    }
+
+    /**
+     * Devuelve las evaluaciones corregidas por el tribunal según los criterios de búsqueda (cuestionario, empleado y
+     * evaluador).
+     * @param int[]|Cuestionario[]|Empleado[]|null[] $criterios
+     * @return Evalua[]
+     */
+    public function findByCorregidos(array $criterios): array
+    {
+        return $this->findByEvaluacion([...$criterios, 'corregidos' => true]);
     }
 
     /** Mejorar consulta para obtener datos de empleado evaluado. */

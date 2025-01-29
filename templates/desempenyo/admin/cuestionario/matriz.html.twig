@@ -15,8 +15,8 @@
         } -%}
     {%- endif %}
     {%- set grupos = cuestionario.grupos|filter(g => g.activa)|sort((a, b) => a.orden <=> b.orden) %}
-    <div class="pagina-titulo">{{ titulo }}</div>
 
+    <div class="pagina-titulo">{{ titulo }}</div>
     <div class="pagina-seccion">{{ cuestionario.titulo }}</div>
 
     <div class="my-4">
@@ -28,20 +28,20 @@
                     <th rowspan="2">Pregunta</th>
                     {% for tipo in tipos -%}
                         <th colspan="2">{{ tipo }}</th>
-                    {% endfor -%}
+                    {% endfor %}
                 </tr>
                 <tr>
                     {% for i in 1..tipos|length -%}
                         <th class="text-start">Puntos</th>
                         <th>Evidencias</th>
-                    {% endfor -%}
+                    {% endfor %}
                 </tr>
             {% else -%}
                 <tr>
                     <th>Pregunta</th>
                     {% for tipo in tipos -%}
                         <th>{{ tipo }}</th>
-                    {% endfor -%}
+                    {% endfor %}
                 </tr>
             {%- endif %}
             </thead>
@@ -66,7 +66,7 @@
                                 <td></td>
                                 {% if detalle %}<td></td>{% endif %}
                             {% endif -%}
-                        {% endfor -%}
+                        {% endfor %}
                     </tr>
                 {% endfor -%}
             {% endfor -%}
@@ -95,8 +95,6 @@
             </tbody>
         </table>
     </div>
-
-
 {% endblock %}
 
 {% block botones %}
