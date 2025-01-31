@@ -4,6 +4,7 @@ namespace App\Form\Desempenyo;
 
 use Override;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -51,8 +52,13 @@ use Symfony\Component\Validator\Constraints\Range;
                 'constraints' => [
                     new Range(['min' => 0, 'max' => 100]),
                 ],
-                'help' => 'Peso de la evaluación de la Fase 3 Evaluación por tercer agente (valor entre 0 y 100).',
+                'help' => 'Peso de la evaluación de la Fase 3 Evaluación por agente colaborador (valor entre 0 y 100).',
                 'label' => 'Peso Fase 3',
+            ])
+            ->add('reducido', CheckboxType::class, [
+                'help' => 'Marcar si el agente colaborador va a rellenar un cuestionario reducido.',
+                'label' => 'Cuestionario reducido',
+                'required' => false,
             ])
         ;
     }

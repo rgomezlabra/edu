@@ -106,36 +106,31 @@
 
 {% block modal %}
     {%- set etiquetas = tipos|map(t => t.etiqueta)|reduce((unicos, elem) => elem in unicos ? unicos : unicos|merge([elem]), []) %}
-    <div class="modal fade" id="modalTipos" tabindex="-1" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content p-4">
-                <div class="h3">Elegir tipo de pregunta</div>
-                    <table class="tabla-condensada">
-                        <thead class="cabecera-condensada">
-                        <tr>
-                            <th>Tipo</th>
-                            <th>Ejemplo</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for id, tipo in tipos|filter((t, i) => opciones is defined and i in opciones|keys) -%}
-                            <tr>
-                                <td>
-                                    <a href="{{ path('desempenyo_admin_pregunta_new', {cuestionario: cuestionario.id, grupo: grupo.id, tipo: id, opciones: opciones[id]|json_encode}) }}">
-                                        {{ tipo.leyenda }}
-                                    </a>
-                                </td>
-                                <td>
-                                    {{- include('desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {ejemplo: true}, ignore_missing = true) }}
-                                </td>
-                            </tr>
-                        {%- endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% set contenido %}
+        <table class="tabla-condensada">
+            <thead class="cabecera-condensada">
+            <tr>
+                <th>Tipo</th>
+                <th>Ejemplo</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for id, tipo in tipos|filter((t, i) => opciones is defined and i in opciones|keys) -%}
+                <tr>
+                    <td>
+                        <a href="{{ path('desempenyo_admin_pregunta_new', {cuestionario: cuestionario.id, grupo: grupo.id, tipo: id, opciones: opciones[id]|json_encode}) }}">
+                            {{ tipo.leyenda }}
+                        </a>
+                    </td>
+                    <td>
+                        {{- include('desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {ejemplo: true}, ignore_missing = true) }}
+                    </td>
+                </tr>
+            {%- endfor %}
+            </tbody>
+        </table>
+    {% endset %}
+    {{ include('layout/_dialogo_info.html.twig', {id: 'modalTipos', titulo: 'Elegir tipo de pregunta', contnido: contenido}) }}
 {% endblock %}
 
 {% block js %}
@@ -143,7 +138,7 @@
     <script type="module">
         import { Modal, Toast } from 'bootstrap';
 
-        const modalTips = new Modal('#modalTipos');
+        // const modalTips = new Modal('#modalTipos');
         const ordenar = $('#ordenar');
         const preguntas = $('#datosPreguntas').dataTable({
             buttons: [
@@ -247,9 +242,9 @@
             });
         });
         // Modal para elegir el tipo de pregunta
-        $('#crear').on('click', function (e) {
+        document.querySelector('#crear').addEventListener('click', (e) => {
             e.preventDefault();
-            modalTips.show();
+            document.querySelector('#modalTipos').showModal();
         });
     </script>
 {% endblock %}

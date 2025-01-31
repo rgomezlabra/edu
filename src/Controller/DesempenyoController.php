@@ -26,8 +26,9 @@ class DesempenyoController extends AbstractController
 
     #[Route(
         path: '/',
-        name: ''
-    )]
+        name: '',
+        defaults: ['titulo' => 'Evaluación del Desempeño Universitario'],
+)]
     public function inicio(
         CuestionarioRepository $cuestionarioRepository,
         EmpleadoRepository     $empleadoRepository,

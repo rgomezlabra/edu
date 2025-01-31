@@ -110,13 +110,13 @@ class PreguntaController extends AbstractController
         $form = $this->createForm(PreguntaType::class, $pregunta, [
             'tipos' => $tipos,
         ]);
-        $form
-            ->add('reducida', null, [
+        if ($cuestionario->getConfiguracion()['reducido'] ?? false) {
+            $form->add('reducida', null, [
                 'label' => 'Solo en cuestionario reducido',
                 'help' => 'Marcar para que la pregunta se incluya solo en el cuestionario reducido del tercer agente evaluador.',
-            ])
-            ->remove('opcional')
-        ;
+            ]);
+        }
+        $form->remove('opcional');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

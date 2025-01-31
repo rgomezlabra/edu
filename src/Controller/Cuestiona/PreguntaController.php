@@ -5,6 +5,7 @@ namespace App\Controller\Cuestiona;
 use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Cuestiona\Grupo;
 use App\Entity\Cuestiona\Pregunta;
+use App\Form\Cuestiona\OpcionesNumeroType;
 use App\Form\Cuestiona\OpcionesRangoType;
 use App\Repository\Cuestiona\PreguntaRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,6 +22,13 @@ class PreguntaController extends AbstractController
 {
     /** @var array<array-key, string[]|bool[]> $tipos */
     private array $tipos = [
+        Pregunta::NUMERO => [
+            'clase' => OpcionesNumeroType::class,
+            'leyenda' => 'Número',
+            'fichero' => 'numero',
+            'etiqueta' => 'Respuesta única',
+            'dinamico' => false,
+        ],
         Pregunta::RANGO => [
             'clase' => OpcionesRangoType::class,
             'leyenda' => 'Rango numérico',
