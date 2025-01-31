@@ -57,8 +57,8 @@
                         <td>
                             {% if incidencia.incidencia.solicitante == apunte.autor and loop.last %}
                                 <a class="mx-1" title="Responder información"
-                                   href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_apunte', {codigo: incidencia.cuestionario.url|u.afterLast('/'), incidencia: incidencia.id}) }}">
-                                    {{ ux_icon('fa6-solid:pen-to-square') }}
+                                   href="{{ path('desempenyo_formulario_incidencia_apunte', {codigo: incidencia.cuestionario.url|u.afterLast('/'), incidencia: incidencia.id}) }}">
+                                    <em class="fas fa-edit"></em>
                                 </a>
                             {% endif %}
                         </td>

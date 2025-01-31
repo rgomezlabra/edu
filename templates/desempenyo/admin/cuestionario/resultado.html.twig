@@ -83,7 +83,7 @@
                         %}
                             {# Solo disponible en periodo de resultados provisionales y antes de definitivos #}
                             <a class="corrige"
-                               data-url="{{ path(aplicacion.ruta ~ '_admin_cuestionario_formulario_corrige', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
+                               data-url="{{ path('desempenyo_admin_cuestionario_formulario_corrige', {cuestionario: cuestionario.id, empleado: idEmpleado}) }}">
                                 <em class="mx-1 fas fa-pen-clip" title="Corrección tribunal"></em>
                             </a>
                         {% endif %}
@@ -104,7 +104,7 @@
             <button class="btn btn-primary" id="traslada"
                     title="Trasladar valoraciones provisionales a definitivas del tribunal"
                     data-url="{{ 'desempenyo_admin_formulario_traslada', {cuestionario: cuestionario.id}) }}">
-                {{ ux_icon('fa6-solid:dolly') }} Trasladar valores
+                <em class="mx-1 fas fa-dolly"></em> Trasladar valores
             </button>
         </li>
     {% endif %}
