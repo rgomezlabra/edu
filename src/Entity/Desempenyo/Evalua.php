@@ -95,6 +95,10 @@ class Evalua
     #[ORM\Column(type: Types::STRING, length: 10)]
     private ?string $origen = null;
 
+    /** @var string|null $testimonio Comentario de evaluación apoyada en testimonio de otro responsable */
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $testimonio = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -264,6 +268,18 @@ class Evalua
     public function setOrigen(?string $origen): static
     {
         $this->origen = $origen;
+
+        return $this;
+    }
+
+    public function getTestimonio(): ?string
+    {
+        return $this->testimonio;
+    }
+
+    public function setTestimonio(?string $testimonio): static
+    {
+        $this->testimonio = $testimonio;
 
         return $this;
     }

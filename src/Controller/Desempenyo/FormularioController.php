@@ -11,6 +11,7 @@ use App\Entity\Estado;
 use App\Entity\Plantilla\Empleado;
 use App\Entity\Usuario;
 use App\Form\Desempenyo\CorreccionType;
+use App\Form\Desempenyo\TestimonioType;
 use App\Repository\Cuestiona\CuestionarioRepository;
 use App\Repository\Cuestiona\FormularioRepository;
 use App\Repository\Cuestiona\PreguntaRepository;
@@ -491,6 +492,7 @@ class FormularioController extends AbstractController
                     return $this->render('desempenyo/formulario.html.twig', [
                         'evalua' => $evalua,
                         'respuestas' => $respuestas,
+                        'form_testimonio' => $this->createForm(TestimonioType::class, $evalua)->createView(),
                         'codigo' => $codigo,
                     ]);
                 }
@@ -592,6 +594,10 @@ class FormularioController extends AbstractController
         }
 
         $formularioRepository->save($formulario);
+        if (Evalua::EVALUA_RESPONSABLE === $evalua->getTipoEvaluador()) {
+            // Testimonio opcional para evaluadores responsables
+            $evalua->setTestimonio($request->request->all()['testimonio']['testimonio'] ?? null);
+        }
         $this->evaluaRepository->save($evalua, true);
         if ($enviado) {
             $this->lock->release();
@@ -740,11 +746,6 @@ class FormularioController extends AbstractController
             'cuestionario' => $cuestionario,
             'empleado' => $empleado,
         ];
-        $evalua = $this->evaluaRepository->findOneBy($criterios + ['tipo_evaluador' => Evalua::NO_EVALUACION]);
-        if ($evalua instanceof Evalua) {
-            return $evalua;
-        }
-
         $criterios += null === $evaluador ? ['tipo_evaluador' => Evalua::AUTOEVALUACION] : ['evaluador' => $evaluador];
 
         return $this->evaluaRepository->findOneBy($criterios);

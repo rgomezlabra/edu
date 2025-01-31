@@ -60,8 +60,8 @@
                     {%- endfor %}
                 {%- else %}
                     {#- Cuestionario reducido #}
-                    <a class="nav-link" id="vert-tabs-0-tab" role="tab" data-bs-toggle="pill" href="#vert-tabs-0"
-                       aria-controls="vert-tabs-0" aria-selected="false">
+                    <a class="nav-link {{ not editar ? 'show active' }}" id="vert-tabs-0-tab" role="tab"
+                       data-bs-toggle="pill" href="#vert-tabs-0" aria-controls="vert-tabs-0" aria-selected="false">
                         <span class="ms-3">Cuestionario reducido</span>
                     </a>
                 {%- endif %}
@@ -138,8 +138,8 @@
                     {%- endfor %}
                 {%- else %}
                     {#- Cuestionario reducido #}
-                    <div class="tab-pane fade text-left" id="vert-tabs-0" role="tabpanel"
-                         aria-labelledby="vert-tabs-0-tab" tabindex="0">
+                    <div class="tab-pane fade text-left {{ not editar ? 'show active' }}" id="vert-tabs-0"
+                         role="tabpanel" aria-labelledby="vert-tabs-0-tab" tabindex="0">
                         <div class="d-grid">
                             <div class="row bg-dark text-bg-dark opacity-50 fw-bolder">
                                 <div class="col-5">Pregunta</div>
@@ -155,7 +155,7 @@
                                         <div class="col-5">
                                             <div class="fw-bold" title="{{ pregunta.descripcion|raw }}">{{ pregunta }}</div>
                                         </div>
-                                        {%- if preguntas is defined and preguntas|length > 0 %}
+                                        {%- if editar %}
                                             {{- include('desempenyo/admin/pregunta/_pregunta_' ~ tipo.fichero ~ '.html.twig', {
                                                 etiqueta: 'preg_' ~ pregunta.id, valor: respuestas[pregunta.id]|default(puntos_iniciales)}) }}
                                         {%- else %}
