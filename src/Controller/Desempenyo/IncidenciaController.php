@@ -8,8 +8,9 @@ use App\Entity\Cuestiona\Cuestionario;
 use App\Entity\Desempenyo\Incidencia;
 use App\Entity\Estado;
 use App\Entity\Usuario;
-use App\Form\Cirhus\IncidenciaApunteType;
+use App\Form\Cirhus\IncidenciaApunteType as CirhusIncidenciaApunteType;
 use App\Form\Desempenyo\IncidenciaType;
+use App\Form\Desempenyo\IncidenciaApunteType;
 use App\Repository\Cirhus\IncidenciaApunteRepository;
 use App\Repository\Cirhus\IncidenciaRepository as CirhusIncidenciaRepository;
 use App\Repository\Cuestiona\CuestionarioRepository;
@@ -242,6 +243,7 @@ class IncidenciaController extends AbstractController
     #[Route(
         path: '/formulario/{codigo}/incidencia/{id}/delete',
         name: 'formulario_incidencia_delete',
+        requirements: ['codigo' => '[a-z0-9-]+'],
         defaults: ['titulo' => 'Eliminar Incidencia para Evaluación de Desempeño'],
         methods: ['GET', 'POST']
     )]
@@ -293,6 +295,7 @@ class IncidenciaController extends AbstractController
         );
     }
 
+    /** Crear o editar un apunte de incidencia por parte del administrador. */
     #[Route(
         path: '/admin/incidencia/{incidencia}/apunte/{apunte?}',
         name: 'admin_incidencia_apunte',
@@ -314,7 +317,6 @@ class IncidenciaController extends AbstractController
         $finalizado = $this->estadoRepository->findOneBy(['nombre' => Estado::FINALIZADO]);
         $cirhus = $incidencia->getIncidencia();
         $ultimo = $cirhus?->getApuntes()->last();
-
         if (!$cirhus instanceof CirhusIncidencia) {
             $incidenciaRepository->remove($incidencia, true);
             $this->addFlash('danger', 'La incidencia se elimina por error en inconsistencia de datos.');
@@ -352,6 +354,7 @@ class IncidenciaController extends AbstractController
                 ->setIncidencia($cirhus)
                 ->setAutor($autor)
                 ->setFechaInicio($fecha)
+                ->setFechaFin($apunte->getEstado() === $finalizado ? $fecha : null)
             ;
             $cirhus->addApunte($apunte);
             if ($nuevo) {
@@ -386,6 +389,131 @@ class IncidenciaController extends AbstractController
             'incidencia' => $incidencia,
             'titulo' => sprintf('%s Apunte de Incidencia para Evaluación de Desempeño', $nuevo ? 'Nuevo' : 'Editar'),
             'button_label' => $nuevo ? '' : 'Actualizar',
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /** Editar el apunte más reciente de la incidencia por parte de un usuario, si le pertenece. */
+    #[Route(
+        path: '/formulario/{codigo}/incidencia/{incidencia}/apunte',
+        name: 'formulario_incidencia_apunte',
+        requirements: ['codigo' => '[a-z0-9-]+'],
+        defaults: ['titulo' => 'Responder Información Solicitada'],
+        methods: ['GET', 'POST']
+    )]
+    public function apunteUsuairo(
+        Request                    $request,
+        EstadoRepository           $estadoRepository,
+        IncidenciaApunteRepository $apunteRepository,
+        IncidenciaRepository       $incidenciaRepository,
+        string                     $codigo,
+        Incidencia                 $incidencia,
+    ): Response
+    {
+        $this->denyAccessUnlessGranted(null, ['relacion' => null]);
+        $finalizado = $estadoRepository->findOneBy(['nombre' => Estado::FINALIZADO]);
+        $cirhus = $incidencia->getIncidencia();
+        $ultimo = $cirhus?->getApuntes()->last();
+        if (!$cirhus instanceof CirhusIncidencia) {
+            $incidenciaRepository->remove($incidencia, true);
+            $this->addFlash('danger', 'La incidencia se elimina por error en inconsistencia de datos.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        } elseif (!$ultimo instanceof IncidenciaApunte) {
+            $this->addFlash('danger', 'El apunte no existe.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        } elseif ($ultimo->getEstado() === $finalizado && $ultimo->getComentario() !== null) {
+            $this->addFlash('danger', 'La incidencia ya está finalizada.');
+
+            return $this->redirectToRoute($this->rutaBase);
+        }
+
+        $form = $this->createForm(CirhusIncidenciaApunteType::class, $ultimo, [
+            'rol' => 'usuario',
+        ]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $ultimo->setFechaFin(new DateTimeImmutable());
+            $apunteRepository->save($ultimo, true);
+            $this->generator->logAndFlash('info', 'Información requerida actualizada', [
+                'id' => $ultimo->getId(),
+                'cuestionario' => $incidencia->getCuestionario(),
+                'incidencia_id' => $incidencia->getId(),
+                'autor' => $ultimo->getAutor(),
+            ]);
+
+            return $this->redirectToRoute(
+                $this->rutaBase . '_formulario_incidencia_show', [
+                'id' => $incidencia->getId(),
+                'codigo' => $codigo,
+            ],
+                Response::HTTP_SEE_OTHER
+            );
+        }
+
+        return $this->render('desempenyo/incidencia_apunte.html.twig', [
+            'incidencia' => $incidencia,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /** Añadir una respuesta del usuario al apunte. */
+    #[Route(
+        path: 'admin/incidencia/{incidencia}/informacion',
+        name: 'admin_incidencia_informacion',
+        defaults: ['titulo' => 'Responder incidencia'],
+        methods: ['GET', 'POST']
+    )]
+    public function informacion(
+        Request                    $request,
+        EstadoRepository           $estadoRepository,
+        IncidenciaApunteRepository $apunteRepository,
+        Incidencia                 $incidencia,
+    ): Response
+    {
+        $this->denyAccessUnlessGranted('admin');
+        $iniciado = $estadoRepository->findOneBy(['nombre' => Estado::INICIADO]);
+        $finalizado = $estadoRepository->findOneBy(['nombre' => Estado::FINALIZADO]);
+        $procesando = $estadoRepository->findOneBy(['nombre' => Estado::PROCESANDO]);
+        $cirhus = $incidencia->getIncidencia();
+        $ultimo = $cirhus?->getApuntes()->last();
+        if ($ultimo instanceof IncidenciaApunte && $ultimo->getEstado() === $finalizado) {
+            $this->addFlash('error', 'La incidencia ya está finalizada.');
+
+            return $this->redirectToRoute($this->rutaBase . '_admin_incidencia_show', [
+                'id' => $incidencia->getId(),
+            ]);
+        }
+        $form = $this->createForm(IncidenciaApunteType::class, $ultimo, ['reabrir' => true]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $apunte = new IncidenciaApunte();
+            $apunte
+                ->setIncidencia($incidencia->getIncidencia())
+                ->setEstado($ultimo->getEstado() === $iniciado ? $procesando : $ultimo->getEstado())
+                ->setServicio($ultimo->getServicio())
+                ->setObservaciones($ultimo->getObservaciones())
+                ->setFechaInicio($ultimo->getFechaInicio())
+                ->setAutor($cirhus?->getSolicitante())
+            ;
+            $ultimo->setFechaFin(new DateTimeImmutable());
+            $apunteRepository->save($ultimo);
+            $apunteRepository->save($apunte, true);
+            $cirhus?->addApunte($apunte);
+            $this->incidenciaRepository->save($incidencia, true);
+            $this->generator->logAndFlash('info', 'Solicitada información al usuario', [
+                'id' => $apunte->getId(),
+                'estado' => $apunte->getEstado()?->getNombre(),
+                'incidencia_id' => $incidencia->getId(),
+            ]);
+
+            return $this->redirectToRoute($this->rutaBase . '_admin_incidencia_show', ['id' => $incidencia->getId()]);
+        }
+
+        return $this->render('desempenyo/admin/incidencia/apunte.html.twig', [
+            'incidencia' => $incidencia,
             'form' => $form->createView(),
         ]);
     }

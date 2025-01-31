@@ -54,14 +54,21 @@
                         <td>{{ apunte.comentario }}</td>
                         <td>{{ apunte.autor.empleado }}</td>
                         <td>
-                            <a class="apunte mx-1" href="" title="Ver detalle" data-id="{{ apunte.id }}">
-                                <em class="mx-1 fas fa-magnifying-glass" title="Ver detalles"></em>
+                            <a class="apunte mx-1" href="" title="Ver detalles" data-id="{{ apunte.id }}">
+                                <em class="fas fa-magnifying-glass"></em>
                             </a>
-                            {% if incidencia.incidencia.apuntes.last.estado.nombre|default != constant('App\\Entity\\Estado::FINALIZADO')  and loop.last -%}
-                                <a href="{{ path('desempenyo_admin_incidencia_apunte',{'incidencia': incidencia.id, 'apunte': apunte.id}) }}">
-                                    <em class="mx-1 fas fa-edit" title="Editar"></em>
+                            {% if apunte.estado.nombre|default != constant('App\\Entity\\Sistema\\Estado::FINALIZADO') and loop.last -%}
+                                <a class="mx-1" title="Editar"
+                                   href="{{ path('desempenyo_admin_incidencia_apunte',{incidencia: incidencia.id, apunte: apunte.id}) }}">
+                                    <em class="mx-1 fas fa-edit"></em>
                                 </a>
-                            {%- endif %}
+                                {% if apunte.comentario %}
+                                    <a class="mx-1" title="Solicitar información"
+                                       href="{{ path('desempenyo_admin_incidencia_informacion', {incidencia: incidencia.id}) }}">
+                                        <em class="mx-1 fas fa-info-circle"></em>
+                                    </a>
+                                {% endif %}
+                            {% endif %}
                         </td>
                     </tr>
                     {% if loop.first %}{% set inicio = apunte.fechaInicio | date('U') %}{% endif -%}

@@ -37,11 +37,12 @@
                     <th>Fecha final</th>
                     <th>Comentario</th>
                     <th>Autor</th>
+                    <th data-dt-order="disable">Acciones</th>
                 </tr>
                 </thead>
                 {%- set inicio = 0 -%}
                 {%- set fin = 0 -%}
-                {%- for apunte in incidencia.incidencia.apuntes %}
+                {% for apunte in incidencia.incidencia.apuntes -%}
                     <tr>
                         <td>
                             <span class="badge">
@@ -53,12 +54,20 @@
                         <td>{{ apunte.fechaFin ? apunte.fechaFin | date('d/m/Y, H:i') }}</td>
                         <td>{{ apunte.comentario }}</td>
                         <td>{{ apunte.autor.empleado }}</td>
+                        <td>
+                            {% if incidencia.incidencia.solicitante == apunte.autor and loop.last %}
+                                <a class="mx-1" title="Responder información"
+                                   href="{{ path(aplicacion.ruta ~ '_formulario_incidencia_apunte', {codigo: incidencia.cuestionario.url|u.afterLast('/'), incidencia: incidencia.id}) }}">
+                                    {{ ux_icon('fa6-solid:pen-to-square') }}
+                                </a>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% if loop.first %}{% set inicio = apunte.fechaInicio | date('U') %}{% endif -%}
                     {% if loop.last %}{% set fin = apunte.fechaFin ? apunte.fechaFin|date('U') : 0 %}{% endif -%}
-                {% endfor -%}
+                {% endfor %}
             </table>
-            {%- if fin > 0 %}
+            {%- if fin > 0 -%}
                 <div class="progress-stacked">
                     {%- set total = fin - inicio -%}
                     {%- for apunte in incidencia.incidencia.apuntes -%}
@@ -113,6 +122,9 @@
             language: {
                 url: '{{ asset("includes/datatable_noinfo.es.json") }}'
             },
+            order: [
+                [1, 'desc'],
+            ],
         });
     </script>
 {% endblock %}
