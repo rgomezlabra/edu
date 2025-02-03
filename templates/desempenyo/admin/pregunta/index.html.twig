@@ -136,9 +136,7 @@
 {% block js %}
     {{ parent() }}
     <script type="module">
-        import { Modal, Toast } from 'bootstrap';
-
-        // const modalTips = new Modal('#modalTipos');
+        import { Toast } from 'bootstrap';
         const ordenar = $('#ordenar');
         const preguntas = $('#datosPreguntas').dataTable({
             buttons: [
