@@ -10,312 +10,89 @@
     <p class=""><em>(descripción de la aplicación)</em></p>
 
     {#- Acciones comunes #}
-    <div class="my-4">
+    <div class="d-flex align-items-start w-100 my-4">
         {%- if activos|length == 0 %}
             <div class="alert alert-warning">En este momento, no hay cuestionarios activos.</div>
         {%- else %}
-            {#- Autoevaluación #}
-            <div class="pagina-seccion">
-                Fase 1: Autoevaluación del desempeño ({{ activos[0].configuracion.peso1|default(pesos[0]) }}%)
+            {# Menú lateral #}
+            <div class="nav nav-pills flex-column col-2 p-3" role="tablist" aria-orientation="vertical">
+                <button class="nav-link active" id="vert-tabs-fase1-tab" type="button" role="tab" data-bs-toggle="pill"
+                        data-bs-target="#vert-tabs-fase1" aria-controls="vert-tabs-fase1" aria-selected="true">
+                    Autoevaluación
+                </button>
+                {%- if evaluaciones|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'))|length > 0 %}
+                    <button class="nav-link" id="vert-tabs-fase2-tab" type="button" role="tab" data-bs-toggle="pill"
+                            data-bs-target="#vert-tabs-fase2" aria-controls="vert-tabs-fase2">
+                        Evaluación responsable
+                    </button>
+                {% endif %}
+                {%- if evaluaciones|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'))|length > 0 %}
+                    <button class="nav-link" id="vert-tabs-fase3-tab" type="button" role="tab" data-bs-toggle="pill"
+                            data-bs-target="#vert-tabs-fase3" aria-controls="vert-tabs-fase3">
+                        Evaluación colaborador
+                    </button>
+                {% endif %}
+                {% if activos[0].configuracion.provisional.date is defined and activos[0].configuracion.provisional.date|date('c') < 'now'|date('c') %}
+                    <button class="nav-link" id="vert-tabs-resultado-tab" type="button" role="tab" data-bs-toggle="pill"
+                            data-bs-target="#vert-tabs-resultado" aria-controls="vert-tabs-resultado">
+                        Resultados
+                    </button>
+                {% endif %}
+                <button class="nav-link" id="vert-tabs-desarrollo-tab" type="button" role="tab" data-bs-toggle="pill"
+                        data-bs-target="#vert-tabs-desarrollo" aria-controls="vert-tabs-desarrollo">
+                    Desarrollo profesional
+                </button>
+                <button class="nav-link" id="vert-tabs-documentos-tab" type="button" role="tab" data-bs-toggle="pill"
+                        data-bs-target="#vert-tabs-documentos" aria-controls="vert-tabs-documentos">
+                    Documentación
+                </button>
             </div>
-            <div class="container-fluid my-2">
-                <a data-bs-toggle="collapse" href="#acordeonAuto" aria-expanded="false" aria-controls="acordeonAuto">
-                    <em class="me-2 fas fa-info-circle text-info"></em>
-                    Pulsar para obtener más detalle del procedimiento.
-                </a>
-            </div>
-            <div class="collapse" id="acordeonAuto">
-                <div class="container-fluid my-2 fw-bold">
-                    Artículos 9 y 11, y anexo del "Cuestionario de evaluación de competencias profesionales".
+            {# Paneles #}
+            <div class="tab-content col-10" id="vert-tabs-tabContent">
+                <div class="tab-pane fade text-left show active" id="vert-tabs-fase1" role="tabpanel"
+                     aria-labelledby="vert-tabs-fase1-tab" tabindex="0">
+                    {{ include('desempenyo/_index_fase1.html.twig') }}
                 </div>
-                <div class="container-fluid my-2">
-                    La autoevaluación de las competencias se realiza mediante la cumplimentación del cuestionario de
-                    evaluación de competencias profesionales. Cada conducta incluida en el cuestionario deberá ser
-                    valorada por la propia persona empleada pública, aplicando una escala Likert de 1 a 10 (siendo 1 el
-                    valor mínimo y 10 el valor máximo).
-                </div>
-                <div class="container-fluid my-2">
-                    Para cada conducta profesional con valores comprendidos en el intervalo 5 a 7, no es obligatorio
-                    indicar evidencias.
-                </div>
-                <div class="container-fluid my-2">
-                    Para cada conducta profesional con valores comprendidos en los intervalos de 1 a 4, y de 8 a 10,
-                    todos los agentes evaluadores deberán indicar una o varias evidencias específicas que sirvan de
-                    justificación del valor otorgado a esta.
-                </div>
-                <div class="container-fluid my-2">
-                    En caso de que la evidencia o conducta específica señalada no se considere adecuada como
-                    justificación del valor numérico otorgado, este podrá no ser tenido en cuenta en el resultado de
-                    la evaluación en el supuesto de desviación de las puntuaciones en más de 5 puntos entre las
-                    otorgadas por la persona responsable y la autoevaluación.
-                </div>
-                <div class="container-fluid my-2">
-                    La autoevaluación por parte de la persona empleada pública tiene un valor ponderado del
-                    {{ activos[0].configuracion.peso1|default(pesos[0]) }}%, con respecto a la puntuación máxima de la
-                    evaluación de la conducta profesional.
-                </div>
-                <div class="container-fluid my-2">
-                    Para más detalle sobre los criterios de valoración a aplicar por cada intervalo de valores de 1 a 4,
-                    de 5 a 8 y de 9 a 10, consultar el cuestionario facilitado en
-                    <a href="#documentos">documentos de interés</a>.
-                </div>
-                <div class="container-fluid my-2 bg-info bg-opacity-50">
-                    Para facilitar la evaluación y la interpretación de los resultados, a efectos orientativos, puede
-                    consultar las escalas Likert propuestas por la Universidad de Sevilla en
-                    <a href="#documentos">documentos de interés</a>.
-                </div>
-            </div>
-            <ul class="lead my-3">
-                {%- if activos[0].fechaAlta > date() %}
-                    <div class="alert alert-warning">
-                        El cuestionario estará disponible entre los días {{ activos[0].fechaAlta|date('d/m/Y') }} y
-                        {{ activos[0].fechaBaja|date('d/m/Y') }}. Puede consultar el texto en el apartado
-                        <a href="#documentos">documentos de interés</a>.
+                {%- if evaluaciones|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'))|length > 0 %}
+                    <div class="tab-pane fade text-left" id="vert-tabs-fase2" role="tabpanel"
+                         aria-labelledby="vert-tabs-fase2-tab" tabindex="0">
+                        {{ include('desempenyo/_index_fase2.html.twig') }}
                     </div>
-                {%- elseif activos[0].fechaBaja < date() %}
-                    <div class="alert alert-warning">
-                        El plazo para cumplimentar el cuestionario terminó el día {{ activos[0].fechaBaja|date('d/m/Y') }}.
-                        Si existe alguna incidencia, puede comunicarla en el apartado
-                        <a href="#incidencias1">Revisar o comunicar incidencias del proceso de autoevaluación</a>.
-                    </div>
-                {%- elseif evaluados|length == 0 %}
-                    <div class="alert alert-warning">
-                        El empleado actualmente no tiene cuestionario asignado.
-                        Si existe alguna incidencia, puede comunicarla en el apartado
-                        <a href="#incidencias1">Revisar o comunicar incidencias del proceso de autoevaluación</a>.
-                    </div>
-                {%- elseif rechazado %}
-                    <div class="alert alert-warning">
-                        <em class="mx-1 fas fa-triangle-exclamation"></em>Usted ha solicitado no ser evaluado.<br>
-                        {% if not rechazado -%}
-                            <a id="recupera" href="" data-url="{{ activos[0].url ~ '/recupera' }}">
-                                Volver a activar mi participación (solo disponible hasta el día
-                                {{ activos[0].fechaBaja|date('d/m/Y') }}, inclusive)
-                            </a>
-                        {%- endif %}
-                    </div>
-                {%- else %}
-                    {%- if evaluados|filter(e => e.habilita)|length == 0 %}
-                        {#- Opciones antes de evaluar #}
-                        <li>Antes de empezar la autoevaluación, elija una de las siguientes opciones:</li>
-                        <ul>
-                            <li>
-                                <a id="habilita" href="" data-url="{{ activos[0].url ~ '/habilita' }}">
-                                    Doy mi habilitación para ser evaluado en mi actual puesto desempeñado
-                                </a>
-                            </li>
-                            {%- if not rechazado %}
-                                <li>
-                                    <a id="rechaza" href="" data-url="{{ activos[0].url ~ '/rechaza' }}">
-                                        Solicito no participar en el proceso de autoevaluación del desempeño
-                                    </a>
-                                </li>
-                            {%- endif %}
-                        </ul>
-                    {%- else %}
-                        {#- Evaluación #}
-                        <li>
-                            <a class="fw-bold" href="{{ activos[0].url }}">
-                                Realizar o consultar el cuestionario para su autoevaluación de competencias
-                            </a>
-                        </li>
-                    {%- endif %}
                 {%- endif %}
-                <li><a href="{{ activos[0].url ~ '/evaluador' }}">Comprobar evaluadores</a></li>
-                <li>
-                    <a id="incidencias1" href="{{ activos[0].url ~ '/incidencia' }}">
-                        Revisar o comunicar incidencias del proceso de autoevaluación
-                    </a>
-                </li>
-            </ul>
-
-            {# Evaluación por parte del responsable #}
-            {%- if activos|length > 0 and evaluaciones|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'))|length > 0 %}
-                <div class="pagina-seccion">
-                    Fase 2: Evaluación por parte del responsable o evaluador principal
-                    ({{ activos[0].configuracion.peso2|default(pesos[1]) }}%)
+                {%- if evaluaciones|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'))|length > 0 %}
+                    <div class="tab-pane fade text-left" id="vert-tabs-fase3" role="tabpanel"
+                         aria-labelledby="vert-tabs-fase3-tab" tabindex="0">
+                        {{ include('desempenyo/_index_fase3.html.twig') }}
+                    </div>
+                {%- endif %}
+                {% if activos[0].configuracion.provisional.date is defined and activos[0].configuracion.provisional.date|date('c') < 'now'|date('c') %}
+                    <div class="tab-pane fade text-left" id="vert-tabs-resultado" role="tabpanel"
+                         aria-labelledby="vert-tabs-resultado-tab" tabindex="0">
+                        {{ include('desempenyo/_index_resultado.html.twig') }}
+                    </div>
+                {% endif %}
+                <div class="tab-pane fade text-left" id="vert-tabs-desarrollo" role="tabpanel"
+                     aria-labelledby="vert-tabs-desarrollo-tab" tabindex="0">
+                    {{ include('desempenyo/_index_desarrollo.html.twig') }}
                 </div>
-                <div class="container-fluid my-2">
-                    <a data-bs-toggle="collapse" href="#acordeonEvalua" aria-expanded="false" aria-controls="acordeonAuto">
-                        <em class="me-2 fas fa-info-circle text-info"></em>
-                        Pulsar para obtener más detalle del procedimiento.
-                    </a>
+                <div class="tab-pane fade text-left" id="vert-tabs-documentos" role="tabpanel"
+                     aria-labelledby="vert-tabs-documentos-tab" tabindex="0">
+                    {{ include('desempenyo/_index_documentos.html.twig') }}
                 </div>
-                <div class="collapse" id="acordeonEvalua">
-                    <div class="container-fluid my-2 fw-bold">
-                        Artículos 9 y 11, y anexo del "Cuestionario de evaluación de competencias profesionales".
-                    </div>
-                    <div class="container-fluid my-2">
-                        En este apartado debe realizar su evaluación como responsable o evaluador principal (valor
-                        ponderado del {{ activos[0].configuracion.peso2|default(pesos[1]) }}%).
-                    </div>
-                    <div class="container-fluid my-2">
-                        Cada conducta incluida en el cuestionario deberá ser valorada aplicando una escala Likert de 1 a
-                        10 (siendo 1 el valor mínimo y 10 el valor máximo).
-                    </div>
-                    <div class="container-fluid my-2">
-                        Para cada conducta profesional con valores comprendidos en el intervalo
-                        <strong>de 5 a 7, no es obligatorio</strong> indicar evidencias.
-                    </div>
-                    <div class="container-fluid my-2">
-                        Para cada conducta profesional con valores comprendidos en los intervalos de 1 a 4, y de 8 a 10,
-                        todos los agentes evaluadores deberán indicar una o varias evidencias específicas que sirvan de
-                        justificación del valor otorgado a esta.
-                    </div>
-                    <div class="container-fluid my-2">
-                        En caso de que la evidencia o conducta específica señalada no se considere adecuada como
-                        justificación del valor numérico otorgado, este podrá no ser tenido en cuenta en el resultado de
-                        la evaluación en el supuesto de desviación de las puntuaciones en más de 5 puntos entre las
-                        otorgadas por la persona responsable y la autoevaluación.
-                    </div>
-                    <div class="container-fluid my-2">
-                        Para más detalle sobre los criterios de valoración a aplicar por cada intervalo de valores de
-                        1 a 4, de 5 a 8 y de 9 a 10, consultar el cuestionario facilitado en
-                        <a href="#documentos">documentos de interés</a>.
-                    </div>
-                    <div class="container-fluid my-2 bg-info bg-opacity-50">
-                        Para facilitar la evaluación y la interpretación de los resultados, a efectos orientativos, puede
-                        consultar las escalas Likert propuestas por la Universidad de Sevilla en
-                        <a href="#documentos">documentos de interés</a>.
-                    </div>
-                </div>
-                <ul class="lead my-3">
-                    {%- if activos[0].fechaAlta > date() %}
-                        <div class="alert alert-warning">
-                            El cuestionario estará disponible entre los días {{ activos[0].fechaAlta|date('d/m/Y') }} y
-                            {{ activos[0].fechaBaja|date('d/m/Y') }}. Puede consultar el texto en el apartado
-                            <a href="#documentos">documentos de interés</a>.
-                        </div>
-                    {%- elseif activos[0].fechaBaja < date() %}
-                        <div class="alert alert-warning">
-                            El plazo para cumplimentar el cuestionario terminó el día {{ activos[0].fechaBaja|date('d/m/Y') }}.
-                            Si existe de una incidencia, puede comunicarla en el apartado
-                            <a href="#incidencias2">Comunicar incidencias de evaluación por parte del responsable</a>.
-                        </div>
-                    {%- else %}
-                        <li>
-                            <a class="fw-bold"
-                               href="{{ activos[0].url ~ '/empleado?tipo=' ~ constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') }}">
-                                Comprobar relación de personas a evaluar y realizar o consultar sus evaluaciones
-                            </a>
-                        </li>
-                    {%- endif %}
-
-                    <li>
-                        <a id="incidencias2" href="{{ activos[0].url ~ '/incidencia' }}">
-                            Revisar o comunicar incidencias de evaluación por parte del responsable
-                        </a>
-                    </li>
-                </ul>
-            {%- endif %}
-
-            {# Evaluación por parte de terceros agentes #}
-            {%- if activos|length > 0 and evaluaciones|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'))|length > 0 %}
-                <div class="pagina-seccion">
-                    Fase 3: Evaluación por parte de otras personas evaluadoras colaboradoras
-                    ({{ activos[0].configuracion.peso3|default(pesos[2]) }}%)
-                </div>
-                <div class="container-fluid my-2">
-                    <a data-bs-toggle="collapse" href="#acordeonOtro" aria-expanded="false" aria-controls="acordeonOtro">
-                        <em class="me-2 fas fa-info-circle text-info"></em>
-                        Pulsar para obtener más detalle del procedimiento.
-                    </a>
-                </div>
-                <div class="collapse" id="acordeonOtro">
-                    <div class="container-fluid my-2 fw-bold">
-                        Artículos 9 y 11, y anexo del "Cuestionario de evaluación de competencias profesionales".
-                    </div>
-                    <div class="container-fluid my-2">
-                        En este apartado debe realizar su evaluación como persona evaluadora colaboradora (tercer
-                        agente, con valor ponderado del {{ activos[0].configuracion.peso3|default(pesos[2]) }}%).
-                    </div>
-                    <div class="container-fluid my-2">
-                        El cuestionario deberá ser valorado aplicando una escala Likert de 1 a 10 (siendo 1 el valor
-                        mínimo y 10 el valor máximo).
-                    </div>
-                    <div class="container-fluid my-2">
-                        Para los valores comprendidos en el intervalo <strong>de 5 a 7, no es obligatorio</strong>
-                        indicar evidencias.
-                    </div>
-                    <div class="container-fluid my-2">
-                        Para los valores comprendidos en los intervalos de 1 a 4, y de 8 a 10, todos los agentes
-                        evaluadores deberán indicar una o varias evidencias específicas que sirvan de justificación del
-                        valor otorgado a esta.
-                    </div>
-                    <div class="container-fluid my-2">
-                        En caso de que la evidencia o conducta específica señalada no se considere adecuada como
-                        justificación del valor numérico otorgado, este podrá no ser tenido en cuenta en el resultado de
-                        la evaluación en el supuesto de desviación de las puntuaciones en más de 5 puntos entre las
-                        otorgadas por la persona responsable y la autoevaluación.
-                    </div>
-                    <div class="container-fluid my-2">
-                        Para más detalle sobre los criterios de valoración a aplicar por cada intervalo de valores de
-                        1 a 4, de 5 a 8 y de 9 a 10, consultar el cuestionario facilitado en
-                        <a href="#documentos">documentos de interés</a>.
-                    </div>
-                    <div class="container-fluid my-2 bg-info bg-opacity-50">
-                        Para facilitar la evaluación y la interpretación de los resultados, a efectos orientativos, puede
-                        consultar las escalas Likert propuestas por la Universidad de Sevilla en
-                        <a href="#documentos">documentos de interés</a>.
-                    </div>
-                </div>
-                <ul class="lead my-3">
-                    {%- if activos[0].fechaAlta <= date() and date() <= activos[0].fechaBaja %}
-                        <li>
-                            <a class="fw-bold"
-                               href="{{ activos[0].url ~ '/empleado?tipo=' ~ constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') }}">
-                                Comprobar relación de personas a evaluar y realizar o consultar sus evaluaciones
-                            </a>
-                        </li>
-                    {%- endif %}
-                </ul>
-            {%- endif %}
-
-            {# Otros #}
-            {% if activos[0].configuracion.provisional.date is defined and activos[0].configuracion.provisional.date|date('c') < 'now'|date('c') %}
-                <div class="pagina-seccion">Resultados del proceso de evaluación activo</div>
-                <ul class="lead my-3">
-                    {# Solo se debe mostrar en periodo entre fecha de resultado provisional y de resultado definitivo #}
-                    <li>
-                        <a id="verProvisional" href="">Resultado provisional del proceso de evaluación del desempeño</a>
-                    </li>
-                    {% if activos[0].configuracion.definitiva.date is defined and activos[0].configuracion.definitiva.date|date('c') < 'now'|date('c') %}
-                        {# Solo se debe mostrar cuando se cumpla la fecha de resultado definitivo #}
-                        <li>Resultado final del proceso de evaluación del desempeño</li>
-                    {% endif -%}
-                </ul>
-            {% endif %}
-            <div class="pagina-seccion" id="documentos">Área de desarrollo profesional</div>
-            <div class="container-fluid my-2">
-                <ul class="lead my-3">
-                    {% if not registrado -%}
-                        <li>
-                            <a href="{{ activos[0].url ~ '/compara' }}">Oportunidades de alineación de expectativas</a>
-                        </li>
-                    {%- endif %}
-                </ul>
             </div>
-            <div class="pagina-seccion" id="documentos">Documentos y enlaces de interés del procedimiento activo</div>
-            <ul class="lead my-3">
-                <li>Texto del acuerdo</li>
-                <li>Escalas Lickert</li>
-                <li>Cuestionario (PDF y Word)</li>
-                <li>Enlaces de interés a procedimientos electrónicos
-                    (presentación de instancias, interposición de recursos administrativos, ...)
-                </li>
-            </ul>
-        {%- endif %}
-        {% if cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Estado::ARCHIVADO'))|length > 0 -%}
-            <div class="pagina-seccion">Resultados de evaluaciones anteriores</div>
-            <ul class="lead my-3">
-                ...
-            </ul>
         {%- endif %}
     </div>
-    <div class="linea-botones"></div>
+
+    {% if cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Estado::ARCHIVADO'))|length > 0 -%}
+        <div class="pagina-seccion">Resultados de evaluaciones anteriores</div>
+        <ul class="lead my-3">
+            ...
+        </ul>
+    {%- endif %}
 
     {#- Mostrar roles de la aplicación con permiso para el usuario. #}
     {% if 'ROLE_ADMIN' in app.user.roles -%}
+        <div class="linea-botones"></div>
         <div class="h5">
             <a href="{{ path('desempenyo_admin' ) }}"><em class="fas fa-cog"></em> Administrador</a>
         </div>

@@ -1,0 +1,59 @@
+<div class="pagina-seccion">
+    Fase 3: Evaluación por parte de otras personas evaluadoras colaboradoras
+    ({{ activos[0].configuracion.peso3|default(pesos[2]) }}%)
+</div>
+
+<div class="container-fluid my-2">
+    <a data-bs-toggle="collapse" href="#acordeonOtro" aria-expanded="false" aria-controls="acordeonOtro">
+        <em class="me-2 fas fa-info-circle text-info"></em>
+        Pulsar para obtener más detalle del procedimiento.
+    </a>
+</div>
+<div class="collapse" id="acordeonOtro">
+    <div class="container-fluid my-2 fw-bold">
+        Artículos 9 y 11, y anexo del "Cuestionario de evaluación de competencias profesionales".
+    </div>
+    <div class="container-fluid my-2">
+        En este apartado debe realizar su evaluación como persona evaluadora colaboradora (tercer
+        agente, con valor ponderado del {{ activos[0].configuracion.peso3|default(pesos[2]) }}%).
+    </div>
+    <div class="container-fluid my-2">
+        El cuestionario deberá ser valorado aplicando una escala Likert de 1 a 10 (siendo 1 el valor
+        mínimo y 10 el valor máximo).
+    </div>
+    <div class="container-fluid my-2">
+        Para los valores comprendidos en el intervalo <strong>de 5 a 7, no es obligatorio</strong>
+        indicar evidencias.
+    </div>
+    <div class="container-fluid my-2">
+        Para los valores comprendidos en los intervalos de 1 a 4, y de 8 a 10, todos los agentes
+        evaluadores deberán indicar una o varias evidencias específicas que sirvan de justificación del
+        valor otorgado a esta.
+    </div>
+    <div class="container-fluid my-2">
+        En caso de que la evidencia o conducta específica señalada no se considere adecuada como
+        justificación del valor numérico otorgado, este podrá no ser tenido en cuenta en el resultado de
+        la evaluación en el supuesto de desviación de las puntuaciones en más de 5 puntos entre las
+        otorgadas por la persona responsable y la autoevaluación.
+    </div>
+    <div class="container-fluid my-2">
+        Para más detalle sobre los criterios de valoración a aplicar por cada intervalo de valores de
+        1 a 4, de 5 a 8 y de 9 a 10, consultar el cuestionario facilitado en
+        <a href="#documentos">documentos de interés</a>.
+    </div>
+    <div class="container-fluid my-2 bg-info bg-opacity-50">
+        Para facilitar la evaluación y la interpretación de los resultados, a efectos orientativos, puede
+        consultar las escalas Likert propuestas por la Universidad de Sevilla en
+        <a href="#documentos">documentos de interés</a>.
+    </div>
+</div>
+<ul class="lead my-3">
+    {%- if activos[0].fechaAlta <= date() and date() <= activos[0].fechaBaja %}
+        <li>
+            <a class="fw-bold"
+               href="{{ activos[0].url ~ '/empleado?tipo=' ~ constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') }}">
+                Comprobar relación de personas a evaluar y realizar o consultar sus evaluaciones
+            </a>
+        </li>
+    {%- endif %}
+</ul>

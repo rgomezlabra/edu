@@ -1,0 +1,11 @@
+<div class="pagina-seccion">Área de desarrollo profesional</div>
+
+<div class="container-fluid my-2">
+    <ul class="lead my-3">
+        {% if not registrado -%}
+            <li>
+                <a href="{{ activos[0].url ~ '/compara' }}">Oportunidades de alineación de expectativas</a>
+            </li>
+        {%- endif %}
+    </ul>
+</div>
