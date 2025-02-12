@@ -12,7 +12,9 @@ use Doctrine\Persistence\ObjectManager;
  */
 class GrupoFixtures extends Fixture
 {
-    public const string GRUPO_EJEMPLO = 'A2';
+    public const string GRUPO1 = 'A1';
+    public const string GRUPO2 = 'C1';
+    public const string GRUPO3 = 'L3';
 
     public function load(ObjectManager $manager): void
     {
@@ -23,6 +25,7 @@ class GrupoFixtures extends Fixture
             ->setNivelMaximo(30)
         ;
         $manager->persist($grupo);
+        $this->addReference(self::GRUPO1, $grupo);
         $grupo = new Grupo();
         $grupo->setNombre('A2')
             ->setAdscripcion('F')
@@ -30,16 +33,16 @@ class GrupoFixtures extends Fixture
             ->setNivelMaximo(26)
         ;
         $manager->persist($grupo);
-        $this->addReference(self::GRUPO_EJEMPLO, $grupo);
         $grupo = new Grupo();
-        $grupo->setNombre('B1')
+        $grupo->setNombre('C1')
             ->setAdscripcion('F')
             ->setNivelMinimo(15)
             ->setNivelMaximo(22)
         ;
         $manager->persist($grupo);
+        $this->addReference(self::GRUPO2, $grupo);
         $grupo = new Grupo();
-        $grupo->setNombre('B2')
+        $grupo->setNombre('C2')
             ->setAdscripcion('F')
             ->setNivelMinimo(14)
             ->setNivelMaximo(18)
@@ -54,6 +57,7 @@ class GrupoFixtures extends Fixture
         $grupo = new Grupo();
         $grupo->setNombre('L3')->setAdscripcion('L');
         $manager->persist($grupo);
+        $this->addReference(self::GRUPO3, $grupo);
         $grupo = new Grupo();
         $grupo->setNombre('L4')->setAdscripcion('L');
         $manager->persist($grupo);

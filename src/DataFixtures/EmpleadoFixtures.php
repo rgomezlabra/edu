@@ -10,7 +10,6 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Clock\DatePoint;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Cargar empleados de defecto.
@@ -18,13 +17,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
  */
 class EmpleadoFixtures extends Fixture implements DependentFixtureInterface
 {
-    public const string ADMIN_EJEMPLO = 'admin';
-    public const string EMPLEADO_EJEMPLO = 'curry';
-    public const string EVALUADOR_EJEMPLO = 'evalua';
-
-    public function __construct(private readonly UserPasswordHasherInterface $hasher)
-    {
-    }
+    public const string ADMIN = 'admin';
+    public const string EMPLEADO = 'curry';
+    public const string EVALUADOR = 'evalua';
+    public const string COLABORADOR = 'colabora';
 
     public function load(ObjectManager $manager): void
     {
@@ -37,33 +33,49 @@ class EmpleadoFixtures extends Fixture implements DependentFixtureInterface
         ;
         $manager->persist($empleado);
         $manager->flush();
-        $this->addReference(self::ADMIN_EJEMPLO, $empleado);
+        $this->addReference(self::ADMIN, $empleado);
 
-        $empleado = new Empleado();
-        $empleado->setNombre('Currante')
-            ->setApellidos('Total')
-            ->setDocIdentidad('22222222R')
-            ->setNrp('22222222R')
-            ->setGrupo($this->getReference(GrupoFixtures::GRUPO_EJEMPLO, Grupo::class))
-            ->setUnidad($this->getReference(UnidadFixtures::UNIDAD_EJEMPLO, Unidad::class))
-            ->setSituacion($this->getReference(SituacionFixtures::SITUA_EJEMPLO, Situacion::class))
-        ;
-        $manager->persist($empleado);
-        $manager->flush();
-        $this->addReference(self::EMPLEADO_EJEMPLO, $empleado);
+        for ($i = 0; $i < 3; $i++) {
+            $empleado = new Empleado();
+            $empleado->setNombre('Currante')
+                ->setApellidos('Total ' . $i)
+                ->setDocIdentidad(str_repeat($i + 2, 8) . chr(65 + $i))
+                ->setNrp(str_repeat($i + 2, 8) . chr(65 + $i))
+                ->setGrupo($this->getReference($i % 2 === 0 ? GrupoFixtures::GRUPO2 : GrupoFixtures::GRUPO3, Grupo::class))
+                ->setUnidad($this->getReference($i < 2 ? UnidadFixtures::UNIDAD1 : UnidadFixtures::UNIDAD2, Unidad::class))
+                ->setSituacion($this->getReference(SituacionFixtures::SITUA, Situacion::class))
+            ;
+            $manager->persist($empleado);
+            $manager->flush();
+            $this->addReference(self::EMPLEADO . $i, $empleado);
+        }
 
-        $empleado = new Empleado();
-        $empleado->setNombre('Evaluador')
-            ->setApellidos('Eficiente')
-            ->setDocIdentidad('33333333K')
-            ->setNrp('33333333K')
-            ->setGrupo($this->getReference(GrupoFixtures::GRUPO_EJEMPLO, Grupo::class))
-            ->setUnidad($this->getReference(UnidadFixtures::UNIDAD_EJEMPLO, Unidad::class))
-            ->setSituacion($this->getReference(SituacionFixtures::SITUA_EJEMPLO, Situacion::class))
-        ;
-        $manager->persist($empleado);
-        $manager->flush();
-        $this->addReference(self::EVALUADOR_EJEMPLO, $empleado);
+        for ($i = 0; $i < 2; $i++) {
+            $empleado = new Empleado();
+            $empleado->setNombre('Evaluador')
+                ->setApellidos('Eficiente ' . $i)
+                ->setDocIdentidad(str_repeat($i + 5, 8) . chr(65 + $i))
+                ->setNrp(str_repeat($i + 5, 8) . chr(65 + $i))
+                ->setGrupo($this->getReference(GrupoFixtures::GRUPO1, Grupo::class))
+                ->setUnidad($this->getReference($i % 2 === 0 ? UnidadFixtures::UNIDAD1 : UnidadFixtures::UNIDAD2, Unidad::class))
+                ->setSituacion($this->getReference(SituacionFixtures::SITUA, Situacion::class))
+            ;
+            $manager->persist($empleado);
+            $manager->flush();
+            $this->addReference(self::EVALUADOR . $i, $empleado);
+            $empleado = new Empleado();
+            $empleado->setNombre('Colaborador')
+                ->setApellidos('Colaborativo ' . $i)
+                ->setDocIdentidad(str_repeat($i + 7, 8) . chr(65 + $i))
+                ->setNrp(str_repeat($i + 7, 8) . chr(65 + $i))
+                ->setGrupo($this->getReference(GrupoFixtures::GRUPO1, Grupo::class))
+                ->setUnidad($this->getReference($i % 2 === 0 ? UnidadFixtures::UNIDAD1 : UnidadFixtures::UNIDAD2, Unidad::class))
+                ->setSituacion($this->getReference(SituacionFixtures::SITUA, Situacion::class))
+            ;
+            $manager->persist($empleado);
+            $manager->flush();
+            $this->addReference(self::COLABORADOR . $i, $empleado);
+        }
     }
 
     public function getDependencies(): array

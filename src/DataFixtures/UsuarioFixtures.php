@@ -21,36 +21,14 @@ class UsuarioFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
-        $usuario = new Usuario();
-        $clave = $this->hasher->hashPassword($usuario, 'edu-' . EmpleadoFixtures::ADMIN_EJEMPLO);
-        $usuario->setLogin(EmpleadoFixtures::ADMIN_EJEMPLO)
-            ->setPassword($clave)
-            ->setCorreo(EmpleadoFixtures::ADMIN_EJEMPLO . '@localhost')
-            ->setRoles(['ROLE_ADMIN'])
-            ->setEmpleado($this->getReference(EmpleadoFixtures::ADMIN_EJEMPLO, Empleado::class))
-        ;
-        $manager->persist($usuario);
-        $manager->flush();
-
-        $usuario = new Usuario();
-        $clave = $this->hasher->hashPassword($usuario, 'edu-' . EmpleadoFixtures::EMPLEADO_EJEMPLO);
-        $usuario->setLogin(EmpleadoFixtures::EMPLEADO_EJEMPLO)
-            ->setPassword($clave)
-            ->setCorreo(EmpleadoFixtures::EMPLEADO_EJEMPLO . '@localhost')
-            ->setEmpleado($this->getReference(EmpleadoFixtures::EMPLEADO_EJEMPLO, Empleado::class))
-        ;
-        $manager->persist($usuario);
-        $manager->flush();
-
-        $usuario = new Usuario();
-        $clave = $this->hasher->hashPassword($usuario, 'edu-' . EmpleadoFixtures::EVALUADOR_EJEMPLO);
-        $usuario->setLogin(EmpleadoFixtures::EVALUADOR_EJEMPLO)
-            ->setPassword($clave)
-            ->setCorreo(EmpleadoFixtures::EVALUADOR_EJEMPLO . '@localhost')
-            ->setEmpleado($this->getReference(EmpleadoFixtures::EVALUADOR_EJEMPLO, Empleado::class))
-        ;
-        $manager->persist($usuario);
-        $manager->flush();
+        $this->crearUsuario($manager, EmpleadoFixtures::ADMIN, ['ROLE_ADMIN']);
+        for ($i = 0; $i < 3; $i++) {
+            $this->crearUsuario($manager, EmpleadoFixtures::EMPLEADO . $i);
+        }
+        for ($i = 0; $i < 2; $i++) {
+            $this->crearUsuario($manager, EmpleadoFixtures::EVALUADOR . $i);
+            $this->crearUsuario($manager, EmpleadoFixtures::COLABORADOR . $i);
+        }
     }
 
     public function getDependencies(): array
@@ -58,5 +36,20 @@ class UsuarioFixtures extends Fixture implements DependentFixtureInterface
         return [
             EmpleadoFixtures::class,
         ];
+    }
+
+    /** @param string[] $roles */
+    private function crearUsuario(ObjectManager $manager, string $login, array $roles = []): void
+    {
+        $usuario = new Usuario();
+        $clave = $this->hasher->hashPassword($usuario, 'edu-' . $login);
+        $usuario->setLogin($login)
+            ->setPassword($clave)
+            ->setCorreo($login . '@localhost')
+            ->setRoles($roles)
+            ->setEmpleado($this->getReference($login, Empleado::class))
+        ;
+        $manager->persist($usuario);
+        $manager->flush();
     }
 }
