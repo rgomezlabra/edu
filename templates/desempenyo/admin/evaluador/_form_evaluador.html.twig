@@ -15,12 +15,14 @@
             </tr>
             </thead>
             <tbody>
-            {%- for empleado in empleados %}
-                <tr id="{{ empleado.docIdentidad }}">
-                    <td>{{ empleado.docIdentidad }}</td>
-                    <td>{{ empleado }}</td>
-                </tr>
-            {%- endfor %}
+            {% for empleado in empleados -%}
+                {% if empleado.id != form.vars.value.empleado.id -%}
+                    <tr id="{{ empleado.docIdentidad }}">
+                        <td>{{ empleado.docIdentidad }}</td>
+                        <td>{{ empleado }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
             </tbody>
         </table>
         {{ form_help(form.evaluador, {help_attr: {class: 'text-secondary'}}) }}

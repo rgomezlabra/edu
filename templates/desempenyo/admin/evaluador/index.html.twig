@@ -298,7 +298,7 @@
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id}) }}">
-                <em class="fas fa-table"></em> Ver todos
+                <em class="fas fa-table"></em> Ver todo
             </a>
         </li>
     {%- endif %}
@@ -306,7 +306,7 @@
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoAuto}) }}">
-                <em class="fas fa-users"></em> Ver empleados
+                <em class="fas fa-users"></em> Empleados
             </a>
         </li>
     {%- endif %}
@@ -322,7 +322,7 @@
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoResp}) }}">
-                <em class="fas fa-user-check"></em> Ver responsables
+                <em class="fas fa-user-check"></em> Responsables
             </a>
         </li>
     {%- endif %}
@@ -339,7 +339,7 @@
             <li class="nav-item me-2">
                 <a class="btn btn-primary"
                    href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoOtro}) }}">
-                    <em class="fas fa-user-pen"></em> Ver otros
+                    <em class="fas fa-user-pen"></em> Colaboradores
                 </a>
             </li>
         {%- endif %}
@@ -348,7 +348,7 @@
         <li class="nav-item me-2">
             <a class="btn btn-primary"
                href="{{ path('desempenyo_admin_evaluador_index', {id: cuestionario.id, tipo: tipoNo}) }}">
-                <em class="fas fa-user-times"></em> Ver rechazados
+                <em class="fas fa-user-times"></em> Rechazados
             </a>
         </li>
     {%- endif %}
@@ -360,12 +360,15 @@
             </button>
         </li>
     {% elseif tipo == tipoResp -%}
-        <li class="nav-item ms-5 me-2">
-            <a class="btn btn-primary"
-               href="{{ path('desempenyo_admin_evaluador_carga', {id: cuestionario.id, tipo: 'evaluador'}) }}">
-                <em class="fas fa-file-upload"></em> Cargar desde CSV
-            </a>
-        </li>
+        {% if not cuestionario.fechaAlta or cuestionario.fechaAlta|date('Ymd') > 'now'|date('Ymd') %}
+            {# Solo para antes de que el cuestionario esté activo #}
+            <li class="nav-item ms-5 me-2">
+                <a class="btn btn-primary"
+                   href="{{ path('desempenyo_admin_evaluador_carga', {id: cuestionario.id, tipo: 'evaluador'}) }}">
+                    <em class="fas fa-file-upload"></em> Cargar desde CSV
+                </a>
+            </li>
+        {%- endif %}
     {%- endif %}
     {% if tipo == tipoOtro -%}
         <li class="nav-item ms-5 me-2">
@@ -533,7 +536,7 @@
                 method: 'POST',
                 url: url,
                 async: true,
-                success: function (response) {
+                success: (response) => {
                     $('#asignarForm').html(response);
                     let marca = 'table-info';
                     const cuadroEvaluador = $('#evaluador_evaluador');
@@ -558,7 +561,7 @@
                     });
                     modal.showModal();
                 },
-                error: function (xhr) {
+                error: (xhr) => {
                     $('#asignarTitulo').html('Error ' + xhr.status);
                     $('#asignarForm').html(response);
                     modal.showModal();

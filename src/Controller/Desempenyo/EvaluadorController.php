@@ -665,7 +665,7 @@ class EvaluadorController extends AbstractController
         ]);
     }
 
-        /** Empleado indica que puede ser evaluado en su puesto actual. */
+    /** Empleado indica que puede ser evaluado en su puesto actual. */
     #[Route(
         path: '/formulario/{codigo}/habilita',
         name: 'formulario_habilita',

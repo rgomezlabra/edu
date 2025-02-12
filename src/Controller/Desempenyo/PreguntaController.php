@@ -31,6 +31,7 @@ class PreguntaController extends AbstractController
         Pregunta::NUMERO => [
             'min' => 1,
             'max' => 10,
+            'salto' => 1,
             'observaciones' => true,
         ],
         Pregunta::RANGO => [

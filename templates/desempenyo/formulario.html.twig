@@ -256,7 +256,7 @@
 
 {% block modal %}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoEnviar',
-        texto:'Si envía el cuestionario se guardarán los datos definitivamente y ya no podrán ser editados.',
+        texto: 'Si envía el cuestionario se guardarán los datos definitivamente y ya no podrán ser editados.',
         pregunta: '¿Enviar este cuestionario?'}) }}
 {% endblock %}
 
@@ -266,15 +266,14 @@
         import { Toast } from 'bootstrap';
         const aviso = new Toast('#aviso');
         // Pedir confirmación antes de enviar formulario si las evidencias son adecuadas
-        const enviar = $('#enviar');
-        const enviado = $('#enviado');
-        enviado.val(false);
-        enviar.on('click', function (e) {
+        const enviado = document.querySelector('#enviado');
+        enviado.value = false;
+        document.querySelector('#enviar').addEventListener('click', (e) => {
             e.preventDefault();
             let seguir = true;
-            $('[class$=emphasis]').each(function () {
-                const observa = $('#' + $(this).prop('id').replace('preg_', 'observa_'));
-                if (observa.val().length < 10) {
+            document.querySelectorAll('[class$=emphasis]').forEach((preg) => {
+                const observa = document.querySelector('#' + preg.id.replace('preg_', 'observa_'));
+                if (observa.value.length < 10) {
                     aviso.show();
                     seguir = false;
                 }
@@ -284,22 +283,23 @@
             }
             document.querySelector('#dialogoEnviar').showModal();
         });
-        $('#dialogoEnviarAceptar').on('click', function () {
-            enviado.val(true).parent().submit();
+        document.querySelector('#dialogoEnviarAceptar').addEventListener('click', () => {
+            enviado.value = true;
+            enviado.parentElement.submit();
         });
         // Actualizar color y media de puntos
-        document.querySelectorAll('[id^=preg_]').forEach((el) => {
-            el.addEventListener('change', () => {
-                let valor = el.value;
+        document.querySelectorAll('[id^=preg_]').forEach((preg) => {
+            preg.addEventListener('change', () => {
+                let valor = preg.value;
                 let clases = 'fw-bold ' + (valor < 5 || valor > 7 ? 'text-danger-emphasis' : 'text-info');
-                if (el.type === 'range') {
-                    const salida = document.querySelector('#' + el.id.replace('preg_', 'salida_'));
+                if (preg.type === 'range') {
+                    const salida = document.querySelector('#' + preg.id.replace('preg_', 'salida_'));
                     salida.classList = clases;
                 } else {
-                    el.classList = clases;
+                    preg.classList = clases;
                 }
                 let total = 0;
-                const grupo = el.closest('.d-grid');
+                const grupo = preg.closest('.d-grid');
                 const preguntas = grupo.querySelectorAll('[id^=preg_]');
                 preguntas.forEach((pregunta) => {
                     total += parseFloat(pregunta.value);
@@ -316,7 +316,7 @@
                     // Aviso en grupo de preguntas (si identificador del grupo termina en número)
                     const aviso = new Toast(panel.querySelector('[id^=aviso_]'));
                     panel.querySelectorAll('[class$=emphasis]').forEach((preg) => {
-                        const observa = panel.querySelector('#' + preg.id.replace('preg_', 'observa_'));
+                        const observa = panel.querySelector('#' + preg.id.replace(/^(preg_)|(salida_)/, 'observa_'));
                         if (observa.value.length < 10) {
                             aviso.show();
                         }

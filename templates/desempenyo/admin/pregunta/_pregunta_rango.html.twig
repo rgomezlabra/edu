@@ -7,7 +7,7 @@
     {%- if pregunta.opciones.observaciones|default(false) %}<div class="col-2">{% endif %}
         <label>
             {{ pregunta.opciones.min|default }}
-            <input class="w-75" type="range" id="{{ preg }}" name="{{ preg }}" value="{{ valor.valor|default }}"
+            <input class="w-75" type="range" id="{{ preg }}" name="{{ preg }}" value="{{ valor.valor|default(6) }}"
                    min="{{ pregunta.opciones.min|default }}" max="{{ pregunta.opciones.max|default }}"
                    onload="{{ salida }}.value = this.value" oninput="{{ salida }}.value = 'Puntuación: ' + this.value" />
             {{ pregunta.opciones.max|default }}
