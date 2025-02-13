@@ -19,7 +19,11 @@
             <tbody>
             {% for grupo in grupos -%}
                 <tr class="fila" data-id="{{ grupo.id }}">
-                    <td><span class="badge-secondary" title="Reordenar grupos"><em class="fas fa-sort"></em></span></td>
+                    <td>
+                        {%- if grupos|length > 1 -%}
+                            <span class="badge-secondary" title="Reordenar grupos"><em class="fas fa-sort"></em></span>
+                        {%- endif -%}
+                    </td>
                     <td>{{ grupo.orden }}</td>
                     <td>{{ grupo.codigo }}</td>
                     <td>{{ grupo.titulo }}</td>

@@ -71,8 +71,8 @@ class Pregunta implements Stringable
     private bool $opcional = false;
 
     #[Gedmo\SortablePosition]
-    #[ORM\Column(type: Types::SMALLINT, nullable: false)]
-    private ?int $orden = 0;
+    #[ORM\Column(type: Types::SMALLINT)]
+    private ?int $orden = null;
 
     #[ORM\Column(type: Types::STRING, length: 100)]
     private ?string $codigo = null;

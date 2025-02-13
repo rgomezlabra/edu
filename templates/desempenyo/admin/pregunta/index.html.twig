@@ -221,7 +221,7 @@
             });
             $.ajax({
                 type: 'POST',
-                url: "{{ path('desempenyo_admin_pregunta_orden', {'cuestionario': cuestionario.id, 'grupo': grupo.id}) }}",
+                url: "{{ path('desempenyo_admin_pregunta_orden', {cuestionario: cuestionario.id, grupo: grupo.id}) }}",
                 data: {'orden': orden},
                 dataType: 'JSON',
                 async: true,

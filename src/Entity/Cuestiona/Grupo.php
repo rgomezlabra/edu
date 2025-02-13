@@ -33,8 +33,8 @@ class Grupo implements Stringable
     private ?bool $activa = true;
 
     #[Gedmo\SortablePosition]
-    #[ORM\Column(type: Types::SMALLINT, nullable: false)]
-    private int $orden = 0;
+    #[ORM\Column(type: Types::SMALLINT)]
+    private ?int $orden = null;
 
     #[ORM\Column(type: Types::STRING, length: 100)]
     private ?string $codigo = null;
@@ -89,12 +89,12 @@ class Grupo implements Stringable
         return $this;
     }
 
-    public function getOrden(): int
+    public function getOrden(): ?int
     {
         return $this->orden;
     }
 
-    public function setOrden(int $orden = 0): static
+    public function setOrden(?int $orden): static
     {
         $this->orden = $orden;
 
