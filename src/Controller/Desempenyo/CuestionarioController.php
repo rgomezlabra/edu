@@ -143,6 +143,32 @@ class CuestionarioController extends AbstractController
         ]);
     }
 
+    #[Route(
+        path: '/{id}/delete',
+        name: 'delete',
+        defaults: ['titulo' => 'Eliminar Cuestionario de Evaluación de Desempeño'],
+        methods: ['GET', 'POST']
+    )]
+    public function delete(Request $request, Cuestionario $cuestionario): Response
+    {
+        $this->denyAccessUnlessGranted('admin');
+        $id = $cuestionario->getId();
+        if (count($cuestionario->getGrupos()) > 0) {
+            $this->generator->logAndFlash('error', 'No se puede eliminar un cuestionario con grupos definidos.', [
+                'id' => $id,
+                'codigo' => $cuestionario->getCodigo(),
+            ]);
+        } elseif ($this->isCsrfTokenValid('delete' . (int) $id, $request->request->getString('_token'))) {
+            $this->cuestionarioRepository->remove($cuestionario, true);
+            $this->generator->logAndFlash('info', 'Cuestionario eliminado', [
+                'id' => $id,
+                'codigo' => $cuestionario->getCodigo(),
+            ]);
+        }
+
+        return $this->redirectToRoute('desempenyo_admin_cuestionario_index', [], Response::HTTP_SEE_OTHER);
+    }
+
     /** Activar formulario (estado publicado). */
     #[Route(
         path: '/{id}/activar',
