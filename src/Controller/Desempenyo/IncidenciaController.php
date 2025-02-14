@@ -350,8 +350,7 @@ class IncidenciaController extends AbstractController
             }
 
             $fecha = new DateTimeImmutable();
-            $apunte
-                ->setIncidencia($cirhus)
+            $apunte->setIncidencia($cirhus)
                 ->setAutor($autor)
                 ->setFechaInicio($fecha)
                 ->setFechaFin($apunte->getEstado() === $finalizado ? $fecha : null)

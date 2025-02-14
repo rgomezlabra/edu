@@ -21,9 +21,8 @@ class IncidenciaApunteType extends AbstractType
     {
         /** @var Estado[] $estados */
         $estados = $this->estadoRepository->createQueryBuilder('estado')
-            ->join('estado.tipo', 'tipo')
             ->andWhere('estado.nombre <> :iniciado')
-            ->andWhere('tipo.nombre = :incidencia')
+            ->andWhere('estado.tipo = :incidencia')
             ->setParameter('iniciado', Estado::INICIADO)
             ->setParameter('incidencia', Estado::INCIDENCIA)
             ->getQuery()
@@ -38,7 +37,7 @@ class IncidenciaApunteType extends AbstractType
     <em class="text-info fas fa-info-circle"></em> Pulsar para ver información de los estados.
 </em>
 EOT;
-        if ($options['reabrir'] || '' !== $options['rol']) {
+        if ($options['reabrir'] || '' === $options['rol']) {
             $builder->add('comentario');
         } else {
             $builder

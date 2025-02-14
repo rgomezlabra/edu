@@ -11,7 +11,7 @@
         <div class="fila-campo">Estado actual</div>
         <div class="fila-valor">
             <span class="badge">
-                <em class="bg-{{ incidencia.incidencia.apuntes.last.estado.color }} p-1 fas {{ incidencia.incidencia.apuntes.last.estado.icono|default }}"></em>
+                <em class="bg-{{ incidencia.incidencia.apuntes.last.estado.color|default }} p-1 fas {{ incidencia.incidencia.apuntes.last.estado.icono|default }}"></em>
             </span>
             {{- incidencia.incidencia.apuntes.last.estado.nombre|default -}}
         </div>
@@ -45,7 +45,7 @@
                     <tr>
                         <td>
                             <span class="badge">
-                                <em class="bg-{{ apunte.estado.color }} p-1 fas {{ apunte.estado.icono|default }}"></em>
+                                <em class="bg-{{ apunte.estado.color|default }} p-1 fas {{ apunte.estado.icono|default }}"></em>
                             </span>
                             {{- apunte.estado.nombre|default -}}
                         </td>
@@ -57,7 +57,7 @@
                             <a class="apunte mx-1" href="" title="Ver detalles" data-id="{{ apunte.id }}">
                                 <em class="fas fa-magnifying-glass"></em>
                             </a>
-                            {% if apunte.estado.nombre|default != constant('App\\Entity\\Sistema\\Estado::FINALIZADO') and loop.last -%}
+                            {% if apunte.estado.nombre|default != constant('App\\Entity\\Estado::FINALIZADO') and loop.last -%}
                                 <a class="mx-1" title="Editar"
                                    href="{{ path('desempenyo_admin_incidencia_apunte',{incidencia: incidencia.id, apunte: apunte.id}) }}">
                                     <em class="mx-1 fas fa-edit"></em>
@@ -108,7 +108,7 @@
                 <div class="fila-campo">Estado</div>
                 <div class="fila-valor">
                     <span class="badge">
-                        <em class="bg-{{ apunte.estado.color }} p-1 fas {{ apunte.estado.icono|default }}"></em>
+                        <em class="bg-{{ apunte.estado.color|default }} p-1 fas {{ apunte.estado.icono|default }}"></em>
                     </span>
                     {{- apunte.estado.nombre|default -}}
                 </div>

@@ -20,7 +20,7 @@
             </tr>
         </thead>
         <tbody>
-        {%- for incidencia in incidencias %}
+        {% for incidencia in incidencias -%}
             <tr>
                 <td>{{ incidencia.id }}</td>
                 <td>{{ incidencia.incidencia.apuntes.last.estado.nombre|default }}</td>

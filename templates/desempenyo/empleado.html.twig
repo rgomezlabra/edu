@@ -19,7 +19,7 @@
             <tbody>
             {%- for evaluacion in evaluaciones %}
                 <tr>
-                    <td>{{ evaluacion.empleado.unidad.nombre) }}</td>
+                    <td>{{ evaluacion.empleado.unidad.nombre }}</td>
                     <td>{{ evaluacion.empleado }}</td>
                     <td>
                         {%- if evaluacion.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') -%}
