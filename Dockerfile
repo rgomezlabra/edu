@@ -36,15 +36,15 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY --from=deps app/vendor/ /var/www/html/vendor
 COPY . /var/www/html
 COPY docker/.env.local /var/www/html/.env
-RUN chown -R www-data /var/www/html/migrations /var/www/html/var/cache /var/www/html/var/log
+COPY docker/000-default.conf /etc/apache2/sites-available/000-default.conf
+RUN chmod a+x /var/www/html/docker/init-script.sh \
+    && chown -R www-data:www-data /var/www/html/migrations /var/www/html/var/cache /var/www/html/var/log
 
 COPY --from=composer:lts /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER 1
 RUN chmod +x /usr/bin/composer \
     && /usr/bin/composer dump-autoload \
     && /usr/bin/composer install
-
-RUN sed -i -e 's,/var/www/html,/var/www/html/public,' /etc/apache2/sites-available/000-default.conf
 
 USER www-data
 

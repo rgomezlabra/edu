@@ -12,9 +12,7 @@ services:
       log:
         condition: service_started
     post_start:
-      - command: /var/www/html/bin/console make:migration
-      - command: /var/www/html/bin/console doctrine:migration:migrate
-      - command: /var/www/html/bin/console doctrine:fixtures:load --no-interaction
+      - command: /var/www/html/docker/init-script.sh
   db:
     image: mysql:8.0
     restart: always
@@ -35,6 +33,8 @@ services:
       retries: 5
   log:
     image: redis:7.0
+    expose:
+      - 6379
 
 volumes:
   database_data:
