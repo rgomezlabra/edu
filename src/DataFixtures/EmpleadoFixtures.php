@@ -42,6 +42,7 @@ class EmpleadoFixtures extends Fixture implements DependentFixtureInterface
                 ->setDocIdentidad(str_repeat($i + 2, 8) . chr(65 + $i))
                 ->setNrp(str_repeat($i + 2, 8) . chr(65 + $i))
                 ->setGrupo($this->getReference($i % 2 === 0 ? GrupoFixtures::GRUPO2 : GrupoFixtures::GRUPO3, Grupo::class))
+                ->setNivel($i % 2 === 0 ? 20 : null)
                 ->setUnidad($this->getReference($i < 2 ? UnidadFixtures::UNIDAD1 : UnidadFixtures::UNIDAD2, Unidad::class))
                 ->setSituacion($this->getReference(SituacionFixtures::SITUA, Situacion::class))
             ;
@@ -57,6 +58,7 @@ class EmpleadoFixtures extends Fixture implements DependentFixtureInterface
                 ->setDocIdentidad(str_repeat($i + 5, 8) . chr(65 + $i))
                 ->setNrp(str_repeat($i + 5, 8) . chr(65 + $i))
                 ->setGrupo($this->getReference(GrupoFixtures::GRUPO1, Grupo::class))
+                ->setNivel(27)
                 ->setUnidad($this->getReference($i % 2 === 0 ? UnidadFixtures::UNIDAD1 : UnidadFixtures::UNIDAD2, Unidad::class))
                 ->setSituacion($this->getReference(SituacionFixtures::SITUA, Situacion::class))
             ;
@@ -69,6 +71,7 @@ class EmpleadoFixtures extends Fixture implements DependentFixtureInterface
                 ->setDocIdentidad(str_repeat($i + 7, 8) . chr(65 + $i))
                 ->setNrp(str_repeat($i + 7, 8) . chr(65 + $i))
                 ->setGrupo($this->getReference(GrupoFixtures::GRUPO1, Grupo::class))
+                ->setNivel(25)
                 ->setUnidad($this->getReference($i % 2 === 0 ? UnidadFixtures::UNIDAD1 : UnidadFixtures::UNIDAD2, Unidad::class))
                 ->setSituacion($this->getReference(SituacionFixtures::SITUA, Situacion::class))
             ;

@@ -146,9 +146,11 @@ class Cuestionario implements Stringable
         return $this->bienvenida;
     }
 
-    public function setBienvenida(?string $bienvenida): void
+    public function setBienvenida(?string $bienvenida): static
     {
         $this->bienvenida = $bienvenida;
+
+        return $this;
     }
 
     public function getDespedida(): ?string
@@ -156,9 +158,11 @@ class Cuestionario implements Stringable
         return $this->despedida;
     }
 
-    public function setDespedida(?string $despedida): void
+    public function setDespedida(?string $despedida): static
     {
         $this->despedida = $despedida;
+
+        return $this;
     }
 
     public function getAutor(): ?Usuario

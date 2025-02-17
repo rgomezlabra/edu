@@ -30,6 +30,7 @@ class EstadoFixtures extends Fixture
             ->setColor('gray')
         ;
         $manager->persist($estado);
+        $this->addReference(Estado::BORRADOR, $estado);
         $estado = new Estado();
         $estado->setNombre(Estado::ARCHIVADO)
             ->setTipo(Estado::SISTEMA)

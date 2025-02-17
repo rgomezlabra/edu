@@ -47,9 +47,11 @@ class Archivo
         return $this->archivo;
     }
 
-    public function setArchivo(?\App\Entity\Archivo $archivo): void
+    public function setArchivo(?\App\Entity\Archivo $archivo): static
     {
         $this->archivo = $archivo;
+
+        return $this;
     }
 
     public function getFecha(): ?DateTimeImmutable

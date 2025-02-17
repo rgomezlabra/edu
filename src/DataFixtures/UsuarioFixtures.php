@@ -10,7 +10,7 @@ use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
- * Cargar usuario administrador por defecto.
+ * Cargar usuarios de ejemplo.
  * @author Ramón M. Gómez <ramongomez@us.es>
  */
 class UsuarioFixtures extends Fixture implements DependentFixtureInterface
@@ -51,5 +51,8 @@ class UsuarioFixtures extends Fixture implements DependentFixtureInterface
         ;
         $manager->persist($usuario);
         $manager->flush();
+        if (EmpleadoFixtures::ADMIN === $login) {
+            $this->addReference('usuario' . $login, $usuario);
+        }
     }
 }
