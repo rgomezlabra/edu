@@ -42,8 +42,7 @@ RUN chmod a+x /var/www/html/docker/init-script.sh \
 
 COPY --from=composer:lts /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER 1
-RUN chmod +x /usr/bin/composer \
-    && /usr/bin/composer dump-autoload \
+RUN /usr/bin/composer dump-autoload \
     && /usr/bin/composer install
 
 USER www-data

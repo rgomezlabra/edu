@@ -1,7 +1,7 @@
 name: edu
 
 services:
-  server:
+  web:
     build:
       context: .
     ports:
@@ -11,8 +11,17 @@ services:
         condition: service_healthy
       log:
         condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /var/www/html/src
+        - action: sync
+          path: ./templates
+          target: /var/www/html/templates
     post_start:
       - command: /var/www/html/docker/init-script.sh
+
   db:
     image: mysql:8.0
     restart: always
@@ -31,6 +40,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
   log:
     image: redis:7.0
     expose:
