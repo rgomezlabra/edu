@@ -38,6 +38,7 @@ COPY . /var/www/html
 COPY docker/.env.local /var/www/html/.env
 COPY docker/000-default.conf /etc/apache2/sites-available/000-default.conf
 RUN chmod a+x /var/www/html/docker/init-script.sh \
+    && mkdir -p /var/www/html/var/cache /var/www/html/var/log \
     && chown -R www-data:www-data /var/www/html/migrations /var/www/html/var/cache /var/www/html/var/log
 
 COPY --from=composer:lts /usr/bin/composer /usr/bin/composer

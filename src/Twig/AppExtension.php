@@ -58,6 +58,14 @@ class AppExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter(
                 'sum',
                 static fn (array $datos): float|int => array_sum($datos),
+            ),
+            // Enmascarar caracteres
+            new TwigFilter(
+                'mask',
+                static fn (string $valor): string =>
+                strlen($valor) < 9 ?
+                    (substr($valor, 0, intdiv(strlen($valor), 2)) . str_repeat('*', strlen($valor) - intdiv(strlen($valor), 2))) :
+                    (substr($valor, 0, strlen($valor) - intdiv(strlen($valor), 2) - intdiv(strlen($valor) - 4, 2)) . str_repeat('*', intdiv(strlen($valor), 2)) . substr($valor, strlen($valor) - intdiv(strlen($valor) - intdiv(strlen($valor), 2), 2)))
             )
         ];
     }
