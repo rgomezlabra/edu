@@ -1,10 +1,6 @@
 # syntax=docker/dockerfile:1
 
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
-
-FROM composer:lts as deps
+FROM composer:lts AS deps
 
 WORKDIR /app
 
@@ -18,7 +14,7 @@ RUN --mount=type=bind,source=composer.json,target=composer.json \
     composer dump-autoload
 
 
-FROM php:8.3.6-apache as final
+FROM php:8.3.6-apache AS final
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -37,12 +33,13 @@ COPY --from=deps app/vendor/ /var/www/html/vendor
 COPY . /var/www/html
 COPY docker/.env.local /var/www/html/.env
 COPY docker/000-default.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/init-script.sh /var/www/html/docker/init-script.sh
 RUN chmod a+x /var/www/html/docker/init-script.sh \
     && mkdir -p /var/www/html/var/cache /var/www/html/var/log \
     && chown -R www-data:www-data /var/www/html/migrations /var/www/html/var/cache /var/www/html/var/log
 
 COPY --from=composer:lts /usr/bin/composer /usr/bin/composer
-ENV COMPOSER_ALLOW_SUPERUSER 1
+ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN /usr/bin/composer dump-autoload \
     && /usr/bin/composer install
 
