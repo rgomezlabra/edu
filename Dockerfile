@@ -35,6 +35,7 @@ COPY docker/.env.local /var/www/html/.env
 COPY docker/000-default.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/init-script.sh /var/www/html/docker/init-script.sh
 RUN chmod a+x /var/www/html/docker/init-script.sh \
+    && sed -i -e 's/\r//g' /var/www/html/docker/init-script.sh \
     && mkdir -p /var/www/html/var/cache /var/www/html/var/log \
     && chown -R www-data:www-data /var/www/html/migrations /var/www/html/var/cache /var/www/html/var/log
 
