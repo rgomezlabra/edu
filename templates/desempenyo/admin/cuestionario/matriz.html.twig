@@ -57,9 +57,7 @@
                     <tr>
                         <td class="fw-bold">{{ pregunta }}</td>
                         {% for codigo, tipo in tipos -%}
-                            {% if codigo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and not pregunta.reducida
-                                or codigo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and pregunta.reducida
-                            -%}
+                            {% if codigo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and not pregunta.reducida -%}
                                 <td>{{ respuestas[codigo][pregunta.id].valor|default|number_format(2, ',') }}</td>
                                 {% if detalle %}<td>{{ respuestas[codigo][pregunta.id].observa|default }}</td>{% endif %}
                             {% else -%}

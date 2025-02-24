@@ -17,7 +17,7 @@
             <h3>Evaluación de {{ evalua.empleado }} por parte de tercer agente {{ app.user.empleado }}</h3>
         {%- endif %}
         <dl>
-            <dt>Fecha de entrega: {{ evalua.formulario.enviado|date('d/m/Y') }}</dt>
+            <dt>Fecha de entrega: {{ evalua.formulario.fechaEnvio|date('d/m/Y') }}</dt>
             {% if evalua.testimonio %}
                 <dt>
                     Otras personas responsables y/o colaboradoras cuyos testimonios evidenciados han servido de ayuda o
