@@ -429,7 +429,7 @@ class IncidenciaController extends AbstractController
         }
 
         $form = $this->createForm(CirhusIncidenciaApunteType::class, $ultimo, [
-            'rol' => 'usuario',
+            'rol' => '',
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {

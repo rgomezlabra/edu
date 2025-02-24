@@ -4,11 +4,13 @@
     <div class="pagina-titulo">{{ titulo }}</div>
 
     {{ include('desempenyo/admin/servicio/_form.html.twig') }}
-
 {% endblock %}
 
 {% block migas %}
     {{ parent() }}
-    <li class="breadcrumb-item"><a href="{{ path('desempenyo_admin_servicio_index') }}">Servicio</a>
+    <li class="breadcrumb-item">
+        <a href="{{ path('desempenyo_admin_servicio_index') }}">Servicio</a>
     </li>
 {% endblock %}
+
+{% block botones %}{% endblock %}
