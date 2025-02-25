@@ -57,12 +57,14 @@
                     <tr>
                         <td class="fw-bold">{{ pregunta }}</td>
                         {% for codigo, tipo in tipos -%}
-                            {% if codigo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and not pregunta.reducida -%}
-                                <td>{{ respuestas[codigo][pregunta.id].valor|default|number_format(2, ',') }}</td>
-                                {% if detalle %}<td>{{ respuestas[codigo][pregunta.id].observa|default }}</td>{% endif %}
-                            {% else -%}
+                            {% if config.reducida|default(false) and ((codigo != constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and pregunta.reducida)
+                                or (codigo == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and not pregunta.reducida))
+                            -%}
                                 <td></td>
                                 {% if detalle %}<td></td>{% endif %}
+                            {% else -%}
+                                <td>{{ respuestas[codigo][pregunta.id].valor|default|number_format(2, ',') }}</td>
+                                {% if detalle %}<td>{{ respuestas[codigo][pregunta.id].observa|default }}</td>{% endif %}
                             {% endif -%}
                         {% endfor %}
                     </tr>
@@ -97,7 +99,7 @@
 
 {% block botones %}
     <li class="nav-item me-2">
-        <a class="btn btn-primary" href="{{ path(app.current_route, app.current_route_parameters|merge({detalle: not detalle})) }}">
+        <a class="btn btn-primary" href="{{ path(app.current_route, app.current_route_parameters|merge(app.request.query.all)|merge({detalle: not detalle})) }}">
             {%- if detalle %}
                 <em class="fas fa-table"></em> Matriz de resultados
             {%- else %}

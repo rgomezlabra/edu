@@ -66,7 +66,7 @@
     {%- elseif rechazado %}
         <div class="alert alert-warning">
             <em class="mx-1 fas fa-triangle-exclamation"></em>Usted ha solicitado no ser evaluado.<br>
-            {% if not rechazado -%}
+            {% if not registrado -%}
                 <a id="recupera" href="" data-url="{{ activos[0].url ~ '/recupera' }}">
                     Volver a activar mi participación (solo disponible hasta el día
                     {{ activos[0].fechaBaja|date('d/m/Y') }}, inclusive)
