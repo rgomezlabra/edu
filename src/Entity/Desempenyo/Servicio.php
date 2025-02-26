@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Stringable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ServicioRepository::class)]
 #[ORM\Table(name: "desempenyo_servicio")]
@@ -19,24 +20,25 @@ class Servicio implements Stringable
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
+    #[ORM\Column(type: Types::STRING, length: 50, unique: true)]
     private ?string $codigo = null;
 
-    #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
+    #[ORM\Column(type: Types::STRING, length: 255)]
     private ?string $nombre = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 100, nullable: true)]
+    #[Assert\Email]
     private ?string $correo = null;
 
-    #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
+    #[ORM\Column(type: Types::STRING, length: 100, nullable: true)]
     private ?string $telefono = null;
 
-    #[ORM\Column(type: Types::STRING, length: 255, nullable: false)]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     private ?string $responsable = null;
 
     public function __toString(): string
     {
-        return (string)$this->codigo;
+        return (string) $this->codigo;
     }
 
     public function getId(): ?int
