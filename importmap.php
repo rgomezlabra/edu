@@ -39,50 +39,50 @@ return [
         'version' => '3.7.1',
     ],
     'datatables.net-bs5' => [
-        'version' => '2.1.8',
+        'version' => '2.2.2',
     ],
     'datatables.net' => [
-        'version' => '2.1.8',
+        'version' => '2.2.2',
     ],
     'datatables.net-bs5/css/dataTables.bootstrap5.min.css' => [
-        'version' => '2.1.8',
+        'version' => '2.2.2',
         'type' => 'css',
     ],
     'datatables.net-buttons-bs5' => [
-        'version' => '3.2.0',
+        'version' => '3.2.2',
     ],
     'datatables.net-buttons' => [
-        'version' => '3.2.0',
+        'version' => '3.2.2',
     ],
     'datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css' => [
-        'version' => '3.2.0',
+        'version' => '3.2.2',
         'type' => 'css',
     ],
     'datatables.net-responsive-bs5' => [
-        'version' => '3.0.3',
+        'version' => '3.0.4',
     ],
     'datatables.net-select-bs5' => [
-        'version' => '2.1.0',
+        'version' => '3.0.0',
     ],
     'datatables.net-responsive' => [
-        'version' => '3.0.3',
+        'version' => '3.0.4',
     ],
     'datatables.net-select' => [
-        'version' => '2.1.0',
+        'version' => '3.0.0',
     ],
     'datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css' => [
-        'version' => '3.0.3',
+        'version' => '3.0.4',
         'type' => 'css',
     ],
     'datatables.net-select-bs5/css/select.bootstrap5.min.css' => [
-        'version' => '2.1.0',
+        'version' => '3.0.0',
         'type' => 'css',
     ],
     'datatables.net-buttons/js/buttons.html5.js' => [
-        'version' => '3.2.0',
+        'version' => '3.2.2',
     ],
     'datatables.net-buttons/js/buttons.print.js' => [
-        'version' => '3.2.0',
+        'version' => '3.2.2',
     ],
     'datatables.net-rowreorder' => [
         'version' => '1.5.0',
@@ -105,32 +105,32 @@ return [
         'type' => 'css',
     ],
     '@fortawesome/fontawesome-free' => [
-        'version' => '6.7.1',
+        'version' => '6.7.2',
     ],
     '@fortawesome/fontawesome-free/css/fontawesome.min.css' => [
-        'version' => '6.7.1',
+        'version' => '6.7.2',
         'type' => 'css',
     ],
     '@fortawesome/fontawesome-svg-core' => [
-        'version' => '6.7.1',
+        'version' => '6.7.2',
     ],
     '@fortawesome/fontawesome-svg-core/styles.min.css' => [
-        'version' => '6.7.1',
+        'version' => '6.7.2',
         'type' => 'css',
     ],
     '@fortawesome/free-regular-svg-icons' => [
-        'version' => '6.7.1',
+        'version' => '6.7.2',
     ],
     '@fortawesome/free-solid-svg-icons' => [
-        'version' => '6.7.1',
+        'version' => '6.7.2',
     ],
     '@fortawesome/free-brands-svg-icons' => [
-        'version' => '6.7.1',
+        'version' => '6.7.2',
     ],
     '@ckeditor/ckeditor5-build-classic' => [
-        'version' => '44.1.0',
+        'version' => '44.2.1',
     ],
     'ckeditor5/translations/es.js' => [
-        'version' => '44.1.0',
+        'version' => '44.2.1',
     ],
 ];
