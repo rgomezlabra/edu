@@ -182,6 +182,7 @@ class PlantillaController extends AbstractController
                         ->setNombre($linea['DES_UNIDAD'])
                     ;
                     $this->unidadRepository->save($unidad, true);
+                    $unidades[] = $unidad;
                     ++$resultado['nuevos']['unidades'];
                 }
 
@@ -193,11 +194,12 @@ class PlantillaController extends AbstractController
                         ->setNombre($linea['DES_SITAD'])
                     ;
                     $this->situacionRepository->save($situacion, true);
+                    $situaciones[] = $situacion;
                     ++$resultado['nuevos']['situaciones'];
                 }
 
                 if ('S' === $linea['AUS_SN']) {
-                    $ausencia = array_slice(array_filter($situaciones, static fn (Ausencia $a) => $a->getCodigo() === $linea['ID_AUSENC']), 0, 1)[0] ?? null;
+                    $ausencia = array_slice(array_filter($ausencias, static fn (Ausencia $a) => $a->getCodigo() === $linea['ID_AUSENC']), 0, 1)[0] ?? null;
                     if (!$ausencia instanceof Ausencia) {
                         // Nueva ausencia
                         $ausencia = new Ausencia();
@@ -205,6 +207,7 @@ class PlantillaController extends AbstractController
                             ->setNombre($linea['DES_AUSENC'])
                         ;
                         $this->ausenciaRepository->save($ausencia, true);
+                        $ausencias[] = $ausencia;
                         ++$resultado['nuevos']['ausencias'];
                     }
                 } else {
