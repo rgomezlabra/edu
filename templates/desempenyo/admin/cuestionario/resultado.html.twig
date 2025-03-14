@@ -35,12 +35,12 @@
             </tr>
             </thead>
             <tbody>
-            {%- for idEmpleado, dato in datos %}
+            {% for idEmpleado, dato in datos -%}
                 <tr>
                     <td>{{ (dato|first).formulario.empleado }}</td>
                     {%- if rechazos[idEmpleado] is defined %}
                         <td>{{ rechazos[idEmpleado].registrado ? rechazos[idEmpleado].registrado|date('Y-m-d') }}</td>
-                        <td></td>
+                        <td>{{ 0|number_format(2, ',' ) }}</td>
                         <td></td>
                         {%- set tipos = [
                             constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE'),
@@ -54,11 +54,11 @@
                             constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO'),
                         ] %}
                     {%- endif %}
-                    {%- for tipo in tipos %}
+                    {% for tipo in tipos -%}
                         <td>{{ dato[tipo].puntos|default|number_format(2, ',' ) }}</td>
                         <td>{{ dato[tipo] is defined ? (dato[tipo].formulario.formulario.fechaEnvio is defined ? dato[tipo].formulario.formulario.fechaEnvio|date('Y-m-d')) }}</td>
                     {%- endfor %}
-                    {%- set media =
+                    {%- set media = rechazos[idEmpleado].registrado|defaul(false) ? 0 :
                         (dato[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')].puntos|default(0) * config['peso1'] / 100)
                         + (dato[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')].puntos|default(0) * config['peso2'] / 100)
                         + (dato[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')].puntos|default(0) * config['peso3'] / 100)
@@ -96,8 +96,8 @@
 {% endblock %}
 
 {% block botones %}
-    {% if cuestionario.configuracion.provisional is defined and cuestionario.configuracion.provisional.date|date('c') < 'now'|date('c') and
-        cuestionario.configuracion.definitiva is defined and cuestionario.configuracion.definitiva.date|date('c') > 'now'|date('c')
+    {% if cuestionario.configuracion.provisional.date is defined and cuestionario.configuracion.provisional.date|date('c') < 'now'|date('c') and
+        cuestionario.configuracion.definitiva.date is defined and cuestionario.configuracion.definitiva.date|date('c') > 'now'|date('c')
     %}
         {# Solo disponible en periodo de resultados provisionales y antes de definitivos #}
         <li class="nav-item me-2">
@@ -195,6 +195,13 @@
                     modal.showModal();
                 },
             });
+        });
+        // Confirmar traslado de valoraciones a columna del tribunal
+        document.querySelector('#traslada').addEventListener('click', () => {
+            document.querySelector('#modalTraslada').showModal();
+        });
+        document.querySelector('#modalTrasladaAceptar').addEventListener('click', () => {
+            window.location.href = document.getElementById('traslada').dataset.url;
         });
     </script>
 {% endblock %}
