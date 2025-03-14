@@ -45,13 +45,13 @@
     </div>
 </div>
 <ul class="lead my-3">
-    {%- if activos[0].fechaAlta > date() %}
+    {%- if activos[0].fechaAlta|date('Ymd') > hoy %}
         <div class="alert alert-warning">
             El cuestionario estará disponible entre los días {{ activos[0].fechaAlta|date('d/m/Y') }} y
             {{ activos[0].fechaBaja|date('d/m/Y') }}. Puede consultar el texto en el apartado
             <a href="#documentos">documentos de interés</a>.
         </div>
-    {%- elseif activos[0].fechaBaja < date() %}
+    {%- elseif activos[0].fechaBaja|date('Ymd') < hoy %}
         <div class="alert alert-warning">
             El plazo para cumplimentar el cuestionario terminó el día {{ activos[0].fechaBaja|date('d/m/Y') }}.
             Si existe alguna incidencia, puede comunicarla en el apartado

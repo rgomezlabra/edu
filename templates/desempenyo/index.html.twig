@@ -1,12 +1,15 @@
 {% extends '/layout/base.html.twig' %}
 
 {% block content %}
-    {#- Pesos establecidos por defecto #}
+    {% set hoy = 'now'|date('Ymd') -%}
+    {# Pesos establecidos por defecto -#}
     {% set pesos = [34, 56, 10] -%}
     {% set activos = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO')) -%}
     {% set rechazado = evaluados|filter(e => e.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION'))|length > 0 -%}
     {% set registrado = evaluados|filter(e => e.registrado != null)|length > 0 -%}
+
     <div class="pagina-titulo">Evaluación del Desempeño Universitario</div>
+
     <p class=""><em>(descripción de la aplicación)</em></p>
 
     {#- Acciones comunes #}
@@ -32,7 +35,7 @@
                         Evaluación colaborador
                     </button>
                 {% endif %}
-                {% if activos[0].configuracion.provisional.date is defined and activos[0].configuracion.provisional.date|date('c') < 'now'|date('c') %}
+                {% if activos[0].configuracion.provisional.date is defined and activos[0].configuracion.provisional.date|date('Ymd') <= hoy %}
                     <button class="nav-link" id="vert-tabs-resultado-tab" type="button" role="tab" data-bs-toggle="pill"
                             data-bs-target="#vert-tabs-resultado" aria-controls="vert-tabs-resultado">
                         Resultados
@@ -120,8 +123,8 @@
         texto: 'Doy mi habilitación para ser evaluado en mi actual puesto desempeñado.',
         cancelar: 'No', aceptar: 'Sí'}) }}
     {% set activo = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO'))[0]|default -%}
-    {% if activo -%}
-        {% set datosProvisional -%}
+    {% if not activo -%}
+        {% set datos -%}
             <div class="container-fluid py-4 g-4">
                 {% if registrado -%}
                 <div class="row py-2">
@@ -159,45 +162,67 @@
                 {%- endif %}
             </div>
         {% endset -%}
-        {{- include('layout/_dialogo_info.html.twig', {id: 'provisional', titulo: 'Resultado provisional',
-            contenido: datosProvisional}) }}
-    {%- endif %}
+    {% else %}
+        {%- set datos = 'Sin datos' -%}
+    {% endif %}
+    {{- include('layout/_dialogo_info.html.twig', {id: 'dialogoResultado', titulo: 'Resultado', contenido: datos}) }}
 {% endblock %}
 
 {% block js %}
     {{ parent() }}
     <script type="module">
-        const rechaza = $('#rechaza');
-        const recupera = $('#recupera');
-        const habilita = $('#habilita');
         // Rechazar evaluación
-        rechaza.on('click', function (e) {
-            e.preventDefault();
-            document.querySelector('#dialogoRechaza').showModal();
-        });
-        $('#dialogoRechazaAceptar').on('click', function () {
-            window.location.href = rechaza.data('url');
-        });
+        const rechaza = document.querySelector('#rechaza');
+        if (rechaza !== null) {
+            rechaza.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                document.querySelector('#dialogoRechaza').showModal();
+            });
+            document.querySelector('#dialogoRechazaAceptar').addEventListener('click', () => {
+                window.location.href = rechaza.dataset.url;
+            });
+        }
         // Recuperar evaluación
-        recupera.on('click', function (e) {
-            e.preventDefault();
-            document.querySelector('#dialogoRecupera').showModal();
-        });
-        $('#dialogoRecuperaAceptar').on('click', function () {
-            window.location.href = recupera.data('url');
-        });
+        const recupera = document.querySelector('#recupera');
+        if (recupera !== null) {
+            recupera.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                document.querySelector('#dialogoRecupera').showModal();
+            });
+            document.querySelector('#dialogoRecuperaAceptar').addEventListener('click', () => {
+                window.location.href = recupera.dataset.url;
+            });
+        }
         // Habilitación para puesto actual
-        habilita.on('click', function (e) {
-            e.preventDefault();
-            document.querySelector('#dialogoHabilita').showModal();
-        });
-        $('#dialogoHabilitaAceptar').on('click', function () {
-            window.location.href = habilita.data('url');
-        });
-        // Mostrar resultado provisioanl
-        $('#verProvisional').on('click', function (e) {
-            e.preventDefault();
-            document.querySelector('#provisional').showModal();
-        });
+        const habilita = document.querySelector('#habilita');
+        if (habilita !== null) {
+            habilita.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                document.querySelector('#dialogoHabilita').showModal();
+            });
+            document.querySelector('#dialogoHabilitaAceptar').addEventListener('click', () => {
+                window.location.href = habilita.dataset.url;
+            });
+        }
+        // Mostrar resultados provisional y definitivo
+        const resultado = document.querySelector('#dialogoResultado');
+        const provisional = document.querySelector('#provisional');
+        if (provisional !== null) {
+            provisional.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                resultado.dataset.tipo = 'provisional';
+                document.querySelector('#dialogoResultadoTitulo').innerHTML = 'Resultado ' + resultado.dataset.tipo;
+                resultado.showModal();
+            });
+        }
+        const definitiva = document.querySelector('#definitiva');
+        if (definitiva !== null) {
+            definitiva.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                resultado.dataset.tipo = 'definitivo';
+                document.querySelector('#dialogoResultadoTitulo').innerHTML = 'Resultado ' + resultado.dataset.tipo;
+                resultado.showModal();
+            });
+        }
     </script>
 {% endblock %}

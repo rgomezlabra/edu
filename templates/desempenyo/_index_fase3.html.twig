@@ -43,7 +43,7 @@
     </div>
 </div>
 <ul class="lead my-3">
-    {%- if activos[0].fechaAlta <= date() and date() <= activos[0].fechaBaja %}
+    {%- if activos[0].fechaAlta|date('Ymd') <= hoy and hoy <= activos[0].fechaBaja|date('Ymd') %}
         <li>
             <a class="fw-bold"
                href="{{ activos[0].url ~ '/empleado?tipo=' ~ constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') }}">
