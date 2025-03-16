@@ -23,7 +23,10 @@ class CorreccionType extends AbstractType
         $evaluacion = $options['data'];
         $builder
             ->add('empleado', TextType::class, [
-                'attr' => ['class'=>'w-50','readonly' => true],
+                'attr' => [
+                    'class'=>'w-50',
+                    'readonly' => true,
+                ],
                 'data' => (string) $evaluacion->getEmpleado(),
                 'mapped' => false,
             ])
@@ -36,7 +39,10 @@ class CorreccionType extends AbstractType
                 'required' => false,
             ])
             ->add('corrector', TextType::class, [
-                'attr' => ['class'=>'w-50','readonly' => true],
+                'attr' => [
+                    'class'=>'w-50',
+                    'readonly' => true,
+                ],
                 'data' => (string) $evaluacion->getCorrector()?->getLogin(),
                 'label' => 'Confirmada por',
                 'mapped' => false,
