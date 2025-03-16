@@ -285,12 +285,17 @@ class CuestionarioController extends AbstractController
             $finPeriodo = $cuestionario->getFechaBaja();
             if (!$finPeriodo instanceof DateTimeImmutable) {
                 $error = 'Periodo de validez del cuestionario no establecido.';
-            } elseif ($config['provisional'] instanceof DateTimeImmutable && $finPeriodo >= $config['provisional']) {
+            } elseif (is_a($config['provisional'], 'DateTimeInterface')
+                && $finPeriodo->format('Ymd') >= $config['provisional']->format('Ymd')
+            ) {
                 $error = sprintf(
                     'La fecha provisional debe ser posterior a %s.',
                     $finPeriodo->format('d/m/Y')
                 );
-            } elseif ($config['provisional'] instanceof DateTimeImmutable && $config['definitiva'] instanceof DateTimeImmutable && $config['provisional'] > $config['definitiva']) {
+            } elseif (is_a($config['provisional'], 'DateTimeInterface')
+                && is_a($config['definitiva'], 'DateTimeInterface')
+                && $config['provisional']->format('Ymd') > $config['definitiva']->format('Ymd')
+            ) {
                 $error = sprintf(
                     'La fecha definitiva debe ser igual o posterior a %s.',
                     $config['provisional']->format('d/m/Y')

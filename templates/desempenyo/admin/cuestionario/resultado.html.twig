@@ -118,7 +118,7 @@
 {% endblock %}
 
 {% block modal %}
-    {{- include('layout/_dialogo_form.html.twig', {id: 'corregir', titulo: 'Corregir valoración'}) }}
+    {{- include('layout/_dialogo_form.html.twig', {id: 'corregir'}) }}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'modalTraslada',
         texto: '¿Trasladar todas las calificaciones provisionales a calificaciones definitivas del tribunal?'
     }) }}
@@ -186,6 +186,7 @@
                 url: url,
                 async: true,
                 success: function (response) {
+                    $('#corregirTitulo').html('Corregir valoración');
                     $('#corregirForm').html(response);
                     modal.showModal();
                 },
