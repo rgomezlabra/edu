@@ -492,7 +492,6 @@ class FormularioController extends AbstractController
                     return $this->render('desempenyo/formulario.html.twig', [
                         'evalua' => $evalua,
                         'respuestas' => $respuestas,
-                        'form_testimonio' => $this->createForm(TestimonioType::class, $evalua)->createView(),
                         'codigo' => $codigo,
                     ]);
                 }
@@ -502,6 +501,7 @@ class FormularioController extends AbstractController
                 'evalua' => $evalua,
                 'respuestas' => $respuestas,
                 'codigo' => $codigo,
+                'form_testimonio' => $this->createForm(TestimonioType::class, $evalua)->createView(),
                 'sesion' => $this->lock->getRemainingLifetime(),
             ]);
         }
@@ -550,10 +550,7 @@ class FormularioController extends AbstractController
         if (!$formulario instanceof Formulario) {
             // Nuevo formulario
             $formulario = new Formulario();
-            $formulario
-                ->setCuestionario($cuestionario)
-                ->setUsuario($usuario)
-            ;
+            $formulario->setCuestionario($cuestionario)->setUsuario($usuario);
             $evalua->setFormulario($formulario);
         }
 
@@ -570,10 +567,7 @@ class FormularioController extends AbstractController
                 )->first();
                 if (!$respuesta instanceof Respuesta) {
                     $respuesta = new Respuesta();
-                    $respuesta
-                        ->setFormulario($formulario)
-                        ->setPregunta($pregunta)
-                    ;
+                    $respuesta->setFormulario($formulario)->setPregunta($pregunta);
                 }
 
                 // TODO puede ser necesario verificar validez de datos

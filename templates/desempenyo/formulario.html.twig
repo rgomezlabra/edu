@@ -194,6 +194,14 @@
                      aria-labelledby="vert-tabs-despedida-tab" tabindex="0">
                     <div>{{ evalua.cuestionario.despedida|default|raw }}</div>
                     {%- if editar %}
+                        {% if evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
+                            <div class="mx-4 my-2">
+                                Si lo desea, en su caso, puede dejar constancia de otras personas responsables y/o
+                                colaboradoras, cuyos testimonios evidenciados hayan podido servirle de ayuda o apoyo en
+                                este proceso de evaluación.
+                            </div>
+                            {{ form_row(form_testimonio.testimonio) }}
+                        {% endif %}
                         <div class="d-flex">
                             <button class="btn btn-primary m-2 align-self-center" id="enviar">
                                 <em class="mx-1 fas fa-envelope"></em>Enviar
