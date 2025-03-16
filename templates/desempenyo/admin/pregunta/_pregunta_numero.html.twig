@@ -1,5 +1,5 @@
 {% set preg = etiqueta|default('preg_0') %}
-{% set val = valor.valor|default(6) %}
+{% set val = valor.valor|default %}
 {% if ejemplo is defined -%}
     <label><input type="number" disabled value="8" /></label>
 {% else -%}

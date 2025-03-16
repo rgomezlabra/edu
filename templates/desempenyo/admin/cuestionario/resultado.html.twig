@@ -58,7 +58,7 @@
                         <td>{{ dato[tipo].puntos|default|number_format(2, ',' ) }}</td>
                         <td>{{ dato[tipo] is defined ? (dato[tipo].formulario.formulario.fechaEnvio is defined ? dato[tipo].formulario.formulario.fechaEnvio|date('Y-m-d')) }}</td>
                     {%- endfor %}
-                    {%- set media = rechazos[idEmpleado].registrado|defaul(false) ? 0 :
+                    {%- set media = rechazos[idEmpleado].registrado|default(false) ? 0 :
                         (dato[constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')].puntos|default(0) * config['peso1'] / 100)
                         + (dato[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE')].puntos|default(0) * config['peso2'] / 100)
                         + (dato[constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO')].puntos|default(0) * config['peso3'] / 100)
