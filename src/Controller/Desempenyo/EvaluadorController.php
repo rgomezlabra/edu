@@ -84,18 +84,25 @@ class EvaluadorController extends AbstractController
                 $evaluaciones = [];
                 $cuenta = $request->query->has('cuenta');
                 if ($cuenta) {
-                    // Contar evaluados por cada evaluador
+                    // Contar evaluados por cada evaluador y rechazados
+                    $idRechazados = array_map(
+                        static fn (Evalua $evalua) => $evalua->getEmpleado()->getId(),
+                        $this->evaluaRepository->findByEvaluacion([
+                            'cuestionario' => $cuestionario,
+                            'tipo' => 'rechazados',
+                        ])
+                    );
                     $evaluaciones = array_reduce(
                         $this->evaluaRepository->findByEvaluacion(['cuestionario' => $cuestionario, 'tipo' => $tipo]),
                         /** @param array<array-key, array{evaluador: ?Empleado, asignados: int, evaluados: int, rechazados: int}>|null $cuentas */
-                        function (?array $cuentas, Evalua $evaluacion) {
+                        function (?array $cuentas, Evalua $evaluacion) use ($idRechazados) {
                             $id = $evaluacion->getEvaluador()?->getId() ?? 0;
                             if (0 !== $id && isset($cuentas[$id])) {
                                 ++$cuentas[$id]['asignados'];
                                 if (null !== $evaluacion->getFormulario()?->getFechaEnvio()) {
                                     ++$cuentas[$id]['evaluados'];
                                 }
-                                if (null !== $evaluacion->getRechazado()) {
+                                if (in_array($evaluacion->getEmpleado()->getId(), $idRechazados)) {
                                     ++$cuentas[$id]['rechazados'];
                                 }
                             } else {

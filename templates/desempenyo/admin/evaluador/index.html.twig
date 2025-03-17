@@ -75,9 +75,9 @@
                         <td>{{ evaluacion.evaluados }}</td>
                         <td>{{ evaluacion.rechazados }}</td>
                         <td>
-                            {%- if evaluacion.asignados == (evaluacion.evaluados + evaluacion.rechazados) -%}
+                            {%- if evaluacion.asignados == evaluacion.evaluados -%}
                                 <sup class="badge-success mx-1">Finalizado</sup>
-                            {%- elseif evaluacion.asignados > (evaluacion.evaluados + evaluacion.rechazados) -%}
+                            {%- elseif evaluacion.asignados > evaluacion.evaluados -%}
                                 <sup class="badge-warning mx-1">Pendiente</sup>
                             {%- else -%}
                                 <sup class="badge-danger mx-1">Error</sup>

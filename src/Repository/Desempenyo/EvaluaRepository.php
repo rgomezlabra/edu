@@ -104,6 +104,9 @@ class EvaluaRepository extends ServiceEntityRepository
                         ->andWhere('formulario.fecha_envio ' . ($valor ? 'IS NOT NULL' : 'IS NULL'))
                     ;
                     break;
+                case 'rechazados':
+                    $qb->andWhere('evalua.rechazado IS NOT NULL');
+                    break;
                 case 'corregidos':
                     $qb->andWhere('evalua.correccion IS NOT NULL');
             }
