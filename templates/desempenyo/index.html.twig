@@ -123,7 +123,7 @@
         texto: 'Doy mi habilitación para ser evaluado en mi actual puesto desempeñado.',
         cancelar: 'No', aceptar: 'Sí'}) }}
     {% set activo = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO'))[0]|default -%}
-    {% if not activo -%}
+    {% if activo -%}
         {% set datos -%}
             <div class="container-fluid py-4 g-4">
                 {% if registrado -%}
@@ -224,5 +224,12 @@
                 resultado.showModal();
             });
         }
+        // Enlaces para seleccionar tab
+        document.querySelectorAll('.activarTab').forEach((enlace) => {
+            enlace.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                document.querySelector(enlace.dataset.bsTarget).dispatchEvent(new Event('click'));
+            });
+        });
     </script>
 {% endblock %}

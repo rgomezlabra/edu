@@ -41,7 +41,7 @@
     <div class="container-fluid my-2">
         Para más detalle sobre los criterios de valoración a aplicar por cada intervalo de valores de 1 a 4,
         de 5 a 8 y de 9 a 10, consultar el cuestionario facilitado en
-        <a href="#documentos">documentos de interés</a>.
+        <a class="activarTab" href="" data-bs-target="#vert-tabs-documentos-tab">documentos de interés</a>.
     </div>
 </div>
 <ul class="lead my-3">
@@ -49,7 +49,7 @@
         <div class="alert alert-warning">
             El cuestionario estará disponible entre los días {{ activos[0].fechaAlta|date('d/m/Y') }} y
             {{ activos[0].fechaBaja|date('d/m/Y') }}. Puede consultar el texto en el apartado
-            <a href="#documentos">documentos de interés</a>.
+            <a class="activarTab" href="" data-bs-target="#vert-tabs-documentos-tab">documentos de interés</a>.
         </div>
     {%- elseif activos[0].fechaBaja|date('Ymd') < hoy %}
         <div class="alert alert-warning">

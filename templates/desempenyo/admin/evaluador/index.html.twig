@@ -125,7 +125,7 @@
                     <tr {% if empleado.unidad|default != evaluador.unidad|default %}class="table-info" {% endif %}>
                         <td><span title="{{ empleado.unidad.nombre|default }}">{{ empleado.unidad }}</span></td>
                         <td>{{ empleado }}</td>
-                        <td>{{ empleado.grupo.nombre ~ (empleado.nivel > 0 ? '/' ~ empleado.nivel) }}</td>
+                        <td>{{ empleado.grupo.nombre|default('Sin grupo') ~ (empleado.nivel > 0 ? '/' ~ empleado.nivel) }}</td>
                         <td>{{ empleado.antiguedad|default }}</td>
                         <td>{{ empleado.vigente|date('Y-m-d') }}</td>
                         <td>
@@ -149,7 +149,7 @@
                         {%- if evaluador %}
                             <td><span title="{{ evaluador.unidad.nombre|default }}">{{ evaluador.unidad }}</span></td>
                             <td>{{ evaluador }}</td>
-                            <td>{{ evaluador.grupo.nombre ~ (evaluador.nivel > 0 ? '/' ~ evaluador.nivel) }}</td>
+                            <td>{{ evaluador.grupo.nombre|default('Sin grupo') ~ (evaluador.nivel > 0 ? '/' ~ evaluador.nivel) }}</td>
                             <td>{{ evaluador.antiguedad|default }}</td>
                             <td>{{ evaluador.vigente|date('Y-m-d') }}</td>
                             <td>
