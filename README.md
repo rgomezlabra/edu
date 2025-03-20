@@ -14,7 +14,7 @@ de instalación.
   * Gestor de bases de datos (MySQL, MariaDB, PostgreSQL)
   * Servidor Redis para registro de sesiones (¿?)
   * PHP 8.3
-  * Composer (https://getcomposer.com)
+  * Composer (https://getcomposer.org)
 
 ### Instalación con contenedores:
   * Docker Compose (https://docs.docker.com/compose/)
