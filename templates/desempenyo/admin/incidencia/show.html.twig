@@ -81,7 +81,7 @@
             </table>
             {%- if fin > 0 %}
                 <div class="progress-stacked">
-                    {%- set total = fin - inicio -%}
+                    {%- set total = fin == inicio ? 1 : (fin - inicio) -%}
                     {%- for apunte in incidencia.incidencia.apuntes -%}
                         {%- set valor = (apunte.fechaFin|date('U') - apunte.fechaInicio|date('U')) * 100 // total %}
                         <div class="progress" role="progressbar" aria-label="Apunte {{ loop.index }}"

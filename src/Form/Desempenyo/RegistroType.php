@@ -5,6 +5,7 @@ namespace App\Form\Desempenyo;
 use App\Entity\Desempenyo\Evalua;
 use Override;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -30,7 +31,7 @@ class RegistroType extends AbstractType
             ->add('rechazo_texto', null, [
                 'label' => 'Observaciones',
             ])
-            ->add('registrado', null, [
+            ->add('registrado', DateType::class, [
                 'attr' => ['class' => 'w-auto'],
                 'help' => 'Opcional.',
                 'help_attr' => ['class' => 'text-secondary'],

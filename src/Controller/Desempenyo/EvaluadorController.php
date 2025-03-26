@@ -89,7 +89,7 @@ class EvaluadorController extends AbstractController
                         static fn (Evalua $evalua) => $evalua->getEmpleado()->getId(),
                         $this->evaluaRepository->findByEvaluacion([
                             'cuestionario' => $cuestionario,
-                            'tipo' => 'rechazados',
+                            'rechazados' => true,
                         ])
                     );
                     $evaluaciones = array_reduce(
