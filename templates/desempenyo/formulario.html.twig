@@ -9,7 +9,6 @@
     {%- set editar = evalua.formulario == null or evalua.formulario.fechaEnvio == null -%}
     {%- set reducido = evalua.tipoEvaluador == constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') and evalua.cuestionario.configuracion.reducida|default(false) %}
 
-    <div class="badge-primary rounded-pill float-end">{{ app.user.empleado }}</div>
     <div class="pagina-titulo">{{ evalua.cuestionario.titulo }}</div>
     <div class="m-3">{{ evalua.cuestionario.descripcion|raw }}</div>
 

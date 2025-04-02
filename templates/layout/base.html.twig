@@ -19,7 +19,7 @@
 <main class="container-fluid">
     {% block modal %}{% endblock %}
     {%- if block('usuario') is not empty %}
-        <div class="badge-primary float-end">
+        <div class="badge-primary rounded-pill float-end">
             {% block usuario %}{% endblock %}
         </div>
     {%- endif %}

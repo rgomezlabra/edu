@@ -107,6 +107,8 @@
     {{ parent() }}
 {% endblock %}
 
+{% block usuario %}{{ app.user.empleado }}{% endblock %}
+
 {% block modal %}
     {% set registrado = evaluados|filter(e => e.registrado != null)|length > 0 %}
     {{- include('layout/_dialogo_confirmar.html.twig', {id: 'dialogoRechaza',
