@@ -4,6 +4,10 @@
     <div class="pagina-titulo">{{ titulo }}</div>
 
     {{ form_start(form) }}
+    <div class="mb-3 row">
+        <div class="{{ block('form_label_class', 'layout/_form_tema.html.twig') }}">Nº incidencia</div>
+        <div class="{{ block('form_group_class', 'layout/_form_tema.html.twig') }}">{{ incidencia.id }}</div>
+    </div>
     {{ form_widget(form) }}
     <div class="linea-botones">
         <button class="btn btn-primary"><em class="fas fa-save"></em> {{ button_label|default('Guardar') }}</button>
