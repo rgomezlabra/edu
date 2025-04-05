@@ -459,12 +459,12 @@ class IncidenciaController extends AbstractController
 
     /** Añadir una respuesta del usuario al apunte. */
     #[Route(
-        path: 'admin/incidencia/{incidencia}/informacion',
-        name: 'admin_incidencia_informacion',
-        defaults: ['titulo' => 'Responder incidencia'],
+        path: 'admin/incidencia/{incidencia}/info',
+        name: 'admin_incidencia_info',
+        defaults: ['titulo' => 'Solicitar Información'],
         methods: ['GET', 'POST']
     )]
-    public function informacion(
+    public function info(
         Request                    $request,
         EstadoRepository           $estadoRepository,
         IncidenciaApunteRepository $apunteRepository,
@@ -477,30 +477,44 @@ class IncidenciaController extends AbstractController
         $procesando = $estadoRepository->findOneBy(['nombre' => Estado::PROCESANDO]);
         $cirhus = $incidencia->getIncidencia();
         $ultimo = $cirhus?->getApuntes()->last();
-        if ($ultimo instanceof IncidenciaApunte && $ultimo->getEstado() === $finalizado) {
-            $this->addFlash('error', 'La incidencia ya está finalizada.');
+        if (!$cirhus instanceof CirhusIncidencia || !$ultimo instanceof IncidenciaApunte || $ultimo->getEstado() === $finalizado) {
+            $this->addFlash('error', 'Incidencia errónea o finalizada.');
 
             return $this->redirectToRoute($this->rutaBase . '_admin_incidencia_show', [
                 'id' => $incidencia->getId(),
             ]);
         }
-        $form = $this->createForm(IncidenciaApunteType::class, $ultimo, ['reabrir' => true]);
+        // Apunte para pedir información
+        /** @var Usuario $autor */
+        $autor = $this->getUser();
+        $ahora = new DateTimeImmutable();
+        $ultimo->setFechaFin($ahora);
+        $apunte = new IncidenciaApunte();
+        $apunte->setIncidencia($incidencia->getIncidencia())
+            ->setEstado($ultimo->getEstado() === $iniciado ? $procesando : $ultimo->getEstado())
+            ->setServicio($ultimo->getServicio())
+            ->setFechaInicio($ahora)
+            ->setAutor($autor)
+        ;
+        $form = $this->createForm(IncidenciaApunteType::class, $apunte, ['reabrir' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $apunte = new IncidenciaApunte();
-            $apunte
-                ->setIncidencia($incidencia->getIncidencia())
-                ->setEstado($ultimo->getEstado() === $iniciado ? $procesando : $ultimo->getEstado())
-                ->setServicio($ultimo->getServicio())
-                ->setObservaciones($ultimo->getObservaciones())
-                ->setFechaInicio($ultimo->getFechaInicio())
-                ->setAutor($cirhus?->getSolicitante())
+            // Apunte de información que será rellenado por el solicitante
+            $ahora = new DateTimeImmutable();
+            $apunte->setFechaFin($ahora);
+            $apunteInfo = new IncidenciaApunte();
+            $apunteInfo->setIncidencia($incidencia->getIncidencia())
+                ->setEstado($apunte->getEstado())
+                ->setServicio($apunte->getServicio())
+                ->setFechaInicio($ahora)
+                ->setAutor($cirhus->getSolicitante())
             ;
-            $ultimo->setFechaFin(new DateTimeImmutable());
+            $ultimo->setFechaFin($ahora);
             $apunteRepository->save($ultimo);
-            $apunteRepository->save($apunte, true);
-            $cirhus?->addApunte($apunte);
+            $apunteRepository->save($apunte);
+            $apunteRepository->save($apunteInfo, true);
+            $cirhus->addApunte($apunte)->addApunte($apunteInfo);
             $this->incidenciaRepository->save($incidencia, true);
             $this->generator->logAndFlash('info', 'Solicitada información al usuario', [
                 'id' => $apunte->getId(),

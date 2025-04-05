@@ -55,7 +55,14 @@
                         </td>
                         <td>{{ apunte.fechaInicio ? apunte.fechaInicio | date('d/m/Y, H:i') }}</td>
                         <td>{{ apunte.fechaFin ? apunte.fechaFin | date('d/m/Y, H:i') }}</td>
-                        <td>{{ apunte.comentario }}</td>
+                        <td>
+                            {% if apunte.autor == app.user %}
+                                <em class="fas fa-arrow-circle-right"></em>
+                            {% else %}
+                                <em class="float-end fas fa-arrow-circle-left"></em>
+                            {% endif %}
+                            {{ apunte.comentario }}
+                        </td>
                         <td>{{ apunte.autor.empleado }}</td>
                         <td>
                             {% if incidencia.incidencia.solicitante == apunte.autor and loop.last %}

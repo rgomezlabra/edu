@@ -55,7 +55,14 @@
                         </td>
                         <td>{{ apunte.fechaInicio ? apunte.fechaInicio | date('d/m/Y, H:i') }}</td>
                         <td>{{ apunte.fechaFin ? apunte.fechaFin | date('d/m/Y, H:i') }}</td>
-                        <td>{{ apunte.comentario }}</td>
+                        <td>
+                            {% if apunte.autor == app.user %}
+                                <em class="fas fa-arrow-circle-right"></em>
+                            {% else %}
+                                <em class="float-end fas fa-arrow-circle-left"></em>
+                            {% endif %}
+                            {{ apunte.comentario }}
+                        </td>
                         <td>{{ apunte.autor.empleado }}</td>
                         <td>
                             <a class="apunte mx-1" href="" title="Ver detalles" data-id="{{ apunte.id }}">
@@ -68,7 +75,7 @@
                                 </a>
                                 {% if apunte.comentario %}
                                     <a class="mx-1" title="Solicitar información"
-                                       href="{{ path('desempenyo_admin_incidencia_informacion', {incidencia: incidencia.id}) }}">
+                                       href="{{ path('desempenyo_admin_incidencia_info', {incidencia: incidencia.id}) }}">
                                         <em class="mx-1 fas fa-info-circle"></em>
                                     </a>
                                 {% endif %}
