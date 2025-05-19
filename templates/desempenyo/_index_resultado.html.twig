@@ -2,10 +2,13 @@
 
 <ul class="lead my-3">
     {# Solo se debe mostrar en periodo entre fecha de resultado provisional y de resultado definitivo #}
-    <li>
-        <a id="provisional" href="">Resultado provisional del proceso de evaluación del desempeño</a>
-    </li>
-    {% if activos[0].configuracion.definitiva.date is defined and activos[0].configuracion.definitiva.date|date('Ymd') <= hoy %}
+    {% if activo.configuracion.provisional.date is defined and activo.configuracion.definitiva.date is defined
+        and activo.configuracion.provisional.date|date('Ymd') <= hoy
+        and hoy < activo.configuracion.definitiva.date|date('Ymd') %}
+        <li>
+            <a id="provisional" href="">Resultado provisional del proceso de evaluación del desempeño</a>
+        </li>
+    {% elseif activos[0].configuracion.definitiva.date is defined and activos[0].configuracion.definitiva.date|date('Ymd') <= hoy %}
         {# Solo se debe mostrar cuando se cumpla la fecha de resultado definitivo #}
         <li>
             <a id="definitiva" href="">Resultado final del proceso de evaluación del desempeño</a>

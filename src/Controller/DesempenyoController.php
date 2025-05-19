@@ -12,6 +12,7 @@ use App\Repository\Desempenyo\TipoIncidenciaRepository;
 use App\Repository\EstadoRepository;
 use App\Repository\Plantilla\EmpleadoRepository;
 use App\Service\RutaActual;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -47,22 +48,40 @@ class DesempenyoController extends AbstractController
             'cuestionario' => $cuestionarios,
             'empleado' => $empleado,
         ]);
+        // Obtener resultados
+        $resultados = [];
+        foreach ($cuestionarios as $cuestionario) {
+            try {
+                $resultados[$cuestionario->getId()] = array_map(
+                    static fn($e) => $e->getCorreccion(),
+                    array_filter(
+                        $evaluados,
+                        static fn($e) => $e->getEmpleado() === $empleado && null !== $e->getCorreccion(),
+                    ),
+                )[0];
+            } catch (Exception) {
+                $resultados[$cuestionario->getId()] = null;
+            }
+        }
+
         // Calcular las medias de los formularios enviados para mostrar resultados finales del usuario
-        /** @var float[] $medias */
         $medias = [];
-        foreach ($evaluados as $evaluado) {
-            $formulario = $evaluado->getFormulario();
-            if ($formulario instanceof Formulario && null !== $formulario->getFechaEnvio()) {
-                $total = 0;
-                $n = 0;
-                foreach ($formulario->getRespuestas() as $respuesta) {
-                    $pregunta = $respuesta->getPregunta();
-                    if ($pregunta instanceof Pregunta) {
-                        $total += (float) $respuesta->getValor()['valor'];
-                        $n++;
+        foreach ($cuestionarios as $cuestionario) {
+            $medias[$cuestionario->getId()] = null;
+            foreach ($evaluados as $evaluado) {
+                $formulario = $evaluado->getFormulario();
+                if ($formulario instanceof Formulario && null !== $formulario->getFechaEnvio()) {
+                    $total = 0;
+                    $n = 0;
+                    foreach ($formulario->getRespuestas() as $respuesta) {
+                        $pregunta = $respuesta->getPregunta();
+                        if ($pregunta instanceof Pregunta) {
+                            $total += (float) $respuesta->getValor()['valor'];
+                            $n++;
+                        }
                     }
+                    $medias[$cuestionario->getId()][$evaluado->getTipoEvaluador()] = $total / $n;
                 }
-                $medias[$evaluado->getTipoEvaluador()] = $total / $n;
             }
         }
 
@@ -71,6 +90,7 @@ class DesempenyoController extends AbstractController
             'evaluados' => $evaluados,
             'evaluaciones' => $evaluaRepository->findBy(['evaluador' => $empleado]),
             'medias' => $medias,
+            'resultados' => $resultados,
         ]);
     }
 
