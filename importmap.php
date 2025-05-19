@@ -23,13 +23,13 @@ return [
         'version' => '3.2.2',
     ],
     'bootstrap' => [
-        'version' => '5.3.3',
+        'version' => '5.3.6',
     ],
     '@popperjs/core' => [
         'version' => '2.11.8',
     ],
     'bootstrap/dist/css/bootstrap.min.css' => [
-        'version' => '5.3.3',
+        'version' => '5.3.6',
         'type' => 'css',
     ],
     '@kurkle/color' => [
@@ -39,23 +39,23 @@ return [
         'version' => '3.7.1',
     ],
     'datatables.net-bs5' => [
-        'version' => '2.2.2',
+        'version' => '2.3.1',
     ],
     'datatables.net' => [
-        'version' => '2.2.2',
+        'version' => '2.3.1',
     ],
     'datatables.net-bs5/css/dataTables.bootstrap5.min.css' => [
-        'version' => '2.2.2',
+        'version' => '2.3.1',
         'type' => 'css',
     ],
     'datatables.net-buttons-bs5' => [
-        'version' => '3.2.2',
+        'version' => '3.2.3',
     ],
     'datatables.net-buttons' => [
-        'version' => '3.2.2',
+        'version' => '3.2.3',
     ],
     'datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css' => [
-        'version' => '3.2.2',
+        'version' => '3.2.3',
         'type' => 'css',
     ],
     'datatables.net-responsive-bs5' => [
@@ -79,10 +79,10 @@ return [
         'type' => 'css',
     ],
     'datatables.net-buttons/js/buttons.html5.js' => [
-        'version' => '3.2.2',
+        'version' => '3.2.3',
     ],
     'datatables.net-buttons/js/buttons.print.js' => [
-        'version' => '3.2.2',
+        'version' => '3.2.3',
     ],
     'datatables.net-rowreorder' => [
         'version' => '1.5.0',
@@ -128,9 +128,9 @@ return [
         'version' => '6.7.2',
     ],
     '@ckeditor/ckeditor5-build-classic' => [
-        'version' => '44.2.1',
+        'version' => '44.3.0',
     ],
     'ckeditor5/translations/es.js' => [
-        'version' => '44.2.1',
+        'version' => '45.1.0',
     ],
 ];
