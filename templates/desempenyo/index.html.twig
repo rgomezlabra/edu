@@ -1,6 +1,6 @@
 {% extends '/layout/base.html.twig' %}
 {% set hoy = 'now'|date('Ymd') -%}
-{% set activo = cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO'))[0]|default -%}
+{% set activo = cuestionarios is defined ? cuestionarios|filter(c => c.estado.nombre == constant('App\\Entity\\Estado::PUBLICADO'))[0]|default -%}
 
 {% block content %}
     {# Pesos establecidos por defecto -#}
@@ -137,6 +137,10 @@
                     </div>
                 {% elseif registrado -%}
                     <div class="row py-2">
+                        <div class="row py-2">
+                            <div class="fila-campo col-sm-4">Puntuación sobre 100</div>
+                            <div class="fila-valor col-sm-8">0,00</div>
+                        </div>
                         <div class="fila-campo col-sm-4">Resultado</div>
                         <div class="fila-valor col-sm-8 fw-bold">
                             <em class="fas fa-ban text-primary"></em> Usted ha solicitado no ser evaluado
@@ -145,12 +149,12 @@
                 {% elseif activo.configuracion.definitiva.date is defined and activo.configuracion.definitiva.date|date('Ymd') <= hoy %}
                     {% set resultado = resultados[activo.id] %}
                     <div class="row py-2">
-                        <div class="fila-campo col-sm-6">Puntuación sobre 100</div>
-                        <div class="fila-valor col-sm-6">{{ resultado|number_format(2, ',' ) }}</div>
+                        <div class="fila-campo col-sm-4">Puntuación sobre 100</div>
+                        <div class="fila-valor col-sm-8">{{ resultado|number_format(2, ',' ) }}</div>
                     </div>
                     <div class="row py-2">
-                        <div class="fila-campo col-sm-6">Resultado</div>
-                        <div class="fila-valor col-sm-6 fw-bold">
+                        <div class="fila-campo col-sm-4">Resultado</div>
+                        <div class="fila-valor col-sm-8 fw-bold">
                             {%- if resultado < 60 -%}
                                 <em class="fas fa-times text-danger"></em> NO SUPERADO
                             {%- else -%}
@@ -158,6 +162,12 @@
                             {%- endif -%}
                         </div>
                     </div>
+                    {% if not registrado and medias[activo.id][(constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'))] is not defined %}
+                        <div class="row py-2">
+                            <div class="fila-campo col-sm-4">Incidencia</div>
+                            <div class="fila-valor col-sm-8 fw-bold">Falta su autoevaluación</div>
+                        </div>
+                    {%- endif %}
                 {% else %}
                     {% set media =
                         (medias[activo.id][constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION')]|default(0) * activo.configuracion.peso1 / 100)
@@ -166,17 +176,17 @@
                     -%}
                     {# Este valor no se usa en el piloto de la US
                     <div class="row py-2">
-                        <div class="fila-campo col-sm-6">Puntuación sobre 60</div>
-                        <div class="fila-valor col-sm-6">{{ (media * 6)|number_format(2, ',' ) }}</div>
+                        <div class="fila-campo col-sm-4">Puntuación sobre 60</div>
+                        <div class="fila-valor col-sm-8">{{ (media * 6)|number_format(2, ',' ) }}</div>
                     </div>
                     #}
                     <div class="row py-2">
-                        <div class="fila-campo col-sm-6">Puntuación sobre 100</div>
-                        <div class="fila-valor col-sm-6">{{ (media * 10)|number_format(2, ',' ) }}</div>
+                        <div class="fila-campo col-sm-4">Puntuación sobre 100</div>
+                        <div class="fila-valor col-sm-8">{{ (media * 10)|number_format(2, ',' ) }}</div>
                     </div>
                     <div class="row py-2">
-                        <div class="fila-campo col-sm-6">Resultado</div>
-                        <div class="fila-valor col-sm-6 fw-bold">
+                        <div class="fila-campo col-sm-4">Resultado</div>
+                        <div class="fila-valor col-sm-8 fw-bold">
                             {%- if media < 6 -%}
                                 <em class="fas fa-times text-danger"></em> NO SUPERADO
                             {%- else -%}
@@ -184,6 +194,12 @@
                             {%- endif -%}
                         </div>
                     </div>
+                    {% if not registrado and medias[activo.id][(constant('App\\Entity\\Desempenyo\\Evalua::AUTOEVALUACION'))] is not defined %}
+                        <div class="row py-2">
+                            <div class="fila-campo col-sm-4">Incidencia</div>
+                            <div class="fila-valor col-sm-8 fw-bold">Falta su autoevaluación</div>
+                        </div>
+                    {%- endif %}
                 {%- endif %}
             </div>
         {% endset -%}
