@@ -450,6 +450,7 @@ class FormularioController extends AbstractController
             return $this->redirectToRoute($this->rutaBase);
         }
 
+        $this->lock->setExtra((string) $usuario->getId());
         if ('GET' === $request->getMethod()) {
             // Rellenar el formulario
             if (null === $this->lock->acquire($this->ttl)) {
@@ -593,8 +594,8 @@ class FormularioController extends AbstractController
             $evalua->setTestimonio($request->request->all()['testimonio']['testimonio'] ?? null);
         }
         $this->evaluaRepository->save($evalua, true);
+        $this->lock->release();
         if ($enviado) {
-            $this->lock->release();
             $this->generator->logAndFlash('info', 'Formulario enviado', [
                 'codigo' => $codigo,
                 'empleado' => $evalua->getEmpleado()?->getDocIdentidad(),
@@ -604,6 +605,7 @@ class FormularioController extends AbstractController
 
             return $this->redirectToRoute($this->rutaBase);
         } else {
+            $this->lock->acquire($this->ttl);
             $this->addFlash('info', 'Formulario guardado sin enviar.');
         }
 

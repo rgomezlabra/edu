@@ -21,6 +21,9 @@ class SirhusLock
 
     private bool $dirty = false;
 
+    /** @var string $extra Datos extra para componer la clave de bloqueo. */
+    private string $extra = '';
+
     public function __construct(
         protected readonly RequestStack $stack,
         #[Autowire('%app.redis_url%')]
@@ -31,6 +34,7 @@ class SirhusLock
 
     /**
      * Crear un nuevo bloqueo sobre el recurso de la ruta actual con un periodo de validez (300 s. por defecto).
+     * @param int $ttl Periodo de validez.
      * @return int[]|string[]|null
      */
     public function acquire(int $ttl = 300): ?array
@@ -61,6 +65,12 @@ class SirhusLock
         } catch (RedisException) {
             return null;
         }
+    }
+
+    /** Establecer valor extra para añadir a la clave de bloqueo. */
+    public function setExtra(string $extra = ''): void
+    {
+        $this->extra = $extra;
     }
 
     /**
@@ -144,7 +154,7 @@ class SirhusLock
         return RedisAdapter::createConnection((string) $this->redisUrl);
     }
 
-    /** Compone una cadena con la ruta y sus parámetros. */
+    /** Compone una cadena con la ruta, sus parámetros y con un valor extra opcional. */
     private function getRouteWithParams(): string
     {
         /** @var string $value */
@@ -154,6 +164,10 @@ class SirhusLock
         $params = implode(':', array_filter($routeParams, static fn($k) => $k !== 'titulo', ARRAY_FILTER_USE_KEY));
         if ('' !== $params) {
             $value .= ':' . $params;
+        }
+
+        if ('' !== $this->extra) {
+            $value .= ':' . $this->extra;
         }
 
         return $value;
