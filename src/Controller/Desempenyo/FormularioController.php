@@ -204,9 +204,9 @@ class FormularioController extends AbstractController
         foreach ($trasladables as $trasladable) {
             $id = (int) $trasladable->getEmpleado()?->getId();
             /** @var float $puntos */
-            $puntos = ($medias[$id][Evalua::AUTOEVALUACION] ?? 0) * ($cuestionario->getConfiguracion()['peso1'] ?? 0) / 10 +
-                ($medias[$id][Evalua::EVALUA_RESPONSABLE] ?? 0) * ($cuestionario->getConfiguracion()['peso2'] ?? 0) / 10 +
-                ($medias[$id][Evalua::EVALUA_OTRO] ?? 0) * ($cuestionario->getConfiguracion()['peso3'] ?? 0) / 10
+            $puntos = ($medias[$id][Evalua::AUTOEVALUACION] ?? 0) * (int) ($cuestionario->getConfiguracion()['peso1'] ?? 0) / 10 +
+                ($medias[$id][Evalua::EVALUA_RESPONSABLE] ?? 0) * (int) ($cuestionario->getConfiguracion()['peso2'] ?? 0) / 10 +
+                ($medias[$id][Evalua::EVALUA_OTRO] ?? 0) * (int) ($cuestionario->getConfiguracion()['peso3'] ?? 0) / 10
             ;
             $trasladable->setCorreccion($puntos)
                 ->setComentario(sprintf('Valoración trasladada: %.2f', $puntos))

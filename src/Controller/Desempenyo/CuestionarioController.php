@@ -248,7 +248,7 @@ class CuestionarioController extends AbstractController
     public function desactivar(EstadoRepository $estadoRepository, Cuestionario $cuestionario): Response
     {
         $this->denyAccessUnlessGranted('admin');
-        $cuestionario->setEstado($estadoRepository->findOneBy(['nombre' => Estado::BORRADOR]));
+        $cuestionario->setEstado($estadoRepository->findOneBy(['nombre' => Estado::ARCHIVADO]));
         $this->cuestionarioRepository->save($cuestionario, true);
 
         return $this->render('desempenyo/admin/cuestionario/show.html.twig', [
