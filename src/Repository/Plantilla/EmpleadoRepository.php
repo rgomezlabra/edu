@@ -13,10 +13,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * @author Ramón M. Gómez <ramongomez@us.es>
  * @extends ServiceEntityRepository<Empleado>
- * @method Empleado|null find($id, $lockMode = null, $lockVersion = null)
- * @method Empleado|null findOneBy(array $criteria, array $orderBy = null)
- * @method Empleado[]    findAll()
- * @method Empleado[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class EmpleadoRepository extends ServiceEntityRepository
 {
@@ -76,51 +72,29 @@ class EmpleadoRepository extends ServiceEntityRepository
     /**
      * Devuelve los datos de empleado de un usuario determinado.
      * @param Usuario $usuario Usuario a buscar
+     * @param bool $soloActivo Buscar solo empleado activo (por defecto) o buscar también entre empleados cesados.
      */
-    public function findOneByUsuario(UserInterface $usuario): ?Empleado
+    public function findOneByUsuario(UserInterface $usuario, bool $soloActivo = true): ?Empleado
     {
         try {
-            return $this->createQueryBuilder('empleado')
+            $qb = $this->createQueryBuilder('empleado')
                 ->andWhere('empleado.usuario = :usuario')
                 ->andWhere('empleado.cesado IS NULL')
                 ->setParameter('usuario', $usuario)
-                ->getQuery()
-                ->getOneOrNullResult()
             ;
+            if ($soloActivo) {
+                $qb->andWhere('empleado.cesado IS NULL');
+            }
+
+            return $qb->getQuery()->getOneOrNullResult();
         } catch (NonUniqueResultException) {
             return null;
         }
     }
 
     /**
-     * Devuelve la lista de validadores de empleados.
-     * @return Empleado[]
-     */
-    public function findValidadores(): array
-    {
-        return $this->createQueryBuilder('empleado')
-            ->distinct()
-            ->join('empleado.validador', 'validador')
-            ->andWhere('validador.cesado IS NULL')
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /** Quita los validadores de todos los empleados. */
-    public function cleanValidadores(): void
-    {
-        $this->createQueryBuilder('empleado')
-            ->update()
-            ->set('empleado.validador', 'NULL')
-            ->getQuery()
-            ->execute()
-        ;
-    }
-
-    /**
      * Buscar empleados cesados o activos.
-     * @param bool $cese  Indicar si se buscan empleados cesados (true) o activos (false).
+     * @param bool $cese Indicar si se buscan empleados cesados (true) o activos (false).
      * @return Empleado[]
      */
     public function findCesados(bool $cese = true): array
