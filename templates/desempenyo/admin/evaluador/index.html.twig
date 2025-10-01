@@ -3,7 +3,7 @@
 {% set tipoNo = constant('App\\Entity\\Desempenyo\\Evalua::NO_EVALUACION') %}
 {% set tipoResp = constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_RESPONSABLE') %}
 {% set tipoOtro = constant('App\\Entity\\Desempenyo\\Evalua::EVALUA_OTRO') %}
-{% set avisos = {VF: 'Vigencia futura', DU: 'Distinta unidad'} %}
+{% set avisos = {CS: 'Cese', VF: 'Vigencia futura', DU: 'Distinta unidad'} %}
 {% if tipo == tipoNo %}
     {% set titulo = titulo ~ ' (rechazos)'%}
 {% elseif tipo == tipoAuto %}
@@ -139,12 +139,16 @@
                             {%- endif -%}
                         </td>
                         <td>
-                            {%- if date(empleado.vigente) > date() -%}
-                                <sup class="badge-warning mx-1" title="{{ avisos['VF'] }}">VF</sup>
-                            {%- endif %}
-                            {% if empleado.unidad|default != evaluador.unidad|default %}
-                                <sup class="badge-warning mx-1" title="{{ avisos['DU'] }}">DU</sup>
-                            {%- endif %}
+                            {%- if empleado.cesado -%}
+                                <sup class="badge-warning mx-1" title="{{ avisos['CS'] ~ ': ' ~ empleado.cesado|date('d/m/Y')}}">CS</sup>
+                            {%- else -%}
+                                {%- if date(empleado.vigente) > date() -%}
+                                    <sup class="badge-warning mx-1" title="{{ avisos['VF'] }}">VF</sup>
+                                {%- endif -%}
+                                {% if empleado.unidad|default != evaluador.unidad|default -%}
+                                    <sup class="badge-warning mx-1" title="{{ avisos['DU'] }}">DU</sup>
+                                {%- endif -%}
+                            {%- endif -%}
                         </td>
                         {%- if evaluador %}
                             <td><span title="{{ evaluador.unidad.nombre|default }}">{{ evaluador.unidad }}</span></td>
