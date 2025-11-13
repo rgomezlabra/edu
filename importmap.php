@@ -23,66 +23,66 @@ return [
         'version' => '3.2.2',
     ],
     'bootstrap' => [
-        'version' => '5.3.6',
+        'version' => '5.3.8',
     ],
     '@popperjs/core' => [
         'version' => '2.11.8',
     ],
     'bootstrap/dist/css/bootstrap.min.css' => [
-        'version' => '5.3.6',
+        'version' => '5.3.8',
         'type' => 'css',
     ],
     '@kurkle/color' => [
-        'version' => '0.3.4',
+        'version' => '0.4.0',
     ],
     'jquery' => [
         'version' => '3.7.1',
     ],
     'datatables.net-bs5' => [
-        'version' => '2.3.1',
+        'version' => '2.3.4',
     ],
     'datatables.net' => [
-        'version' => '2.3.1',
+        'version' => '2.3.4',
     ],
     'datatables.net-bs5/css/dataTables.bootstrap5.min.css' => [
-        'version' => '2.3.1',
+        'version' => '2.3.4',
         'type' => 'css',
     ],
     'datatables.net-buttons-bs5' => [
-        'version' => '3.2.3',
+        'version' => '3.2.5',
     ],
     'datatables.net-buttons' => [
-        'version' => '3.2.3',
+        'version' => '3.2.5',
     ],
     'datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css' => [
-        'version' => '3.2.3',
+        'version' => '3.2.5',
         'type' => 'css',
     ],
     'datatables.net-responsive-bs5' => [
-        'version' => '3.0.4',
+        'version' => '3.0.7',
     ],
     'datatables.net-select-bs5' => [
-        'version' => '3.0.0',
+        'version' => '3.1.3',
     ],
     'datatables.net-responsive' => [
-        'version' => '3.0.4',
+        'version' => '3.0.7',
     ],
     'datatables.net-select' => [
-        'version' => '3.0.0',
+        'version' => '3.1.3',
     ],
     'datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css' => [
-        'version' => '3.0.4',
+        'version' => '3.0.7',
         'type' => 'css',
     ],
     'datatables.net-select-bs5/css/select.bootstrap5.min.css' => [
-        'version' => '3.0.0',
+        'version' => '3.1.3',
         'type' => 'css',
     ],
     'datatables.net-buttons/js/buttons.html5.js' => [
-        'version' => '3.2.3',
+        'version' => '3.2.5',
     ],
     'datatables.net-buttons/js/buttons.print.js' => [
-        'version' => '3.2.3',
+        'version' => '3.2.5',
     ],
     'datatables.net-rowreorder' => [
         'version' => '1.5.0',
@@ -105,32 +105,32 @@ return [
         'type' => 'css',
     ],
     '@fortawesome/fontawesome-free' => [
-        'version' => '6.7.2',
+        'version' => '7.1.0',
     ],
     '@fortawesome/fontawesome-free/css/fontawesome.min.css' => [
-        'version' => '6.7.2',
+        'version' => '7.1.0',
         'type' => 'css',
     ],
     '@fortawesome/fontawesome-svg-core' => [
-        'version' => '6.7.2',
+        'version' => '7.1.0',
     ],
     '@fortawesome/fontawesome-svg-core/styles.min.css' => [
-        'version' => '6.7.2',
+        'version' => '7.1.0',
         'type' => 'css',
     ],
     '@fortawesome/free-regular-svg-icons' => [
-        'version' => '6.7.2',
+        'version' => '7.1.0',
     ],
     '@fortawesome/free-solid-svg-icons' => [
-        'version' => '6.7.2',
+        'version' => '7.1.0',
     ],
     '@fortawesome/free-brands-svg-icons' => [
-        'version' => '6.7.2',
+        'version' => '7.1.0',
     ],
     '@ckeditor/ckeditor5-build-classic' => [
         'version' => '44.3.0',
     ],
     'ckeditor5/translations/es.js' => [
-        'version' => '45.1.0',
+        'version' => '47.2.0',
     ],
 ];

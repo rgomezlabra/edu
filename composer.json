@@ -21,7 +21,6 @@
         "ext-iconv": "*",
         "ext-igbinary": "*",
         "ext-redis": "*",
-        "doctrine/annotations": "^2.0.0",
         "doctrine/doctrine-bundle": "^2.10.0",
         "doctrine/doctrine-migrations-bundle": "^3.2.4",
         "doctrine/orm": "^2.15.3",
