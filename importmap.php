@@ -104,33 +104,33 @@ return [
         'version' => '11.0.2',
         'type' => 'css',
     ],
-    '@fortawesome/fontawesome-free' => [
-        'version' => '7.1.0',
-    ],
-    '@fortawesome/fontawesome-free/css/fontawesome.min.css' => [
-        'version' => '7.1.0',
-        'type' => 'css',
-    ],
-    '@fortawesome/fontawesome-svg-core' => [
-        'version' => '7.1.0',
-    ],
-    '@fortawesome/fontawesome-svg-core/styles.min.css' => [
-        'version' => '7.1.0',
-        'type' => 'css',
-    ],
-    '@fortawesome/free-regular-svg-icons' => [
-        'version' => '7.1.0',
-    ],
-    '@fortawesome/free-solid-svg-icons' => [
-        'version' => '7.1.0',
-    ],
-    '@fortawesome/free-brands-svg-icons' => [
-        'version' => '7.1.0',
-    ],
     '@ckeditor/ckeditor5-build-classic' => [
         'version' => '44.3.0',
     ],
+    '@fortawesome/fontawesome-free' => [
+        'version' => '7.2.0',
+    ],
+    '@fortawesome/fontawesome-free/css/fontawesome.min.css' => [
+        'version' => '7.2.0',
+        'type' => 'css',
+    ],
+    '@fortawesome/fontawesome-svg-core' => [
+        'version' => '7.2.0',
+    ],
+    '@fortawesome/fontawesome-svg-core/styles.min.css' => [
+        'version' => '7.2.0',
+        'type' => 'css',
+    ],
+    '@fortawesome/free-regular-svg-icons' => [
+        'version' => '7.2.0',
+    ],
+    '@fortawesome/free-solid-svg-icons' => [
+        'version' => '7.2.0',
+    ],
+    '@fortawesome/free-brands-svg-icons' => [
+        'version' => '7.2.0',
+    ],
     'ckeditor5/translations/es.js' => [
-        'version' => '47.2.0',
+        'version' => '48.1.1',
     ],
 ];
