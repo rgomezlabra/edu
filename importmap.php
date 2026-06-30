@@ -131,6 +131,6 @@ return [
         'version' => '7.2.0',
     ],
     'ckeditor5/translations/es.js' => [
-        'version' => '48.1.1',
+        'version' => '48.2.0',
     ],
 ];
